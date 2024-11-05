@@ -1,0 +1,19 @@
+{
+    "input": ["./assembly/__tests__/*.spec.ts"],
+    "outDir": "./build",
+    "config": "none",
+    "plugins": {
+      "coverage": false
+    },
+    "buildOptions": {
+      "args": ["--transform ./transform"],
+      "target": "wasi"
+    },
+    "runOptions": {
+      "runtime": {
+        "name": "wasmtime",
+        "run": "wasmtime <file>"
+      }
+    }
+  }
+  
