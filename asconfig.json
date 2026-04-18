@@ -30,6 +30,6 @@
   },
   "options": {
     "transform": [],
-    "disableWarning": [226]
+    "disableWarning": [226, 112]
   }
 }

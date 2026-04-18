@@ -121,7 +121,7 @@ function formatNumber(n: u64): string {
   return result;
 }
 
-const blackBoxArea = memory.data(64);
+const blackBoxArea = memory.data(128);
 export function blackbox<T>(value: T): T {
   store<T>(blackBoxArea, value);
   return load<T>(blackBoxArea);

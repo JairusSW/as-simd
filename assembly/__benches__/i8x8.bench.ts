@@ -3,336 +3,267 @@ import { bench, blackbox, dumpToFile } from "./lib/bench";
 
 const OPS: u64 = 25_000_000;
 
+let s0: u64 = 0x0123456789abcdef;
+let s1: u64 = 0x8899aabbccddeeff;
+let s2: u64 = 0xfedcba9876543210;
+let s3: u64 = 0x7766554433221100;
+let s4: u64 = 0xaa55aa55aa55aa55;
+
 // @ts-expect-error: decorator
-@inline function next(x: u64): u64 {
-  return x * 0x9e3779b97f4a7c15 + 0xbf58476d1ce4e5b9;
+@inline function next64(x: u64): u64 {
+  x ^= x << 13;
+  x ^= x >> 7;
+  x ^= x << 17;
+  return x;
 }
 
-let a0: u64 = 0x0123456789abcdef;
+// @ts-expect-error: decorator
+@inline function nextA(): u64 {
+  s0 = next64(s0);
+  s2 = next64(s2);
+  return blackbox(s0 ^ (s2 >> 17));
+}
+
+// @ts-expect-error: decorator
+@inline function nextB(): u64 {
+  s1 = next64(s1);
+  s3 = next64(s3);
+  return blackbox(s1 ^ (s3 << 13));
+}
+
+// @ts-expect-error: decorator
+@inline function nextM(): u64 {
+  s4 = next64(s4);
+  return blackbox(s4 ^ 0xaa55aa55aa55aa55);
+}
+
+// @ts-expect-error: decorator
+@inline function nextShift(): i32 {
+  return <i32>(nextA() & 7);
+}
+
+// @ts-expect-error: decorator
+@inline function nextLane8(): u8 {
+  return <u8>(nextA() & 7);
+}
+
+// @ts-expect-error: decorator
+@inline function nextLane16(): u8 {
+  return <u8>(nextA() & 15);
+}
+
+// @ts-expect-error: decorator
+@inline function nextI8(): i8 {
+  return <i8>(nextA() & 0xff);
+}
+
 bench("i8x8.splat", () => {
-  a0 = next(a0);
-  blackbox(i8x8.splat((a0 & 0xff) as i8));
+  blackbox(i8x8.splat(nextI8()));
 }, OPS, 8);
 dumpToFile("i8x8", "splat");
 
-let a1: u64 = 0x0123456789abcdef;
 bench("i8x8.extract_lane_s", () => {
-  a1 = next(a1);
-  blackbox(i8x8.extract_lane_s(a1, (a1 & 7) as u8));
+  blackbox(i8x8.extract_lane_s(nextA(), nextLane8()));
 }, OPS, 8);
 dumpToFile("i8x8", "extract-lane-s");
 
-let a2: u64 = 0x0123456789abcdef;
 bench("i8x8.extract_lane_u", () => {
-  a2 = next(a2);
-  blackbox(i8x8.extract_lane_u(a2, (a2 & 7) as u8));
+  blackbox(i8x8.extract_lane_u(nextA(), nextLane8()));
 }, OPS, 8);
 dumpToFile("i8x8", "extract-lane-u");
 
-let a3: u64 = 0x0123456789abcdef;
 bench("i8x8.replace_lane", () => {
-  a3 = next(a3);
-  blackbox(i8x8.replace_lane(a3, (a3 & 7) as u8, (a3 >> 8) as i8));
+  blackbox(i8x8.replace_lane(nextA(), nextLane8(), nextI8()));
 }, OPS, 8);
 dumpToFile("i8x8", "replace-lane");
 
-let a4: u64 = 0x0123456789abcdef;
-let b4: u64 = 0xfedcba9876543210;
 bench("i8x8.add", () => {
-  a4 = next(a4);
-  b4 = next(b4);
-  blackbox(i8x8.add(a4, b4));
+  blackbox(i8x8.add(nextA(), nextB()));
 }, OPS, 16);
 dumpToFile("i8x8", "add");
 
-let a5: u64 = 0x0123456789abcdef;
-let b5: u64 = 0xfedcba9876543210;
 bench("i8x8.sub", () => {
-  a5 = next(a5);
-  b5 = next(b5);
-  blackbox(i8x8.sub(a5, b5));
+  blackbox(i8x8.sub(nextA(), nextB()));
 }, OPS, 16);
 dumpToFile("i8x8", "sub");
 
-let a16: u64 = 0x0123456789abcdef;
-let b16: u64 = 0xfedcba9876543210;
+bench("i8x8.mul", () => {
+  blackbox(i8x8.mul(nextA(), nextB()));
+}, OPS, 16);
+dumpToFile("i8x8", "mul");
+
 bench("i8x8.min_s", () => {
-  a16 = next(a16);
-  b16 = next(b16);
-  blackbox(i8x8.min_s(a16, b16));
+  blackbox(i8x8.min_s(nextA(), nextB()));
 }, OPS, 16);
 dumpToFile("i8x8", "min-s");
 
-let a17: u64 = 0x0123456789abcdef;
-let b17: u64 = 0xfedcba9876543210;
 bench("i8x8.min_u", () => {
-  a17 = next(a17);
-  b17 = next(b17);
-  blackbox(i8x8.min_u(a17, b17));
+  blackbox(i8x8.min_u(nextA(), nextB()));
 }, OPS, 16);
 dumpToFile("i8x8", "min-u");
 
-let a18: u64 = 0x0123456789abcdef;
-let b18: u64 = 0xfedcba9876543210;
 bench("i8x8.max_s", () => {
-  a18 = next(a18);
-  b18 = next(b18);
-  blackbox(i8x8.max_s(a18, b18));
+  blackbox(i8x8.max_s(nextA(), nextB()));
 }, OPS, 16);
 dumpToFile("i8x8", "max-s");
 
-let a19: u64 = 0x0123456789abcdef;
-let b19: u64 = 0xfedcba9876543210;
 bench("i8x8.max_u", () => {
-  a19 = next(a19);
-  b19 = next(b19);
-  blackbox(i8x8.max_u(a19, b19));
+  blackbox(i8x8.max_u(nextA(), nextB()));
 }, OPS, 16);
 dumpToFile("i8x8", "max-u");
 
-let a20: u64 = 0x0123456789abcdef;
-let b20: u64 = 0xfedcba9876543210;
 bench("i8x8.avgr_u", () => {
-  a20 = next(a20);
-  b20 = next(b20);
-  blackbox(i8x8.avgr_u(a20, b20));
+  blackbox(i8x8.avgr_u(nextA(), nextB()));
 }, OPS, 16);
 dumpToFile("i8x8", "avgr-u");
 
-let a21: u64 = 0x0123456789abcdef;
 bench("i8x8.abs", () => {
-  a21 = next(a21);
-  blackbox(i8x8.abs(a21));
+  blackbox(i8x8.abs(nextA()));
 }, OPS, 8);
 dumpToFile("i8x8", "abs");
 
-let a22: u64 = 0x0123456789abcdef;
 bench("i8x8.neg", () => {
-  a22 = next(a22);
-  blackbox(i8x8.neg(a22));
+  blackbox(i8x8.neg(nextA()));
 }, OPS, 8);
 dumpToFile("i8x8", "neg");
 
-let a23: u64 = 0x0123456789abcdef;
-let b23: u64 = 0xfedcba9876543210;
 bench("i8x8.add_sat_s", () => {
-  a23 = next(a23);
-  b23 = next(b23);
-  blackbox(i8x8.add_sat_s(a23, b23));
+  blackbox(i8x8.add_sat_s(nextA(), nextB()));
 }, OPS, 16);
 dumpToFile("i8x8", "add-sat-s");
 
-let a24: u64 = 0x0123456789abcdef;
-let b24: u64 = 0xfedcba9876543210;
 bench("i8x8.add_sat_u", () => {
-  a24 = next(a24);
-  b24 = next(b24);
-  blackbox(i8x8.add_sat_u(a24, b24));
+  blackbox(i8x8.add_sat_u(nextA(), nextB()));
 }, OPS, 16);
 dumpToFile("i8x8", "add-sat-u");
 
-let a25: u64 = 0x0123456789abcdef;
-let b25: u64 = 0xfedcba9876543210;
 bench("i8x8.sub_sat_s", () => {
-  a25 = next(a25);
-  b25 = next(b25);
-  blackbox(i8x8.sub_sat_s(a25, b25));
+  blackbox(i8x8.sub_sat_s(nextA(), nextB()));
 }, OPS, 16);
 dumpToFile("i8x8", "sub-sat-s");
 
-let a26: u64 = 0x0123456789abcdef;
-let b26: u64 = 0xfedcba9876543210;
 bench("i8x8.sub_sat_u", () => {
-  a26 = next(a26);
-  b26 = next(b26);
-  blackbox(i8x8.sub_sat_u(a26, b26));
+  blackbox(i8x8.sub_sat_u(nextA(), nextB()));
 }, OPS, 16);
 dumpToFile("i8x8", "sub-sat-u");
 
-let a27: u64 = 0x0123456789abcdef;
 bench("i8x8.shl", () => {
-  a27 = next(a27);
-  blackbox(i8x8.shl(a27, (a27 & 7) as i32));
+  blackbox(i8x8.shl(nextA(), nextShift()));
 }, OPS, 8);
 dumpToFile("i8x8", "shl");
 
-let a28: u64 = 0x0123456789abcdef;
 bench("i8x8.shr_s", () => {
-  a28 = next(a28);
-  blackbox(i8x8.shr_s(a28, (a28 & 7) as i32));
+  blackbox(i8x8.shr_s(nextA(), nextShift()));
 }, OPS, 8);
 dumpToFile("i8x8", "shr-s");
 
-let a29: u64 = 0x0123456789abcdef;
 bench("i8x8.shr_u", () => {
-  a29 = next(a29);
-  blackbox(i8x8.shr_u(a29, (a29 & 7) as i32));
+  blackbox(i8x8.shr_u(nextA(), nextShift()));
 }, OPS, 8);
 dumpToFile("i8x8", "shr-u");
 
-let a30: u64 = 0x0123456789abcdef;
 bench("i8x8.all_true", () => {
-  a30 = next(a30);
-  blackbox(i8x8.all_true(a30));
+  blackbox(i8x8.all_true(nextA()));
 }, OPS, 8);
 dumpToFile("i8x8", "all-true");
 
-let a31: u64 = 0x0123456789abcdef;
 bench("i8x8.bitmask", () => {
-  a31 = next(a31);
-  blackbox(i8x8.bitmask(a31));
+  blackbox(i8x8.bitmask(nextA()));
 }, OPS, 8);
 dumpToFile("i8x8", "bitmask");
 
-let a32: u64 = 0x0123456789abcdef;
-let b32: u64 = 0xfedcba9876543210;
 bench("i8x8.eq", () => {
-  a32 = next(a32);
-  b32 = next(b32);
-  blackbox(i8x8.eq(a32, b32));
+  blackbox(i8x8.eq(nextA(), nextB()));
 }, OPS, 16);
 dumpToFile("i8x8", "eq");
 
-let a33: u64 = 0x0123456789abcdef;
-let b33: u64 = 0xfedcba9876543210;
 bench("i8x8.ne", () => {
-  a33 = next(a33);
-  b33 = next(b33);
-  blackbox(i8x8.ne(a33, b33));
+  blackbox(i8x8.ne(nextA(), nextB()));
 }, OPS, 16);
 dumpToFile("i8x8", "ne");
 
-let a34: u64 = 0x0123456789abcdef;
-let b34: u64 = 0xfedcba9876543210;
 bench("i8x8.lt_s", () => {
-  a34 = next(a34);
-  b34 = next(b34);
-  blackbox(i8x8.lt_s(a34, b34));
+  blackbox(i8x8.lt_s(nextA(), nextB()));
 }, OPS, 16);
 dumpToFile("i8x8", "lt-s");
 
-let a35: u64 = 0x0123456789abcdef;
-let b35: u64 = 0xfedcba9876543210;
 bench("i8x8.lt_u", () => {
-  a35 = next(a35);
-  b35 = next(b35);
-  blackbox(i8x8.lt_u(a35, b35));
+  blackbox(i8x8.lt_u(nextA(), nextB()));
 }, OPS, 16);
 dumpToFile("i8x8", "lt-u");
 
-let a36: u64 = 0x0123456789abcdef;
-let b36: u64 = 0xfedcba9876543210;
 bench("i8x8.le_s", () => {
-  a36 = next(a36);
-  b36 = next(b36);
-  blackbox(i8x8.le_s(a36, b36));
+  blackbox(i8x8.le_s(nextA(), nextB()));
 }, OPS, 16);
 dumpToFile("i8x8", "le-s");
 
-let a37: u64 = 0x0123456789abcdef;
-let b37: u64 = 0xfedcba9876543210;
 bench("i8x8.le_u", () => {
-  a37 = next(a37);
-  b37 = next(b37);
-  blackbox(i8x8.le_u(a37, b37));
+  blackbox(i8x8.le_u(nextA(), nextB()));
 }, OPS, 16);
 dumpToFile("i8x8", "le-u");
 
-let a38: u64 = 0x0123456789abcdef;
-let b38: u64 = 0xfedcba9876543210;
 bench("i8x8.gt_s", () => {
-  a38 = next(a38);
-  b38 = next(b38);
-  blackbox(i8x8.gt_s(a38, b38));
+  blackbox(i8x8.gt_s(nextA(), nextB()));
 }, OPS, 16);
 dumpToFile("i8x8", "gt-s");
 
-let a39: u64 = 0x0123456789abcdef;
-let b39: u64 = 0xfedcba9876543210;
 bench("i8x8.gt_u", () => {
-  a39 = next(a39);
-  b39 = next(b39);
-  blackbox(i8x8.gt_u(a39, b39));
+  blackbox(i8x8.gt_u(nextA(), nextB()));
 }, OPS, 16);
 dumpToFile("i8x8", "gt-u");
 
-let a40: u64 = 0x0123456789abcdef;
-let b40: u64 = 0xfedcba9876543210;
 bench("i8x8.ge_s", () => {
-  a40 = next(a40);
-  b40 = next(b40);
-  blackbox(i8x8.ge_s(a40, b40));
+  blackbox(i8x8.ge_s(nextA(), nextB()));
 }, OPS, 16);
 dumpToFile("i8x8", "ge-s");
 
-let a41: u64 = 0x0123456789abcdef;
-let b41: u64 = 0xfedcba9876543210;
 bench("i8x8.ge_u", () => {
-  a41 = next(a41);
-  b41 = next(b41);
-  blackbox(i8x8.ge_u(a41, b41));
+  blackbox(i8x8.ge_u(nextA(), nextB()));
 }, OPS, 16);
 dumpToFile("i8x8", "ge-u");
 
-let a42: u64 = 0x0123456789abcdef;
-let b42: u64 = 0xfedcba9876543210;
 bench("i8x8.narrow_i16x4_s", () => {
-  a42 = next(a42);
-  b42 = next(b42);
-  blackbox(i8x8.narrow_i16x4_s(a42, b42));
+  blackbox(i8x8.narrow_i16x4_s(nextA(), nextB()));
 }, OPS, 16);
 dumpToFile("i8x8", "narrow-i16x4-s");
 
-let a43: u64 = 0x0123456789abcdef;
-let b43: u64 = 0xfedcba9876543210;
 bench("i8x8.narrow_i16x4_u", () => {
-  a43 = next(a43);
-  b43 = next(b43);
-  blackbox(i8x8.narrow_i16x4_u(a43, b43));
+  blackbox(i8x8.narrow_i16x4_u(nextA(), nextB()));
 }, OPS, 16);
 dumpToFile("i8x8", "narrow-i16x4-u");
 
-let a44: u64 = 0x0123456789abcdef;
-let b44: u64 = 0xfedcba9876543210;
 bench("i8x8.shuffle", () => {
-  a44 = next(a44);
-  b44 = next(b44);
-  blackbox(i8x8.shuffle(a44, b44, 0, 9, 2, 11, 4, 13, 6, 15));
+  blackbox(i8x8.shuffle(
+    nextA(),
+    nextB(),
+    nextLane16(),
+    nextLane16(),
+    nextLane16(),
+    nextLane16(),
+    nextLane16(),
+    nextLane16(),
+    nextLane16(),
+    nextLane16(),
+  ));
 }, OPS, 16);
 dumpToFile("i8x8", "shuffle");
 
-let a45: u64 = 0x0123456789abcdef;
-let s45: u64 = 0xfedcba9876543210;
 bench("i8x8.swizzle", () => {
-  a45 = next(a45);
-  s45 = next(s45);
-  blackbox(i8x8.swizzle(a45, s45));
+  blackbox(i8x8.swizzle(nextA(), nextB()));
 }, OPS, 16);
 dumpToFile("i8x8", "swizzle");
 
-let a46: u64 = 0x0123456789abcdef;
-let s46: u64 = 0xfedcba9876543210;
 bench("i8x8.relaxed_swizzle", () => {
-  a46 = next(a46);
-  s46 = next(s46);
-  blackbox(i8x8.relaxed_swizzle(a46, s46));
+  blackbox(i8x8.relaxed_swizzle(nextA(), nextB()));
 }, OPS, 16);
 dumpToFile("i8x8", "relaxed-swizzle");
 
-let a47: u64 = 0x0123456789abcdef;
-let b47: u64 = 0xfedcba9876543210;
-let m47: u64 = 0xaa55aa55aa55aa55;
 bench("i8x8.relaxed_laneselect", () => {
-  a47 = next(a47);
-  b47 = next(b47);
-  m47 = next(m47);
-  blackbox(i8x8.relaxed_laneselect(a47, b47, m47));
+  blackbox(i8x8.relaxed_laneselect(nextA(), nextB(), nextM()));
 }, OPS, 24);
 dumpToFile("i8x8", "relaxed-laneselect");
 
-let a50: u64 = 0x0123456789abcdef;
 bench("i8x8.popcnt", () => {
-  a50 = next(a50);
-  blackbox(i8x8.popcnt(a50));
+  blackbox(i8x8.popcnt(nextA()));
 }, OPS, 8);
 dumpToFile("i8x8", "popcnt");

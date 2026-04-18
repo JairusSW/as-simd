@@ -1,4 +1,4 @@
-import { v64 } from "..";
+import { v64 } from ".";
 
 /** Initializes a 64-bit SWAR vector from eight 8-bit integer values. Arguments do not need to be compile-time constants. */
 export function i8x8(a: i8, b: i8, c: i8, d: i8, e: i8, f: i8, g: i8, h: i8): v64 {

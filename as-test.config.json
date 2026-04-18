@@ -19,7 +19,7 @@
     },
     "simd": {
       "buildOptions": {
-        "args": ["--enable simd"]
+        "args": ["--enable simd", "--enable relaxed-simd"]
       }
     }
   }
