@@ -1,19 +1,36 @@
 {
-    "input": ["./assembly/__tests__/*.spec.ts"],
-    "outDir": "./build",
-    "config": "none",
-    "plugins": {
-      "coverage": false
+  "$schema": "./node_modules/as-test/as-test.config.schema.json",
+  "input": ["./assembly/__tests__/*.spec.ts"],
+  "outDir": "./.as-test/build",
+  "logs": "./.as-test/logs",
+  "coverageDir": "./.as-test/coverage",
+  "snapshotDir": "./.as-test/snapshots",
+  "config": "none",
+  "coverage": false,
+  "buildOptions": {
+    "target": "bindings",
+    "args": ["--runtime", "stub", "--enable", "sign-extension"]
+  },
+  "fuzz": {
+    "input": ["./assembly/__fuzz__/*.fuzz.ts"],
+    "runs": 1000,
+    "seed": 1337,
+    "target": "bindings"
+  },
+  "runOptions": { "reporter": "default" },
+  "modes": {
+    "swar": {
+      "env": {
+        "JSON_MODE": "SWAR"
+      }
     },
-    "buildOptions": {
-      "args": ["--transform ./transform"],
-      "target": "wasi"
-    },
-    "runOptions": {
-      "runtime": {
-        "name": "wasmtime",
-        "run": "wasmtime <file>"
+    "simd": {
+      "env": {
+        "JSON_MODE": "SIMD"
+      },
+      "buildOptions": {
+        "args": ["--enable simd", "--enable", "sign-extension"]
       }
     }
   }
-  
+}
