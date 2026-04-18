@@ -20,13 +20,13 @@ jobs:
           cache: npm
 
       - name: Install
-        run: npm ci
+        run: npm install
 
       - name: Unit tests
         run: npm test
 
       - name: Fuzz (SWAR)
-        run: npm run fuzz -- --mode swar --runs 200
+        run: npm run fuzz -- --mode swar
 
       - name: Fuzz (SIMD)
-        run: npm run fuzz -- --mode simd --runs 200
+        run: npm run fuzz -- --mode simd
