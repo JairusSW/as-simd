@@ -92,32 +92,6 @@ export namespace i8x8 {
     return i64x2.extract_lane(x, 0) as v64;
   }
 
-  // @ts-expect-error: decorator
-  @inline function sat_i16_to_i8_s(x: i16): i8 {
-    return select(select(x as i8, -128, x < -128), 127, x > 127);
-  }
-
-  // @ts-expect-error: decorator
-  @inline function sat_i16_to_i8_u(x: i16): u8 {
-    return select(select(x as u8, 255, x > 255), 0, x < 0);
-  }
-
-  // In SIMD test builds, narrow fast paths bypass scalar saturation helpers entirely.
-  // Warm all helper branches once so coverage reflects the full implementation surface.
-  // @ts-expect-error: decorator
-  @inline function warm_sat_coverage_once(): void {
-    if (!isDefined(AS_TEST_BINDINGS) || !AS_TEST_BINDINGS || sat_coverage_warmed) return;
-    sat_coverage_warmed = true;
-
-    sat_i16_to_i8_s(200);
-    sat_i16_to_i8_s(-200);
-    sat_i16_to_i8_s(5);
-
-    sat_i16_to_i8_u(-1);
-    sat_i16_to_i8_u(300);
-    sat_i16_to_i8_u(5);
-  }
-
   /** Creates a SWAR vector with eight identical 8-bit integer lanes */
   // @ts-expect-error: decorator
   @inline export function splat(x: i8): v64 {
@@ -417,8 +391,6 @@ export namespace i8x8 {
   /** Narrows each 16-bit signed integer lane to 8-bit signed integer lanes with saturation. */
   // @ts-expect-error: decorator
   @inline export function narrow_i16x4_s(a: v64, b: v64): v64 {
-    if (isDefined(AS_TEST_BINDINGS) && AS_TEST_BINDINGS) warm_sat_coverage_once();
-
     if (isDefined(ASC_FEATURE_SIMD) && ASC_FEATURE_SIMD) {
       return i64x2.extract_lane(i8x16.narrow_i16x8_s(i64x2(a as i64, b as i64), i64x2(0, 0)), 0) as v64;
     }
@@ -428,8 +400,6 @@ export namespace i8x8 {
   /** Narrows each 16-bit signed integer lane to 8-bit unsigned integer lanes with saturation. */
   // @ts-expect-error: decorator
   @inline export function narrow_i16x4_u(a: v64, b: v64): v64 {
-    if (isDefined(AS_TEST_BINDINGS) && AS_TEST_BINDINGS) warm_sat_coverage_once();
-
     if (isDefined(ASC_FEATURE_SIMD) && ASC_FEATURE_SIMD) {
       return i64x2.extract_lane(i8x16.narrow_i16x8_u(i64x2(a as i64, b as i64), i64x2(0, 0)), 0) as v64;
     }

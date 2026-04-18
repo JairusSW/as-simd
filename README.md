@@ -38,20 +38,12 @@ npm run fuzz -- --mode simd --runs 200
 
 ## Docs
 
-This repository is currently code-first. The source files below are the primary reference:
-
-- `assembly/v64/i8x8.ts`: SWAR/SIMD-backed `i8x8` implementation
-- `assembly/scalar/i8x8.ts`: scalar mirror implementation used as oracle
-- `assembly/__tests__/i8x8.spec.ts`: API sync + deterministic parity tests
-- `assembly/__fuzz__/i8x8.fuzz.ts`: randomized parity fuzzing
-- `scripts/run-bench.sh`: benchmark build/runner orchestration
+I'll write them soon. Usage is exactly the same as existing SIMD api though.
 
 ## Usage
 
-`i8x8` is a packed 8-lane `i8` vector represented as a `v64` (`u64`) with lane-wise operations implemented in SWAR, with SIMD paths enabled when available.
-
 ```ts
-import { i8x8 } from "./v64/i8x8";
+import { i8x8 } from "as-simd";
 
 const a = i8x8(1, 2, 3, 4, 5, 6, 7, 8);
 const b = i8x8(8, 7, 6, 5, 4, 3, 2, 1);
@@ -68,7 +60,7 @@ const lane3 = i8x8.extract_lane_s(sum, 3);
 ### Lane operations
 
 ```ts
-import { i8x8 } from "./v64/i8x8";
+import { i8x8 } from "as-simd";
 
 let x = i8x8.splat(5);           // [5,5,5,5,5,5,5,5]
 x = i8x8.replace_lane(x, 2, -7); // [5,5,-7,5,5,5,5,5]
@@ -78,7 +70,7 @@ const v = i8x8.extract_lane_s(x, 2); // -7
 ### Arithmetic and comparisons
 
 ```ts
-import { i8x8 } from "./v64/i8x8";
+import { i8x8 } from "as-simd";
 
 const a = i8x8(10, -2, 30, -40, 50, -60, 70, -80);
 const b = i8x8(1, 2, 3, 4, 5, 6, 7, 8);
@@ -91,7 +83,7 @@ const lt = i8x8.lt_s(a, b); // lane masks: 0x00 or 0xFF per lane
 ### Saturating and narrowing operations
 
 ```ts
-import { i8x8 } from "./v64/i8x8";
+import { i8x8 } from "as-simd";
 
 const hi = i8x8(120, 120, -120, -120, 100, -100, 127, -128);
 const lo = i8x8(20, 40, -20, -40, 50, -50, 1, -1);
@@ -106,7 +98,7 @@ const narrowed = i8x8.narrow_i16x4_s(0x0001000200030004, 0xfff0fff1fff2fff3);
 ### Shuffle and swizzle
 
 ```ts
-import { i8x8 } from "./v64/i8x8";
+import { i8x8 } from "as-simd";
 
 const a = i8x8(0, 1, 2, 3, 4, 5, 6, 7);
 const b = i8x8(10, 11, 12, 13, 14, 15, 16, 17);
@@ -130,35 +122,49 @@ Correctness is validated by:
 
 ### Comparison to SIMD
 
-The current setup compares modes by compiling and running the same benchmarks in:
-
-- `SWAR` mode (`--mode swar`)
-- `SIMD` mode (`--mode simd`)
-
-Use `scripts/run-bench.sh` to build optimized wasm artifacts and execute benchmarks through V8.
+![ahh](https://raw.githubusercontent.com/JairusSW/as-simd/refs/heads/main/charts/chart-simd-v-swar-i8.svg)
 
 ### Running Benchmarks Locally
 
-Requirements:
+Benchmarks are run directly on top of `v8` for tighter control over the engine configuration.
 
-1. `v8` shell on `PATH` (for example via `jsvu`)
-2. `wasm-opt` (Binaryen)
-3. project dependencies installed (`npm install`)
-
-Examples:
+1. Install the local benchmark prerequisites:
 
 ```bash
-# Run all benches in SWAR mode
-./scripts/run-bench.sh --mode swar
-
-# Run all benches in SIMD mode
-./scripts/run-bench.sh --mode simd
-
-# Run one bench by name
-./scripts/run-bench.sh i8x8 --mode swar
+npm install -g jsvu
+jsvu --engines=v8
 ```
 
-The script emits wasm builds to `build/` and logs/charts under `build/logs/as/` and `build/charts/`.
+2. Add `~/.jsvu/bin` to your `PATH` and make sure `wasm-opt` is installed:
+
+```bash
+export PATH="${HOME}/.jsvu/bin:${PATH}"
+sudo apt-get install -y binaryen
+```
+
+3. Install project dependencies:
+
+```bash
+npm install
+```
+
+4. Run either benchmark suite directly:
+
+```bash
+npm run bench
+```
+
+5. Build charts from the latest local logs:
+
+```bash
+npm run charts:build
+```
+
+Or run the full local benchmark flow in one step:
+
+```bash
+npm run bench
+```
 
 ## Contributing
 
