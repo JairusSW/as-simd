@@ -1,4 +1,4 @@
-import { i8x8 } from "../64/i8x8";
+import { i8x8 } from "../v64/i8x8";
 import { bench, blackbox, dumpToFile } from "./lib/bench";
 
 const OPS: u64 = 25_000_000;

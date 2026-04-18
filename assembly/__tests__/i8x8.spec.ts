@@ -1,5 +1,48 @@
 import { describe, expect, test } from "as-test";
-import { i8x8 } from "../64/i8x8";
+import { i8x8 } from "../v64/i8x8";
+import { i8x8_scalar } from "../scalar/i8x8";
+
+type FnSplat = (x: i8) => u64;
+type FnExtractS = (x: u64, idx: u8) => i8;
+type FnExtractU = (x: u64, idx: u8) => u8;
+type FnReplace = (x: u64, idx: u8, value: i8) => u64;
+type FnUnaryVec = (a: u64) => u64;
+type FnUnaryBool = (a: u64) => bool;
+type FnUnaryI32 = (a: u64) => i32;
+type FnBinaryVec = (a: u64, b: u64) => u64;
+type FnShift = (a: u64, b: i32) => u64;
+type FnNarrow = (a: u64, b: u64) => u64;
+type FnShuffle = (a: u64, b: u64, l0: u8, l1: u8, l2: u8, l3: u8, l4: u8, l5: u8, l6: u8, l7: u8) => u64;
+type FnSwizzle = (a: u64, s: u64) => u64;
+type FnLaneSelect = (a: u64, b: u64, m: u64) => u64;
+
+function assertApiSync(): void {
+  const splatFns: FnSplat[] = [i8x8.splat, i8x8_scalar.splat];
+  const extractSFns: FnExtractS[] = [i8x8.extract_lane_s, i8x8_scalar.extract_lane_s];
+  const extractUFns: FnExtractU[] = [i8x8.extract_lane_u, i8x8_scalar.extract_lane_u];
+  const replaceFns: FnReplace[] = [i8x8.replace_lane, i8x8_scalar.replace_lane];
+  const unaryVecFns: FnUnaryVec[] = [i8x8.abs, i8x8_scalar.abs, i8x8.neg, i8x8_scalar.neg, i8x8.popcnt, i8x8_scalar.popcnt];
+  const unaryBoolFns: FnUnaryBool[] = [i8x8.all_true, i8x8_scalar.all_true];
+  const unaryI32Fns: FnUnaryI32[] = [i8x8.bitmask, i8x8_scalar.bitmask];
+  const binaryVecFns: FnBinaryVec[] = [
+    i8x8.add, i8x8_scalar.add, i8x8.sub, i8x8_scalar.sub, i8x8.mul, i8x8_scalar.mul,
+    i8x8.min_s, i8x8_scalar.min_s, i8x8.min_u, i8x8_scalar.min_u, i8x8.max_s, i8x8_scalar.max_s, i8x8.max_u, i8x8_scalar.max_u,
+    i8x8.avgr_u, i8x8_scalar.avgr_u, i8x8.add_sat_s, i8x8_scalar.add_sat_s, i8x8.add_sat_u, i8x8_scalar.add_sat_u,
+    i8x8.sub_sat_s, i8x8_scalar.sub_sat_s, i8x8.sub_sat_u, i8x8_scalar.sub_sat_u,
+    i8x8.eq, i8x8_scalar.eq, i8x8.ne, i8x8_scalar.ne,
+    i8x8.lt_s, i8x8_scalar.lt_s, i8x8.lt_u, i8x8_scalar.lt_u, i8x8.le_s, i8x8_scalar.le_s, i8x8.le_u, i8x8_scalar.le_u,
+    i8x8.gt_s, i8x8_scalar.gt_s, i8x8.gt_u, i8x8_scalar.gt_u, i8x8.ge_s, i8x8_scalar.ge_s, i8x8.ge_u, i8x8_scalar.ge_u,
+    i8x8.narrow_i16x4_s, i8x8_scalar.narrow_i16x4_s, i8x8.narrow_i16x4_u, i8x8_scalar.narrow_i16x4_u,
+  ];
+  const shiftFns: FnShift[] = [i8x8.shl, i8x8_scalar.shl, i8x8.shr_s, i8x8_scalar.shr_s, i8x8.shr_u, i8x8_scalar.shr_u];
+  const shuffleFns: FnShuffle[] = [i8x8.shuffle, i8x8_scalar.shuffle];
+  const swizzleFns: FnSwizzle[] = [i8x8.swizzle, i8x8_scalar.swizzle, i8x8.relaxed_swizzle, i8x8_scalar.relaxed_swizzle];
+  const laneSelectFns: FnLaneSelect[] = [i8x8.relaxed_laneselect, i8x8_scalar.relaxed_laneselect];
+
+  expect<i32>(splatFns.length + extractSFns.length + extractUFns.length + replaceFns.length).toBe(8);
+  expect<i32>(unaryVecFns.length + unaryBoolFns.length + unaryI32Fns.length).toBe(10);
+  expect<i32>(binaryVecFns.length + shiftFns.length + shuffleFns.length + swizzleFns.length + laneSelectFns.length).toBe(62);
+}
 
 let state: u64 = 0;
 let checkId: i32 = 0;
@@ -16,59 +59,6 @@ let checkId: i32 = 0;
 // @ts-expect-error: decorator
 @inline function nextU64(): u64 {
   return (<u64>nextU32() << 32) | <u64>nextU32();
-}
-
-// @ts-expect-error: decorator
-@inline function get8(x: u64, i: i32): u8 {
-  return <u8>((x >> (i * 8)) & 0xff);
-}
-
-// @ts-expect-error: decorator
-@inline function get8s(x: u64, i: i32): i8 {
-  return <i8>get8(x, i);
-}
-
-// @ts-expect-error: decorator
-@inline function set8(x: u64, i: i32, v: u8): u64 {
-  const shift = i * 8;
-  const mask = (<u64>0xff) << shift;
-  return (x & ~mask) | ((<u64>v) << shift);
-}
-
-// @ts-expect-error: decorator
-@inline function pack8(
-  a0: u8, a1: u8, a2: u8, a3: u8,
-  a4: u8, a5: u8, a6: u8, a7: u8,
-): u64 {
-  return (<u64>a0)
-    | (<u64>a1 << 8)
-    | (<u64>a2 << 16)
-    | (<u64>a3 << 24)
-    | (<u64>a4 << 32)
-    | (<u64>a5 << 40)
-    | (<u64>a6 << 48)
-    | (<u64>a7 << 56);
-}
-
-// @ts-expect-error: decorator
-@inline function satS(x: i16): i8 {
-  return x > 127 ? 127 : (x < -128 ? -128 : <i8>x);
-}
-
-// @ts-expect-error: decorator
-@inline function satU(x: i16): u8 {
-  return x < 0 ? 0 : (x > 255 ? 255 : <u8>x);
-}
-
-// @ts-expect-error: decorator
-@inline function pop8(x: u8): u8 {
-  let c: u8 = 0;
-  let v = x;
-  while (v) {
-    c += v & 1;
-    v >>= 1;
-  }
-  return c;
 }
 
 // @ts-expect-error: decorator
@@ -101,297 +91,35 @@ let checkId: i32 = 0;
   return true;
 }
 
-function ref_splat(x: i8): u64 {
-  const u = <u8>x;
-  return pack8(u, u, u, u, u, u, u, u);
-}
-
-function ref_extract_lane_s(x: u64, idx: u8): i8 {
-  return get8s(x, <i32>(idx & 7));
-}
-
-function ref_extract_lane_u(x: u64, idx: u8): u8 {
-  return get8(x, <i32>(idx & 7));
-}
-
-function ref_replace_lane(x: u64, idx: u8, value: i8): u64 {
-  return set8(x, <i32>(idx & 7), <u8>value);
-}
-
-function ref_add(a: u64, b: u64): u64 {
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) out = set8(out, i, <u8>(get8(a, i) + get8(b, i)));
-  return out;
-}
-
-function ref_sub(a: u64, b: u64): u64 {
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) out = set8(out, i, <u8>(get8(a, i) - get8(b, i)));
-  return out;
-}
-
-function ref_mul(a: u64, b: u64): u64 {
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) out = set8(out, i, <u8>(get8(a, i) * get8(b, i)));
-  return out;
-}
-
-function ref_min_s(a: u64, b: u64): u64 {
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) {
-    const ai = get8s(a, i);
-    const bi = get8s(b, i);
-    out = set8(out, i, <u8>(ai < bi ? ai : bi));
-  }
-  return out;
-}
-
-function ref_min_u(a: u64, b: u64): u64 {
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) {
-    const ai = get8(a, i);
-    const bi = get8(b, i);
-    out = set8(out, i, ai < bi ? ai : bi);
-  }
-  return out;
-}
-
-function ref_max_s(a: u64, b: u64): u64 {
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) {
-    const ai = get8s(a, i);
-    const bi = get8s(b, i);
-    out = set8(out, i, <u8>(ai > bi ? ai : bi));
-  }
-  return out;
-}
-
-function ref_max_u(a: u64, b: u64): u64 {
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) {
-    const ai = get8(a, i);
-    const bi = get8(b, i);
-    out = set8(out, i, ai > bi ? ai : bi);
-  }
-  return out;
-}
-
-function ref_avgr_u(a: u64, b: u64): u64 {
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) {
-    const ai = get8(a, i);
-    const bi = get8(b, i);
-    out = set8(out, i, <u8>((<u16>ai + <u16>bi + 1) >> 1));
-  }
-  return out;
-}
-
-function ref_abs(a: u64): u64 {
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) {
-    const v = get8s(a, i);
-    out = set8(out, i, <u8>(v < 0 ? -v : v));
-  }
-  return out;
-}
-
-function ref_neg(a: u64): u64 {
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) out = set8(out, i, <u8>(-get8s(a, i)));
-  return out;
-}
-
-function ref_add_sat_s(a: u64, b: u64): u64 {
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) out = set8(out, i, <u8>satS(<i16>get8s(a, i) + <i16>get8s(b, i)));
-  return out;
-}
-
-function ref_add_sat_u(a: u64, b: u64): u64 {
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) out = set8(out, i, satU(<i16>get8(a, i) + <i16>get8(b, i)));
-  return out;
-}
-
-function ref_sub_sat_s(a: u64, b: u64): u64 {
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) out = set8(out, i, <u8>satS(<i16>get8s(a, i) - <i16>get8s(b, i)));
-  return out;
-}
-
-function ref_sub_sat_u(a: u64, b: u64): u64 {
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) {
-    const ai = get8(a, i);
-    const bi = get8(b, i);
-    out = set8(out, i, ai > bi ? ai - bi : 0);
-  }
-  return out;
-}
-
-function ref_shl(a: u64, b: i32): u64 {
-  const s = b & 7;
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) out = set8(out, i, <u8>((<u32>get8(a, i)) << s));
-  return out;
-}
-
-function ref_shr_s(a: u64, b: i32): u64 {
-  const s = b & 7;
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) out = set8(out, i, <u8>(<i32>get8s(a, i) >> s));
-  return out;
-}
-
-function ref_shr_u(a: u64, b: i32): u64 {
-  const s = b & 7;
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) out = set8(out, i, <u8>((<u32>get8(a, i)) >> s));
-  return out;
-}
-
-function ref_all_true(a: u64): bool {
-  for (let i = 0; i < 8; i++) if (get8(a, i) == 0) return false;
-  return true;
-}
-
-function ref_bitmask(a: u64): i32 {
-  let m: i32 = 0;
-  for (let i = 0; i < 8; i++) m |= <i32>((get8(a, i) >> 7) & 1) << i;
-  return m;
-}
-
-function ref_popcnt(a: u64): u64 {
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) out = set8(out, i, pop8(get8(a, i)));
-  return out;
-}
-
-function ref_eq(a: u64, b: u64): u64 {
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) out = set8(out, i, get8(a, i) == get8(b, i) ? 0xff : 0);
-  return out;
-}
-
-function ref_ne(a: u64, b: u64): u64 {
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) out = set8(out, i, get8(a, i) != get8(b, i) ? 0xff : 0);
-  return out;
-}
-
-function ref_lt_s(a: u64, b: u64): u64 {
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) out = set8(out, i, get8s(a, i) < get8s(b, i) ? 0xff : 0);
-  return out;
-}
-
-function ref_lt_u(a: u64, b: u64): u64 {
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) out = set8(out, i, get8(a, i) < get8(b, i) ? 0xff : 0);
-  return out;
-}
-
-function ref_le_s(a: u64, b: u64): u64 {
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) out = set8(out, i, get8s(a, i) <= get8s(b, i) ? 0xff : 0);
-  return out;
-}
-
-function ref_le_u(a: u64, b: u64): u64 {
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) out = set8(out, i, get8(a, i) <= get8(b, i) ? 0xff : 0);
-  return out;
-}
-
-function ref_gt_s(a: u64, b: u64): u64 {
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) out = set8(out, i, get8s(a, i) > get8s(b, i) ? 0xff : 0);
-  return out;
-}
-
-function ref_gt_u(a: u64, b: u64): u64 {
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) out = set8(out, i, get8(a, i) > get8(b, i) ? 0xff : 0);
-  return out;
-}
-
-function ref_ge_s(a: u64, b: u64): u64 {
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) out = set8(out, i, get8s(a, i) >= get8s(b, i) ? 0xff : 0);
-  return out;
-}
-
-function ref_ge_u(a: u64, b: u64): u64 {
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) out = set8(out, i, get8(a, i) >= get8(b, i) ? 0xff : 0);
-  return out;
-}
-
-function ref_narrow_i16x4_s(a: u64, b: u64): u64 {
-  return pack8(
-    <u8>satS(<i16>(a & 0xffff)),
-    <u8>satS(<i16>((a >> 16) & 0xffff)),
-    <u8>satS(<i16>((a >> 32) & 0xffff)),
-    <u8>satS(<i16>((a >> 48) & 0xffff)),
-    <u8>satS(<i16>(b & 0xffff)),
-    <u8>satS(<i16>((b >> 16) & 0xffff)),
-    <u8>satS(<i16>((b >> 32) & 0xffff)),
-    <u8>satS(<i16>((b >> 48) & 0xffff)),
-  );
-}
-
-function ref_narrow_i16x4_u(a: u64, b: u64): u64 {
-  return pack8(
-    satU(<i16>(a & 0xffff)),
-    satU(<i16>((a >> 16) & 0xffff)),
-    satU(<i16>((a >> 32) & 0xffff)),
-    satU(<i16>((a >> 48) & 0xffff)),
-    satU(<i16>(b & 0xffff)),
-    satU(<i16>((b >> 16) & 0xffff)),
-    satU(<i16>((b >> 32) & 0xffff)),
-    satU(<i16>((b >> 48) & 0xffff)),
-  );
-}
-
-function ref_shuffle(a: u64, b: u64, l0: u8, l1: u8, l2: u8, l3: u8, l4: u8, l5: u8, l6: u8, l7: u8): u64 {
-  const lanes = [l0, l1, l2, l3, l4, l5, l6, l7];
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) {
-    const l = lanes[i] & 15;
-    const src = l < 8 ? a : b;
-    out = set8(out, i, get8(src, <i32>(l & 7)));
-  }
-  return out;
-}
-
-function ref_swizzle(a: u64, s: u64): u64 {
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) {
-    const idx = get8(s, i);
-    out = set8(out, i, idx < 8 ? get8(a, <i32>idx) : 0);
-  }
-  return out;
-}
-
-function ref_relaxed_swizzle(a: u64, s: u64): u64 {
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) out = set8(out, i, get8(a, <i32>(get8(s, i) & 7)));
-  return out;
-}
-
-function ref_relaxed_laneselect(a: u64, b: u64, m: u64): u64 {
-  let out: u64 = 0;
-  for (let i = 0; i < 8; i++) {
-    const selA = (get8(m, i) & 0x80) != 0;
-    out = set8(out, i, selA ? get8(a, i) : get8(b, i));
-  }
-  return out;
-}
-
 describe("i8x8", () => {
+  test("api sync", () => {
+    assertApiSync();
+  });
+
+  test("narrow saturation edge cases", () => {
+    // lanes: [200, -200, 127, -128]
+    const aS: u64 = 0xff80007fff3800c8;
+    // lanes: [300, -300, 1, -1]
+    const bS: u64 = 0xffff0001fed4012c;
+    const outS = i8x8.narrow_i16x4_s(aS, bS);
+    const expectedS: u64 = 0xff01807f807f807f; // [127,-128,127,-128,127,-128,1,-1]
+    expect<u64>(outS).toBe(expectedS);
+    expect<u64>(outS).toBe(i8x8_scalar.narrow_i16x4_s(aS, bS));
+
+    // lanes: [-1, 0, 255, 256]
+    const aU: u64 = 0x010000ff0000ffff;
+    // lanes: [300, -300, 1, 42]
+    const bU: u64 = 0x002a0001fed4012c;
+    const outU = i8x8.narrow_i16x4_u(aU, bU);
+    const expectedU: u64 = 0x2a0100ffffff0000; // [0,0,255,255,255,0,1,42]
+    expect<u64>(outU).toBe(expectedU);
+    expect<u64>(outU).toBe(i8x8_scalar.narrow_i16x4_u(aU, bU));
+  });
+
   test("full scalar parity", () => {
     state = 0x243f6a8885a308d3;
     let completedRuns = 0;
+
     for (let run = 0; run < 256; run++) {
       const a = nextU64();
       const b = nextU64();
@@ -402,7 +130,6 @@ describe("i8x8", () => {
       const idx = <u8>(nextU32() & 7);
       const shift = <i32>(nextU32() & 31);
       const laneVal = <i8>nextU32();
-
       const l0 = <u8>(nextU32() & 15);
       const l1 = <u8>(nextU32() & 15);
       const l2 = <u8>(nextU32() & 15);
@@ -414,48 +141,49 @@ describe("i8x8", () => {
 
       checkId = 1;
 
-      if (!check64(i8x8.splat(laneVal), ref_splat(laneVal))) return;
-      if (!check32(i8x8.extract_lane_s(a, idx), ref_extract_lane_s(a, idx))) return;
-      if (!check32(i8x8.extract_lane_u(a, idx), ref_extract_lane_u(a, idx))) return;
-      if (!check64(i8x8.replace_lane(a, idx, laneVal), ref_replace_lane(a, idx, laneVal))) return;
-      if (!check64(i8x8.add(a, b), ref_add(a, b))) return;
-      if (!check64(i8x8.sub(a, b), ref_sub(a, b))) return;
-      if (!check64(i8x8.mul(a, b), ref_mul(a, b))) return;
-      if (!check64(i8x8.min_s(a, b), ref_min_s(a, b))) return;
-      if (!check64(i8x8.min_u(a, b), ref_min_u(a, b))) return;
-      if (!check64(i8x8.max_s(a, b), ref_max_s(a, b))) return;
-      if (!check64(i8x8.max_u(a, b), ref_max_u(a, b))) return;
-      if (!check64(i8x8.avgr_u(a, b), ref_avgr_u(a, b))) return;
-      if (!check64(i8x8.abs(a), ref_abs(a))) return;
-      if (!check64(i8x8.neg(a), ref_neg(a))) return;
-      if (!check64(i8x8.add_sat_s(a, b), ref_add_sat_s(a, b))) return;
-      if (!check64(i8x8.add_sat_u(a, b), ref_add_sat_u(a, b))) return;
-      if (!check64(i8x8.sub_sat_s(a, b), ref_sub_sat_s(a, b))) return;
-      if (!check64(i8x8.sub_sat_u(a, b), ref_sub_sat_u(a, b))) return;
-      if (!check64(i8x8.shl(a, shift), ref_shl(a, shift))) return;
-      if (!check64(i8x8.shr_s(a, shift), ref_shr_s(a, shift))) return;
-      if (!check64(i8x8.shr_u(a, shift), ref_shr_u(a, shift))) return;
-      if (!checkBool(i8x8.all_true(a), ref_all_true(a))) return;
-      if (!check32(i8x8.bitmask(a), ref_bitmask(a))) return;
-      if (!check64(i8x8.popcnt(a), ref_popcnt(a))) return;
-      if (!check64(i8x8.eq(a, b), ref_eq(a, b))) return;
-      if (!check64(i8x8.ne(a, b), ref_ne(a, b))) return;
-      if (!check64(i8x8.lt_s(a, b), ref_lt_s(a, b))) return;
-      if (!check64(i8x8.lt_u(a, b), ref_lt_u(a, b))) return;
-      if (!check64(i8x8.le_s(a, b), ref_le_s(a, b))) return;
-      if (!check64(i8x8.le_u(a, b), ref_le_u(a, b))) return;
-      if (!check64(i8x8.gt_s(a, b), ref_gt_s(a, b))) return;
-      if (!check64(i8x8.gt_u(a, b), ref_gt_u(a, b))) return;
-      if (!check64(i8x8.ge_s(a, b), ref_ge_s(a, b))) return;
-      if (!check64(i8x8.ge_u(a, b), ref_ge_u(a, b))) return;
-      if (!check64(i8x8.narrow_i16x4_s(c, d), ref_narrow_i16x4_s(c, d))) return;
-      if (!check64(i8x8.narrow_i16x4_u(c, d), ref_narrow_i16x4_u(c, d))) return;
-      if (!check64(i8x8.shuffle(a, b, l0, l1, l2, l3, l4, l5, l6, l7), ref_shuffle(a, b, l0, l1, l2, l3, l4, l5, l6, l7))) return;
-      if (!check64(i8x8.swizzle(a, s), ref_swizzle(a, s))) return;
-      if (!check64(i8x8.relaxed_swizzle(a, s), ref_relaxed_swizzle(a, s))) return;
-      if (!check64(i8x8.relaxed_laneselect(a, b, m), ref_relaxed_laneselect(a, b, m))) return;
+      if (!check64(i8x8.splat(laneVal), i8x8_scalar.splat(laneVal))) return;
+      if (!check32(i8x8.extract_lane_s(a, idx), i8x8_scalar.extract_lane_s(a, idx))) return;
+      if (!check32(i8x8.extract_lane_u(a, idx), i8x8_scalar.extract_lane_u(a, idx))) return;
+      if (!check64(i8x8.replace_lane(a, idx, laneVal), i8x8_scalar.replace_lane(a, idx, laneVal))) return;
+      if (!check64(i8x8.add(a, b), i8x8_scalar.add(a, b))) return;
+      if (!check64(i8x8.sub(a, b), i8x8_scalar.sub(a, b))) return;
+      if (!check64(i8x8.mul(a, b), i8x8_scalar.mul(a, b))) return;
+      if (!check64(i8x8.min_s(a, b), i8x8_scalar.min_s(a, b))) return;
+      if (!check64(i8x8.min_u(a, b), i8x8_scalar.min_u(a, b))) return;
+      if (!check64(i8x8.max_s(a, b), i8x8_scalar.max_s(a, b))) return;
+      if (!check64(i8x8.max_u(a, b), i8x8_scalar.max_u(a, b))) return;
+      if (!check64(i8x8.avgr_u(a, b), i8x8_scalar.avgr_u(a, b))) return;
+      if (!check64(i8x8.abs(a), i8x8_scalar.abs(a))) return;
+      if (!check64(i8x8.neg(a), i8x8_scalar.neg(a))) return;
+      if (!check64(i8x8.add_sat_s(a, b), i8x8_scalar.add_sat_s(a, b))) return;
+      if (!check64(i8x8.add_sat_u(a, b), i8x8_scalar.add_sat_u(a, b))) return;
+      if (!check64(i8x8.sub_sat_s(a, b), i8x8_scalar.sub_sat_s(a, b))) return;
+      if (!check64(i8x8.sub_sat_u(a, b), i8x8_scalar.sub_sat_u(a, b))) return;
+      if (!check64(i8x8.shl(a, shift), i8x8_scalar.shl(a, shift))) return;
+      if (!check64(i8x8.shr_s(a, shift), i8x8_scalar.shr_s(a, shift))) return;
+      if (!check64(i8x8.shr_u(a, shift), i8x8_scalar.shr_u(a, shift))) return;
+      if (!checkBool(i8x8.all_true(a), i8x8_scalar.all_true(a))) return;
+      if (!check32(i8x8.bitmask(a), i8x8_scalar.bitmask(a))) return;
+      if (!check64(i8x8.popcnt(a), i8x8_scalar.popcnt(a))) return;
+      if (!check64(i8x8.eq(a, b), i8x8_scalar.eq(a, b))) return;
+      if (!check64(i8x8.ne(a, b), i8x8_scalar.ne(a, b))) return;
+      if (!check64(i8x8.lt_s(a, b), i8x8_scalar.lt_s(a, b))) return;
+      if (!check64(i8x8.lt_u(a, b), i8x8_scalar.lt_u(a, b))) return;
+      if (!check64(i8x8.le_s(a, b), i8x8_scalar.le_s(a, b))) return;
+      if (!check64(i8x8.le_u(a, b), i8x8_scalar.le_u(a, b))) return;
+      if (!check64(i8x8.gt_s(a, b), i8x8_scalar.gt_s(a, b))) return;
+      if (!check64(i8x8.gt_u(a, b), i8x8_scalar.gt_u(a, b))) return;
+      if (!check64(i8x8.ge_s(a, b), i8x8_scalar.ge_s(a, b))) return;
+      if (!check64(i8x8.ge_u(a, b), i8x8_scalar.ge_u(a, b))) return;
+      if (!check64(i8x8.narrow_i16x4_s(c, d), i8x8_scalar.narrow_i16x4_s(c, d))) return;
+      if (!check64(i8x8.narrow_i16x4_u(c, d), i8x8_scalar.narrow_i16x4_u(c, d))) return;
+      if (!check64(i8x8.shuffle(a, b, l0, l1, l2, l3, l4, l5, l6, l7), i8x8_scalar.shuffle(a, b, l0, l1, l2, l3, l4, l5, l6, l7))) return;
+      if (!check64(i8x8.swizzle(a, s), i8x8_scalar.swizzle(a, s))) return;
+      if (!check64(i8x8.relaxed_swizzle(a, s), i8x8_scalar.relaxed_swizzle(a, s))) return;
+      if (!check64(i8x8.relaxed_laneselect(a, b, m), i8x8_scalar.relaxed_laneselect(a, b, m))) return;
       completedRuns++;
     }
+
     expect<i32>(completedRuns).toBe(256);
   });
 });

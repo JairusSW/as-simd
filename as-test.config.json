@@ -1,6 +1,7 @@
 {
   "$schema": "./node_modules/as-test/as-test.config.schema.json",
   "input": ["./assembly/__tests__/*.spec.ts"],
+  "coverage": true,
   "buildOptions": {
     "target": "bindings",
     "args": ["--enable", "sign-extension"]
@@ -13,17 +14,10 @@
   },
   "runOptions": { "reporter": "default" },
   "modes": {
-    "swar": {
-      "env": {
-        "JSON_MODE": "SWAR"
-      }
-    },
+    "swar": {},
     "simd": {
-      "env": {
-        "JSON_MODE": "SIMD"
-      },
       "buildOptions": {
-        "args": ["--enable simd", "--enable", "sign-extension"]
+        "args": ["--enable simd"]
       }
     }
   }
