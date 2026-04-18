@@ -1,6 +1,7 @@
 {
   "$schema": "./node_modules/as-test/as-test.config.schema.json",
   "input": ["./assembly/__tests__/*.spec.ts"],
+  "coverage": true,
   "buildOptions": {
     "target": "bindings",
     "args": ["--enable", "sign-extension"]
