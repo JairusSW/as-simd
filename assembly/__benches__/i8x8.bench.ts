@@ -79,42 +79,42 @@ dumpToFile("i8x8", "replace-lane");
 
 bench("i8x8.add", () => {
   blackbox(i8x8.add(nextA(), nextB()));
-}, OPS, 16);
+}, OPS, 8);
 dumpToFile("i8x8", "add");
 
 bench("i8x8.sub", () => {
   blackbox(i8x8.sub(nextA(), nextB()));
-}, OPS, 16);
+}, OPS, 8);
 dumpToFile("i8x8", "sub");
 
 bench("i8x8.mul", () => {
   blackbox(i8x8.mul(nextA(), nextB()));
-}, OPS, 16);
+}, OPS, 8);
 dumpToFile("i8x8", "mul");
 
 bench("i8x8.min_s", () => {
   blackbox(i8x8.min_s(nextA(), nextB()));
-}, OPS, 16);
+}, OPS, 8);
 dumpToFile("i8x8", "min-s");
 
 bench("i8x8.min_u", () => {
   blackbox(i8x8.min_u(nextA(), nextB()));
-}, OPS, 16);
+}, OPS, 8);
 dumpToFile("i8x8", "min-u");
 
 bench("i8x8.max_s", () => {
   blackbox(i8x8.max_s(nextA(), nextB()));
-}, OPS, 16);
+}, OPS, 8);
 dumpToFile("i8x8", "max-s");
 
 bench("i8x8.max_u", () => {
   blackbox(i8x8.max_u(nextA(), nextB()));
-}, OPS, 16);
+}, OPS, 8);
 dumpToFile("i8x8", "max-u");
 
 bench("i8x8.avgr_u", () => {
   blackbox(i8x8.avgr_u(nextA(), nextB()));
-}, OPS, 16);
+}, OPS, 8);
 dumpToFile("i8x8", "avgr-u");
 
 bench("i8x8.abs", () => {
@@ -129,22 +129,22 @@ dumpToFile("i8x8", "neg");
 
 bench("i8x8.add_sat_s", () => {
   blackbox(i8x8.add_sat_s(nextA(), nextB()));
-}, OPS, 16);
+}, OPS, 8);
 dumpToFile("i8x8", "add-sat-s");
 
 bench("i8x8.add_sat_u", () => {
   blackbox(i8x8.add_sat_u(nextA(), nextB()));
-}, OPS, 16);
+}, OPS, 8);
 dumpToFile("i8x8", "add-sat-u");
 
 bench("i8x8.sub_sat_s", () => {
   blackbox(i8x8.sub_sat_s(nextA(), nextB()));
-}, OPS, 16);
+}, OPS, 8);
 dumpToFile("i8x8", "sub-sat-s");
 
 bench("i8x8.sub_sat_u", () => {
   blackbox(i8x8.sub_sat_u(nextA(), nextB()));
-}, OPS, 16);
+}, OPS, 8);
 dumpToFile("i8x8", "sub-sat-u");
 
 bench("i8x8.shl", () => {
@@ -174,62 +174,62 @@ dumpToFile("i8x8", "bitmask");
 
 bench("i8x8.eq", () => {
   blackbox(i8x8.eq(nextA(), nextB()));
-}, OPS, 16);
+}, OPS, 8);
 dumpToFile("i8x8", "eq");
 
 bench("i8x8.ne", () => {
   blackbox(i8x8.ne(nextA(), nextB()));
-}, OPS, 16);
+}, OPS, 8);
 dumpToFile("i8x8", "ne");
 
 bench("i8x8.lt_s", () => {
   blackbox(i8x8.lt_s(nextA(), nextB()));
-}, OPS, 16);
+}, OPS, 8);
 dumpToFile("i8x8", "lt-s");
 
 bench("i8x8.lt_u", () => {
   blackbox(i8x8.lt_u(nextA(), nextB()));
-}, OPS, 16);
+}, OPS, 8);
 dumpToFile("i8x8", "lt-u");
 
 bench("i8x8.le_s", () => {
   blackbox(i8x8.le_s(nextA(), nextB()));
-}, OPS, 16);
+}, OPS, 8);
 dumpToFile("i8x8", "le-s");
 
 bench("i8x8.le_u", () => {
   blackbox(i8x8.le_u(nextA(), nextB()));
-}, OPS, 16);
+}, OPS, 8);
 dumpToFile("i8x8", "le-u");
 
 bench("i8x8.gt_s", () => {
   blackbox(i8x8.gt_s(nextA(), nextB()));
-}, OPS, 16);
+}, OPS, 8);
 dumpToFile("i8x8", "gt-s");
 
 bench("i8x8.gt_u", () => {
   blackbox(i8x8.gt_u(nextA(), nextB()));
-}, OPS, 16);
+}, OPS, 8);
 dumpToFile("i8x8", "gt-u");
 
 bench("i8x8.ge_s", () => {
   blackbox(i8x8.ge_s(nextA(), nextB()));
-}, OPS, 16);
+}, OPS, 8);
 dumpToFile("i8x8", "ge-s");
 
 bench("i8x8.ge_u", () => {
   blackbox(i8x8.ge_u(nextA(), nextB()));
-}, OPS, 16);
+}, OPS, 8);
 dumpToFile("i8x8", "ge-u");
 
 bench("i8x8.narrow_i16x4_s", () => {
   blackbox(i8x8.narrow_i16x4_s(nextA(), nextB()));
-}, OPS, 16);
+}, OPS, 8);
 dumpToFile("i8x8", "narrow-i16x4-s");
 
 bench("i8x8.narrow_i16x4_u", () => {
   blackbox(i8x8.narrow_i16x4_u(nextA(), nextB()));
-}, OPS, 16);
+}, OPS, 8);
 dumpToFile("i8x8", "narrow-i16x4-u");
 
 bench("i8x8.shuffle", () => {
@@ -245,17 +245,17 @@ bench("i8x8.shuffle", () => {
     nextLane16(),
     nextLane16(),
   ));
-}, OPS, 16);
+}, OPS, 8);
 dumpToFile("i8x8", "shuffle");
 
 bench("i8x8.swizzle", () => {
   blackbox(i8x8.swizzle(nextA(), nextB()));
-}, OPS, 16);
+}, OPS, 8);
 dumpToFile("i8x8", "swizzle");
 
 bench("i8x8.relaxed_swizzle", () => {
   blackbox(i8x8.relaxed_swizzle(nextA(), nextB()));
-}, OPS, 16);
+}, OPS, 8);
 dumpToFile("i8x8", "relaxed-swizzle");
 
 bench("i8x8.relaxed_laneselect", () => {

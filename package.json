@@ -15,8 +15,9 @@
     "test:wasmtime": "wasmtime ./build/test.wasm",
     "test:wasmer": "wasmer ./build/test.wasm",
     "bench:wasmer": "wasmer ./build/bench.wasm --llvm",
-    "bench:report": "bun ./scripts/chart-simd-v-swar-i8.ts",
-    "bench:compare": "bun ./scripts/chart-simd-v-swar-i8.ts",
+    "bench:report": "bun ./scripts/chart-i8x8-v-i8x16.ts",
+    "bench:compare": "bun ./scripts/chart-i8x8-v-i8x16.ts",
+    "bench:mode-compare:i8x8": "bun ./scripts/chart-i8x8-simd-v-swar.ts",
     "prettier": "prettier -w ."
   },
   "devDependencies": {

@@ -122,7 +122,7 @@ Correctness is validated by:
 
 ### Comparison to SIMD
 
-![ahh](https://raw.githubusercontent.com/JairusSW/as-simd/refs/heads/main/charts/chart-simd-v-swar-i8.svg)
+![ahh](https://raw.githubusercontent.com/JairusSW/as-simd/refs/heads/main/charts/chart-i8x8-v-i8x16.svg)
 
 ### Running Benchmarks Locally
 
