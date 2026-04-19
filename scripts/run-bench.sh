@@ -55,7 +55,6 @@ if [[ -n "$BENCH_NAME" ]]; then
 
   CANDIDATES=(
     "./assembly/__benches__/$BENCH_NAME"
-    "./assembly/__benches__/throughput/$BENCH_NAME"
   )
 
   if [[ "$RAW_BENCH_NAME" == custom/* ]]; then
@@ -74,7 +73,6 @@ if [[ -n "$BENCH_NAME" ]]; then
 else
   FILES=(
     ./assembly/__benches__/*.bench.ts
-    ./assembly/__benches__/throughput/*.bench.ts
   )
 fi
 

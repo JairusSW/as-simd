@@ -71,10 +71,10 @@ export namespace i8x8 {
     const shifted = ((x & ~0x8000800080008000) + 0x0080008000800080) ^ ((x ^ 0x0080008000800080) & 0x8000800080008000);
     const top = (shifted >> 8) & 0x00ff00ff00ff00ff;
     const inRange = ((~(((top & 0x7f7f7f7f7f7f7f7f) + 0x7f7f7f7f7f7f7f7f) & 0x8080808080808080) & ~top & 0x8080808080808080) >> 7) * 0xff & 0x00ff00ff00ff00ff;
-    const outRange = (~inRange) & 0x00ff00ff00ff00ff;
+    const xlow = x & 0x00ff00ff00ff00ff;
     const sign = (x & 0x8000800080008000) >> 15;
     const sat = (0x007f007f007f007f + sign) & 0x00ff00ff00ff00ff;
-    return ((x & 0x00ff00ff00ff00ff) & inRange) | (sat & outRange);
+    return (xlow & inRange) | (sat & ~inRange);
   }
 
   /** Creates a SWAR vector with eight identical 8-bit integer lanes */
@@ -231,9 +231,9 @@ export namespace i8x8 {
     }
     const shift = b & 7;
     if (shift == 0) return a;
-    const fill = (((0xff << (8 - shift)) & 0xff) as v64) * 0x0101010101010101;
-    const logical = (a & ((((0xff << shift) & 0xff) as v64) * 0x0101010101010101)) >> shift;
-    return logical | ((((a & 0x8080808080808080) >> 7) * 0xff) & fill);
+    const keep = (((0xff >> shift) & 0xff) as v64) * 0x0101010101010101;
+    const logical = (a >> shift) & keep;
+    return logical | ((((a & 0x8080808080808080) >> 7) * 0xff) & ~keep);
   }
   /** Performs a bitwise logical right shift on each 8-bit integer lane by a scalar. */
   // @ts-expect-error: decorator
@@ -362,21 +362,23 @@ export namespace i8x8 {
 
     const i0 = (l0 & 7) as v64, i1 = (l1 & 7) as v64, i2 = (l2 & 7) as v64, i3 = (l3 & 7) as v64;
     const i4 = (l4 & 7) as v64, i5 = (l5 & 7) as v64, i6 = (l6 & 7) as v64, i7 = (l7 & 7) as v64;
-
-    const a0 = (a >> (i0 << 3)) & 0xff, a1 = (a >> (i1 << 3)) & 0xff, a2 = (a >> (i2 << 3)) & 0xff, a3 = (a >> (i3 << 3)) & 0xff;
-    const a4 = (a >> (i4 << 3)) & 0xff, a5 = (a >> (i5 << 3)) & 0xff, a6 = (a >> (i6 << 3)) & 0xff, a7 = (a >> (i7 << 3)) & 0xff;
-    const b0 = (b >> (i0 << 3)) & 0xff, b1 = (b >> (i1 << 3)) & 0xff, b2 = (b >> (i2 << 3)) & 0xff, b3 = (b >> (i3 << 3)) & 0xff;
-    const b4 = (b >> (i4 << 3)) & 0xff, b5 = (b >> (i5 << 3)) & 0xff, b6 = (b >> (i6 << 3)) & 0xff, b7 = (b >> (i7 << 3)) & 0xff;
-
+    const s0 = select<v64>(a, b, l0 < 8);
+    const s1 = select<v64>(a, b, l1 < 8);
+    const s2 = select<v64>(a, b, l2 < 8);
+    const s3 = select<v64>(a, b, l3 < 8);
+    const s4 = select<v64>(a, b, l4 < 8);
+    const s5 = select<v64>(a, b, l5 < 8);
+    const s6 = select<v64>(a, b, l6 < 8);
+    const s7 = select<v64>(a, b, l7 < 8);
     return (
-      select(a0, b0, l0 < 8) |
-      (select(a1, b1, l1 < 8) << 8) |
-      (select(a2, b2, l2 < 8) << 16) |
-      (select(a3, b3, l3 < 8) << 24) |
-      (select(a4, b4, l4 < 8) << 32) |
-      (select(a5, b5, l5 < 8) << 40) |
-      (select(a6, b6, l6 < 8) << 48) |
-      (select(a7, b7, l7 < 8) << 56)
+      ((s0 >> (i0 << 3)) & 0xff) |
+      (((s1 >> (i1 << 3)) & 0xff) << 8) |
+      (((s2 >> (i2 << 3)) & 0xff) << 16) |
+      (((s3 >> (i3 << 3)) & 0xff) << 24) |
+      (((s4 >> (i4 << 3)) & 0xff) << 32) |
+      (((s5 >> (i5 << 3)) & 0xff) << 40) |
+      (((s6 >> (i6 << 3)) & 0xff) << 48) |
+      (((s7 >> (i7 << 3)) & 0xff) << 56)
     );
   }
   /** Selects 8-bit lanes from `a` according to indices in `s` with out-of-bounds lanes set to zero. */
@@ -385,25 +387,9 @@ export namespace i8x8 {
     if (isDefined(ASC_FEATURE_SIMD) && ASC_FEATURE_SIMD) {
       return i64x2.extract_lane(i8x16.swizzle(i64x2(a as i64, 0), i64x2(s as i64, 0)), 0) as v64;
     }
-    const i0 = (s & 0x07) as v64;
-    const i1 = ((s >> 8) & 0x07) as v64;
-    const i2 = ((s >> 16) & 0x07) as v64;
-    const i3 = ((s >> 24) & 0x07) as v64;
-    const i4 = ((s >> 32) & 0x07) as v64;
-    const i5 = ((s >> 40) & 0x07) as v64;
-    const i6 = ((s >> 48) & 0x07) as v64;
-    const i7 = ((s >> 56) & 0x07) as v64;
-    const out = ((a >> (i0 << 3)) & 0xff)
-      | (((a >> (i1 << 3)) & 0xff) << 8)
-      | (((a >> (i2 << 3)) & 0xff) << 16)
-      | (((a >> (i3 << 3)) & 0xff) << 24)
-      | (((a >> (i4 << 3)) & 0xff) << 32)
-      | (((a >> (i5 << 3)) & 0xff) << 40)
-      | (((a >> (i6 << 3)) & 0xff) << 48)
-      | (((a >> (i7 << 3)) & 0xff) << 56);
     const x = s & 0xf8f8f8f8f8f8f8f8;
     const valid = ((~(((x & 0x7f7f7f7f7f7f7f7f) + 0x7f7f7f7f7f7f7f7f) & 0x8080808080808080) & ~x & 0x8080808080808080) >> 7) * 0xff;
-    return out & valid;
+    return relaxed_swizzle(a, s) & valid;
   }
   /** Selects 8-bit lanes from `a` according to indices in `s`, mapping out-of-bounds lanes via modulo. */
   // @ts-expect-error: decorator

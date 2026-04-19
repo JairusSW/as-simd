@@ -166,6 +166,19 @@ let s3: u64 = 0x7766554433221100;
   );
 }
 
+// select source first, then gather one byte from that source
+// @ts-expect-error: decorator
+@inline function shuffle_select_src(a: u64, b: u64, l0: u8, l1: u8, l2: u8, l3: u8, l4: u8, l5: u8, l6: u8, l7: u8): u64 {
+  const i0 = (l0 & 7) as u64, i1 = (l1 & 7) as u64, i2 = (l2 & 7) as u64, i3 = (l3 & 7) as u64;
+  const i4 = (l4 & 7) as u64, i5 = (l5 & 7) as u64, i6 = (l6 & 7) as u64, i7 = (l7 & 7) as u64;
+  const s0 = select<u64>(a, b, l0 < 8), s1 = select<u64>(a, b, l1 < 8), s2 = select<u64>(a, b, l2 < 8), s3 = select<u64>(a, b, l3 < 8);
+  const s4 = select<u64>(a, b, l4 < 8), s5 = select<u64>(a, b, l5 < 8), s6 = select<u64>(a, b, l6 < 8), s7 = select<u64>(a, b, l7 < 8);
+  return pack8(
+    (s0 >> (i0 << 3)) & 0xff, (s1 >> (i1 << 3)) & 0xff, (s2 >> (i2 << 3)) & 0xff, (s3 >> (i3 << 3)) & 0xff,
+    (s4 >> (i4 << 3)) & 0xff, (s5 >> (i5 << 3)) & 0xff, (s6 >> (i6 << 3)) & 0xff, (s7 >> (i7 << 3)) & 0xff,
+  );
+}
+
 // direct gather + arithmetic blend mask (no select in hot blend)
 // @ts-expect-error: decorator
 @inline function shuffle_mask(a: u64, b: u64, l0: u8, l1: u8, l2: u8, l3: u8, l4: u8, l5: u8, l6: u8, l7: u8): u64 {
@@ -332,6 +345,15 @@ bench("shuffle.inline-shifts", () => {
   ));
 }, OPS, 16);
 dumpToFile("shuffle-comp", "inline-shifts");
+
+bench("shuffle.select-src", () => {
+  blackbox(shuffle_select_src(
+    nextA(), nextB(),
+    nextLane16(), nextLane16(), nextLane16(), nextLane16(),
+    nextLane16(), nextLane16(), nextLane16(), nextLane16(),
+  ));
+}, OPS, 16);
+dumpToFile("shuffle-comp", "select-src");
 
 bench("shuffle.batch", () => {
   blackbox(shuffle_batch(
