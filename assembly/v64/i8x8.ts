@@ -63,8 +63,7 @@ export namespace i8x8 {
     const hi = (x >> 8) & 0x00ff00ff00ff00ff;
     const hiNonZero = (~(((~(((hi & 0x7f7f7f7f7f7f7f7f) + 0x7f7f7f7f7f7f7f7f) & 0x8080808080808080) & ~hi & 0x8080808080808080) >> 7) * 0xff)) & 0x00ff00ff00ff00ff;
     const sign = (((x & 0x8000800080008000) >> 15) * 0xff) & 0x00ff00ff00ff00ff;
-    const satPos = hiNonZero & ~sign;
-    return ((((x & 0x00ff00ff00ff00ff) & ~hiNonZero) | hiNonZero) & ~sign) | satPos;
+    return (((x & 0x00ff00ff00ff00ff) & ~hiNonZero) | hiNonZero) & ~sign;
   }
 
   // @ts-expect-error: decorator
