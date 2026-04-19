@@ -20,20 +20,8 @@
 
 ## Installation
 
-Install dependencies:
-
 ```bash
-npm install
-```
-
-This project targets AssemblyScript and uses `as-test` for tests/fuzzing and `as-bench` tooling for benchmark output.
-
-Common local commands:
-
-```bash
-npm test
-npm run fuzz -- --mode swar --runs 200
-npm run fuzz -- --mode simd --runs 200
+npm install JairusSW/as-simd
 ```
 
 ## Docs
