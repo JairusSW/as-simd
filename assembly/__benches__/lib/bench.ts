@@ -18,6 +18,17 @@ class BenchResult {
   features!: string[];
   mbps!: f64;
   gbps!: f64;
+  samples!: i32;
+  elapsed_min!: f64;
+  elapsed_max!: f64;
+  elapsed_mean!: f64;
+  elapsed_median!: f64;
+  elapsed_stddev!: f64;
+  ops_min!: f64;
+  ops_max!: f64;
+  ops_mean!: f64;
+  ops_median!: f64;
+  ops_stddev!: f64;
 }
 
 let result: BenchResult | null = null;
@@ -27,6 +38,8 @@ const WASM_PAGE_SIZE: usize = 64 * 1024;
 // @ts-expect-error: BENCH_PREALLOC_BYTES may be undefined.
 const PREALLOC_BYTES: usize = isDefined(BENCH_PREALLOC_BYTES) ? BENCH_PREALLOC_BYTES : 1 << 30; // 1GB
 let preallocated = false;
+// @ts-expect-error: BENCH_SAMPLES may be undefined.
+const BENCH_SAMPLE_COUNT: i32 = isDefined(BENCH_SAMPLES) ? BENCH_SAMPLES : 7;
 
 // @ts-expect-error: @inline is a valid decorator
 @inline function preallocateMemory(): void {
@@ -51,24 +64,63 @@ export function bench(description: string, routine: () => void, ops: u64 = 1_000
     routine();
   }
 
-  const start = performance.now();
+  const samples = BENCH_SAMPLE_COUNT > 0 ? BENCH_SAMPLE_COUNT : 1;
+  const elapsedSamples = new Array<f64>(samples);
+  const opsSamples = new Array<f64>(samples);
 
-  let count = ops;
-  while (count--) {
-    routine();
+  for (let i = 0; i < samples; i++) {
+    const start = performance.now();
+
+    let count = ops;
+    while (count--) {
+      routine();
+    }
+
+    const end = performance.now();
+    const elapsed = Math.max(1, end - start);
+    const opsPerSecond = f64(ops * 1000) / elapsed;
+    elapsedSamples[i] = elapsed;
+    opsSamples[i] = opsPerSecond;
   }
 
-  const end = performance.now();
-  const elapsed = Math.max(1, end - start);
+  elapsedSamples.sort((a: f64, b: f64): i32 => a < b ? -1 : (a > b ? 1 : 0));
+  opsSamples.sort((a: f64, b: f64): i32 => a < b ? -1 : (a > b ? 1 : 0));
 
-  const opsPerSecond = f64(ops * 1000) / elapsed;
+  const elapsedMin = elapsedSamples[0];
+  const elapsedMax = elapsedSamples[samples - 1];
+  const elapsedMedian = elapsedSamples[samples >> 1];
+  const opsMin = opsSamples[0];
+  const opsMax = opsSamples[samples - 1];
+  const opsMedian = opsSamples[samples >> 1];
 
-  let log = `   Completed benchmark in ${formatNumber(u64(Math.round(elapsed)))}ms at ${formatNumber(u64(Math.round(opsPerSecond)))} ops/s`;
+  let elapsedSum: f64 = 0;
+  let opsSum: f64 = 0;
+  for (let i = 0; i < samples; i++) {
+    elapsedSum += elapsedSamples[i];
+    opsSum += opsSamples[i];
+  }
+
+  const elapsedMean = elapsedSum / samples;
+  const opsMean = opsSum / samples;
+
+  let elapsedVar: f64 = 0;
+  let opsVar: f64 = 0;
+  for (let i = 0; i < samples; i++) {
+    const de = elapsedSamples[i] - elapsedMean;
+    const do_ = opsSamples[i] - opsMean;
+    elapsedVar += de * de;
+    opsVar += do_ * do_;
+  }
+  const elapsedStd = Math.sqrt(elapsedVar / samples);
+  const opsStd = Math.sqrt(opsVar / samples);
+
+  let log = `   Completed benchmark in ${formatNumber(u64(Math.round(elapsedMedian)))}ms @ median ${formatNumber(u64(Math.round(opsMedian)))} ops/s`;
+  log += ` [n=${samples}, mean=${formatNumber(u64(Math.round(opsMean)))}, min=${formatNumber(u64(Math.round(opsMin)))}, max=${formatNumber(u64(Math.round(opsMax)))}, sd=${formatNumber(u64(Math.round(opsStd)))}]`;
 
   let mbPerSec: f64 = 0;
   if (bytesPerOp > 0) {
     const totalBytes = bytesPerOp * ops;
-    mbPerSec = f64(totalBytes) / (elapsed / 1000) / (1000 * 1000);
+    mbPerSec = f64(totalBytes) / (elapsedMedian / 1000) / (1000 * 1000);
     log += ` @ ${formatNumber(u64(Math.round(mbPerSec)))}MB/s`;
   }
 
@@ -78,12 +130,23 @@ export function bench(description: string, routine: () => void, ops: u64 = 1_000
   result = {
     language: "assemblycript",
     description,
-    elapsed,
+    elapsed: elapsedMedian,
     bytes: bytesPerOp,
     operations: ops,
     features,
     mbps: mbPerSec,
     gbps: mbPerSec / 1000,
+    samples,
+    elapsed_min: elapsedMin,
+    elapsed_max: elapsedMax,
+    elapsed_mean: elapsedMean,
+    elapsed_median: elapsedMedian,
+    elapsed_stddev: elapsedStd,
+    ops_min: opsMin,
+    ops_max: opsMax,
+    ops_mean: opsMean,
+    ops_median: opsMedian,
+    ops_stddev: opsStd,
   };
 
   console.log(log + "\n");
@@ -100,7 +163,18 @@ export function dumpToFile(suite: string, type: string): void {
     + "\"operations\":" + r.operations.toString() + ","
     + "\"features\":[" + (r.features.length ? ("\"" + r.features.join("\",\"") + "\"") : "") + "],"
     + "\"mbps\":" + r.mbps.toString() + ","
-    + "\"gbps\":" + r.gbps.toString()
+    + "\"gbps\":" + r.gbps.toString() + ","
+    + "\"samples\":" + r.samples.toString() + ","
+    + "\"elapsed_min\":" + r.elapsed_min.toString() + ","
+    + "\"elapsed_max\":" + r.elapsed_max.toString() + ","
+    + "\"elapsed_mean\":" + r.elapsed_mean.toString() + ","
+    + "\"elapsed_median\":" + r.elapsed_median.toString() + ","
+    + "\"elapsed_stddev\":" + r.elapsed_stddev.toString() + ","
+    + "\"ops_min\":" + r.ops_min.toString() + ","
+    + "\"ops_max\":" + r.ops_max.toString() + ","
+    + "\"ops_mean\":" + r.ops_mean.toString() + ","
+    + "\"ops_median\":" + r.ops_median.toString() + ","
+    + "\"ops_stddev\":" + r.ops_stddev.toString()
     + "}";
   writeFile("./build/logs/as/" + SIMD_ENABLED + "/" + suite + "." + type + ".as.json", json);
 }
