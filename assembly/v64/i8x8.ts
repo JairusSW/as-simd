@@ -409,15 +409,23 @@ export namespace i8x8 {
   /** Selects 8-bit lanes from either vector according to lane indexes [0-15]. */
   // @ts-expect-error: decorator
   @inline export function shuffle(a: v64, b: v64, l0: u8, l1: u8, l2: u8, l3: u8, l4: u8, l5: u8, l6: u8, l7: u8): v64 {
-    return i8x8(
-      extract_lane_s(select(a, b, l0 < 8), l0 & 7),
-      extract_lane_s(select(a, b, l1 < 8), l1 & 7),
-      extract_lane_s(select(a, b, l2 < 8), l2 & 7),
-      extract_lane_s(select(a, b, l3 < 8), l3 & 7),
-      extract_lane_s(select(a, b, l4 < 8), l4 & 7),
-      extract_lane_s(select(a, b, l5 < 8), l5 & 7),
-      extract_lane_s(select(a, b, l6 < 8), l6 & 7),
-      extract_lane_s(select(a, b, l7 < 8), l7 & 7),
+    const i0 = (l0 & 7) as v64, i1 = (l1 & 7) as v64, i2 = (l2 & 7) as v64, i3 = (l3 & 7) as v64;
+    const i4 = (l4 & 7) as v64, i5 = (l5 & 7) as v64, i6 = (l6 & 7) as v64, i7 = (l7 & 7) as v64;
+
+    const a0 = (a >> (i0 << 3)) & 0xff, a1 = (a >> (i1 << 3)) & 0xff, a2 = (a >> (i2 << 3)) & 0xff, a3 = (a >> (i3 << 3)) & 0xff;
+    const a4 = (a >> (i4 << 3)) & 0xff, a5 = (a >> (i5 << 3)) & 0xff, a6 = (a >> (i6 << 3)) & 0xff, a7 = (a >> (i7 << 3)) & 0xff;
+    const b0 = (b >> (i0 << 3)) & 0xff, b1 = (b >> (i1 << 3)) & 0xff, b2 = (b >> (i2 << 3)) & 0xff, b3 = (b >> (i3 << 3)) & 0xff;
+    const b4 = (b >> (i4 << 3)) & 0xff, b5 = (b >> (i5 << 3)) & 0xff, b6 = (b >> (i6 << 3)) & 0xff, b7 = (b >> (i7 << 3)) & 0xff;
+
+    return (
+      select(a0, b0, l0 < 8) |
+      (select(a1, b1, l1 < 8) << 8) |
+      (select(a2, b2, l2 < 8) << 16) |
+      (select(a3, b3, l3 < 8) << 24) |
+      (select(a4, b4, l4 < 8) << 32) |
+      (select(a5, b5, l5 < 8) << 40) |
+      (select(a6, b6, l6 < 8) << 48) |
+      (select(a7, b7, l7 < 8) << 56)
     );
   }
   /** Selects 8-bit lanes from `a` according to indices in `s` with out-of-bounds lanes set to zero. */
@@ -454,7 +462,8 @@ export namespace i8x8 {
   /** Selects 8-bit lanes from `a` or `b` based on the high bit of each lane in `m`. */
   // @ts-expect-error: decorator
   @inline export function relaxed_laneselect(a: v64, b: v64, m: v64): v64 {
-    return (a & (((m & 0x8080808080808080) >> 7) * 0xff)) | (b & ~(((m & 0x8080808080808080) >> 7) * 0xff));
+    const mask = ((m & 0x8080808080808080) >> 7) * 0xff;
+    return (a & mask) | (b & ~mask);
   }
 
 }

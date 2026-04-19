@@ -13,6 +13,49 @@ const SUITE_B = "i8x16";
 const MD_OUT = path.join(CHARTS_DIR, "chart-simd-v-swar-i8.md");
 const SVG_OUT = path.join(CHARTS_DIR, "chart-simd-v-swar-i8.svg");
 
+// i8x16 API declaration order (kebab-case bench op names)
+const DECL_ORDER: string[] = [
+  "splat",
+  "extract-lane-s",
+  "extract-lane-u",
+  "replace-lane",
+  "add",
+  "sub",
+  "min-s",
+  "min-u",
+  "max-s",
+  "max-u",
+  "avgr-u",
+  "abs",
+  "neg",
+  "add-sat-s",
+  "add-sat-u",
+  "sub-sat-s",
+  "sub-sat-u",
+  "shl",
+  "shr-s",
+  "shr-u",
+  "all-true",
+  "bitmask",
+  "popcnt",
+  "eq",
+  "ne",
+  "lt-s",
+  "lt-u",
+  "le-s",
+  "le-u",
+  "gt-s",
+  "gt-u",
+  "ge-s",
+  "ge-u",
+  "narrow-i16x8-s",
+  "narrow-i16x8-u",
+  "shuffle",
+  "swizzle",
+  "relaxed-swizzle",
+  "relaxed-laneselect",
+];
+
 type BenchResult = {
   description: string;
   elapsed: number;
@@ -55,14 +98,27 @@ function esc(s: string): string {
 const left = loadSuite(MODE, SUITE_A);
 const right = loadSuite(MODE, SUITE_B);
 
-const ops = Array.from(new Set([...Object.keys(left), ...Object.keys(right)])).sort((a, b) => a.localeCompare(b));
-if (!ops.length) {
+const leftAliases: Record<string, string> = {
+  "narrow-i16x8-s": "narrow-i16x4-s",
+  "narrow-i16x8-u": "narrow-i16x4-u",
+};
+
+const orderedOps = DECL_ORDER.slice();
+const seen = new Set(orderedOps);
+for (const op of [...Object.keys(left), ...Object.keys(right)]) {
+  if (!seen.has(op)) {
+    seen.add(op);
+    orderedOps.push(op);
+  }
+}
+
+if (!orderedOps.length) {
   console.error(`No benchmark JSONs found in build/logs/as/${MODE} for ${SUITE_A}/${SUITE_B}`);
   process.exit(1);
 }
 
-const rows = ops.map((op) => {
-  const l = left[op] || null;
+const rows = orderedOps.map((op) => {
+  const l = left[op] || left[leftAliases[op] ?? ""] || null;
   const r = right[op] || null;
   const lOps = l ? opsPerSec(l) : 0;
   const rOps = r ? opsPerSec(r) : 0;
@@ -98,7 +154,7 @@ for (const r of rows) {
 fs.writeFileSync(MD_OUT, `${md.join("\n")}\n`);
 
 const both = rows.filter((r) => r.l && r.r);
-const chartRows = both.slice().sort((a, b) => b.lOps - a.lOps);
+const chartRows = both.slice();
 const maxOps = Math.max(1, ...chartRows.map((r) => Math.max(r.lOps, r.rOps)));
 
 const rowH = 20;
@@ -131,4 +187,3 @@ fs.writeFileSync(SVG_OUT, `${svg.join("\n")}\n`);
 
 console.log(`Wrote markdown table: ${path.relative(ROOT, MD_OUT)}`);
 console.log(`Wrote svg chart:      ${path.relative(ROOT, SVG_OUT)}`);
-

@@ -8,6 +8,7 @@ RUNTIMES=${RUNTIMES:-"incremental"}
 ENGINES=${ENGINES:-"turbofan"}
 MODE_FILTER=${JSON_MODE:-""}
 TURBOFAN_FLAGS=${TURBOFAN_FLAGS:-"--no-liftoff --experimental-wasm-revectorize"}
+BENCH_SAMPLES=${BENCH_SAMPLES:-7}
 # Deserialize-biased alternative to try manually:
 # TURBOFAN_FLAGS="--no-liftoff --no-wasm-stack-checks --no-wasm-bounds-checks --no-wasm-tier-up --experimental-wasm-revectorize --minor-ms --minor-ms-concurrent-marking-trigger=30 --turboshaft-wasm-load-elimination"
 BENCH_NAME=""
@@ -95,7 +96,7 @@ for file in "${FILES[@]}"; do
         output="./build/${filename%.ts}.${runtime}"
 
         if [[ (-z "$MODE_FILTER" || "$MODE_FILTER" == "SIMD") && (-z "$file_mode" || "$file_mode" == "SIMD") ]]; then
-            npx asc "$file" -o "${output}.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime $runtime --enable bulk-memory --enable simd --enable sign-extension --exportStart start --exportRuntime || {
+            npx asc "$file" -o "${output}.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime $runtime --use BENCH_SAMPLES=$BENCH_SAMPLES --enable bulk-memory --enable simd --enable sign-extension --exportStart start --exportRuntime || {
                 echo "Build failed"
                 exit 1
             }
@@ -104,7 +105,7 @@ for file in "${FILES[@]}"; do
             rm -f "${output}.tmp"
 
         elif [[ (-z "$MODE_FILTER" || "$MODE_FILTER" == "SWAR") && (-z "$file_mode" || "$file_mode" == "SWAR") ]]; then
-            npx asc "$file" -o "${output}.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime $runtime --enable bulk-memory --enable sign-extension --exportStart start --exportRuntime || {
+            npx asc "$file" -o "${output}.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime $runtime --use BENCH_SAMPLES=$BENCH_SAMPLES --enable bulk-memory --enable sign-extension --exportStart start --exportRuntime || {
                 echo "Build failed"
                 exit 1
             }
