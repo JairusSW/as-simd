@@ -239,7 +239,7 @@ bench("i8x16.swizzle", () => {
 }, OPS, 8);
 dumpToFile("i8x16", "swizzle");
 
-if (isDefined(ASC_FEATURE_RELAXED_SIMD) && ASC_FEATURE_RELAXED_SIMD) {
+if (ASC_FEATURE_RELAXED_SIMD) {
   bench("i8x16.relaxed_swizzle", () => {
     blackbox(i8x16.relaxed_swizzle(nextVecA(), nextVecB()));
   }, OPS, 8);

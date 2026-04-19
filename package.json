@@ -10,15 +10,13 @@
     "test": "ast test",
     "fuzz": "ast fuzz",
     "test:fuzz": "ast test --fuzz",
-    "build:test": "rm -rf ./build/ && asc assembly/test.ts -o ./build/test.wasm",
+    "build:test": "rm -rf ./build/ && asc assembly/test.ts -o ./build/test.wasm --config ./node_modules/@assemblyscript/wasi-shim/asconfig.json",
     "build:transform": "tsc -p ./transform",
     "test:wasmtime": "wasmtime ./build/test.wasm",
-    "test:wasmer": "wasmer ./build/test.wasm",
-    "bench:wasmer": "wasmer ./build/bench.wasm --llvm",
-    "bench:report": "bun ./scripts/chart-i8x8-v-i8x16.ts",
-    "bench:compare": "bun ./scripts/chart-i8x8-v-i8x16.ts",
     "bench:mode-compare:i8x8": "bun ./scripts/chart-i8x8-simd-v-swar.ts",
-    "prettier": "prettier -w ."
+    "prettier": "prettier -w .",
+    "charts:build": "./scripts/build-charts.sh",
+    "charts:serve": "serve ./charts"
   },
   "devDependencies": {
     "@assemblyscript/wasi-shim": "^0.1.0",
@@ -27,7 +25,8 @@
     "as-test": "1.0.11",
     "assemblyscript": "^0.28.14",
     "assemblyscript-prettier": "^3.0.4",
-    "json-as": "^1.3.2"
+    "json-as": "^1.3.2",
+    "serve": "^14.2.6"
   },
   "overrides": {
     "assemblyscript": "$assemblyscript"

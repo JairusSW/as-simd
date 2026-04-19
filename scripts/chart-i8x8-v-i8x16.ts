@@ -6,10 +6,10 @@ const LOGS_DIR = path.join(ROOT, "build", "logs", "as");
 const CHARTS_DIR = path.join(ROOT, "charts");
 
 // Hard-coded source suites and modes.
-const MODE_A = "swar";
-const MODE_B = "simd";
 const SUITE_A = "i8x8";
 const SUITE_B = "i8x16";
+const MODE_A = "swar";
+const MODE_B = "simd";
 
 const MD_OUT = path.join(CHARTS_DIR, "chart-i8x8-v-i8x16.md");
 const SVG_OUT = path.join(CHARTS_DIR, "chart-i8x8-v-i8x16.svg");
@@ -73,7 +73,7 @@ for (const op of [...Object.keys(left), ...Object.keys(right)]) {
 }
 
 if (!orderedOps.length) {
-  console.error(`No benchmark JSONs found in build/logs/as/{${MODE_A},${MODE_B}} for ${SUITE_A}/${SUITE_B}`);
+  console.error(`No benchmark JSONs found for ${SUITE_A} (${MODE_A}) / ${SUITE_B} (${MODE_B}) under build/logs/as`);
   process.exit(1);
 }
 
@@ -83,7 +83,8 @@ const rows = orderedOps
     const r = right[op] || null;
     const lOps = l ? opsPerSec(l) : 0;
     const rOps = r ? opsPerSec(r) : 0;
-    const avgOps = (lOps > 0 && rOps > 0) ? (lOps + rOps) / 2 : (lOps || rOps || 0);
+    const speedSamples = [lOps, rOps].filter((n) => n > 0);
+    const avgOps = speedSamples.length ? speedSamples.reduce((a, b) => a + b, 0) / speedSamples.length : 0;
     return {
       op,
       l,
@@ -99,12 +100,12 @@ const rows = orderedOps
 fs.mkdirSync(CHARTS_DIR, { recursive: true });
 
 const md: string[] = [];
-md.push(`# ${SUITE_A} (${MODE_A.toUpperCase()}) vs ${SUITE_B} (${MODE_B.toUpperCase()})`);
+md.push(`# ${SUITE_A} (${MODE_A.toUpperCase()}) vs ${SUITE_B} (${MODE_B.toUpperCase()}) Benchmark Comparison`);
 md.push("");
-md.push(`Source: \`build/logs/as/${MODE_A}\` for ${SUITE_A}, \`build/logs/as/${MODE_B}\` for ${SUITE_B}`);
-md.push(`Sort: highest to lowest average ops/s between compared sides`);
+md.push(`Sources: \`build/logs/as/${MODE_A}/${SUITE_A}.*.as.json\` and \`build/logs/as/${MODE_B}/${SUITE_B}.*.as.json\``);
+md.push(`Sort: highest to lowest average ops/s between these two selected datasets`);
 md.push("");
-md.push(`| op | ${SUITE_A} (${MODE_A}) Mops/s | ${SUITE_B} (${MODE_B}) Mops/s | delta (${SUITE_B} vs ${SUITE_A}) |`);
+md.push(`| op | ${SUITE_A} Mops/s | ${SUITE_B} Mops/s | delta |`);
 md.push("|---|---:|---:|---:|");
 for (const r of rows) {
   md.push(`| \`${r.op}\` | ${r.l ? fmtFloat(r.lOps / 1_000_000, 1) : "—"} | ${r.r ? fmtFloat(r.rOps / 1_000_000, 1) : "—"} | ${r.dOps == null ? "—" : `${fmtFloat(r.dOps, 1)}%`} |`);

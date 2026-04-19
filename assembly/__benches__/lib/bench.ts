@@ -6,7 +6,7 @@ export declare function writeFile(fileName: string, data: string): void;
 @external("env", "readFile")
 export declare function readFileBuffer(filePath: string): ArrayBuffer;
 
-const SIMD_ENABLED = (isDefined(ASC_FEATURE_SIMD) && ASC_FEATURE_SIMD) ? "simd" : "swar";
+const SIMD_ENABLED = ASC_FEATURE_SIMD ? "simd" : "swar";
 
 @json
 class BenchResult {
