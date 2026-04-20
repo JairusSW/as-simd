@@ -5,14 +5,25 @@ const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..")
 const LOGS_DIR = path.join(ROOT, "build", "logs", "as");
 const CHARTS_DIR = path.join(ROOT, "charts");
 
-const SUITE = "i8x8";
+const SUITE = "i16x4";
 const MODE_A = "simd";
 const MODE_B = "swar";
 
-const MD_OUT = path.join(CHARTS_DIR, "chart-i8x8-simd-v-swar.md");
-const SVG_OUT = path.join(CHARTS_DIR, "chart-i8x8-simd-v-swar.svg");
+const MD_OUT = path.join(CHARTS_DIR, "chart-i16x4-simd-v-swar.md");
+const SVG_OUT = path.join(CHARTS_DIR, "chart-i16x4-simd-v-swar.svg");
 
-const DECL_ORDER: string[] = ["splat", "extract-lane-s", "extract-lane-u", "replace-lane", "add", "sub", "min-s", "min-u", "max-s", "max-u", "avgr-u", "abs", "neg", "add-sat-s", "add-sat-u", "sub-sat-s", "sub-sat-u", "shl", "shr-s", "shr-u", "all-true", "bitmask", "popcnt", "eq", "ne", "lt-s", "lt-u", "le-s", "le-u", "gt-s", "gt-u", "ge-s", "ge-u", "narrow-i16x4-s", "narrow-i16x4-u", "shuffle", "swizzle", "relaxed-swizzle", "relaxed-laneselect", "mul"];
+const DECL_ORDER: string[] = [
+  "ctor", "splat", "extract-lane-s", "extract-lane-u", "replace-lane",
+  "add", "sub", "mul", "min-s", "min-u", "max-s", "max-u", "avgr-u", "abs", "neg",
+  "add-sat-s", "add-sat-u", "sub-sat-s", "sub-sat-u",
+  "shl", "shr-s", "shr-u", "all-true", "bitmask",
+  "eq", "ne", "lt-s", "lt-u", "le-s", "le-u", "gt-s", "gt-u", "ge-s", "ge-u",
+  "narrow-i32x2-s", "narrow-i32x2-u",
+  "extend-low-i8x8-s", "extend-low-i8x8-u", "extend-high-i8x8-s", "extend-high-i8x8-u",
+  "extadd-pairwise-i8x8-s", "extadd-pairwise-i8x8-u",
+  "q15mulr-sat-s", "extmul-low-i8x8-s", "extmul-low-i8x8-u", "extmul-high-i8x8-s", "extmul-high-i8x8-u",
+  "shuffle", "relaxed-laneselect", "relaxed-q15mulr-s", "relaxed-dot-i8x8-i7x8-s",
+];
 
 type BenchResult = {
   description: string;
@@ -76,15 +87,7 @@ const rows = orderedOps
     const aOps = a ? opsPerSec(a) : 0;
     const bOps = b ? opsPerSec(b) : 0;
     const avgOps = aOps > 0 && bOps > 0 ? (aOps + bOps) / 2 : aOps || bOps || 0;
-    return {
-      op,
-      a,
-      b,
-      aOps,
-      bOps,
-      avgOps,
-      dOps: a && b ? pctDelta(aOps, bOps) : null,
-    };
+    return { op, a, b, aOps, bOps, avgOps, dOps: a && b ? pctDelta(aOps, bOps) : null };
   })
   .sort((x, y) => y.avgOps - x.avgOps);
 
@@ -108,7 +111,7 @@ const maxOps = Math.max(1, ...chartRows.map((r) => Math.max(r.aOps, r.bOps)));
 
 const rowH = 20;
 const headerH = 56;
-const leftW = 170;
+const leftW = 230;
 const barW = 560;
 const rightW = 300;
 const height = headerH + chartRows.length * rowH + 20;

@@ -334,7 +334,13 @@ export namespace i8x8 {
     if (ASC_FEATURE_SIMD) {
       return i64x2.extract_lane(i8x16.narrow_i16x8_s(i64x2(a as i64, b as i64), i64x2(0, 0)), 0) as v64;
     }
-    return pack_low_bytes(narrow_i16x4_s_swar(a)) | (pack_low_bytes(narrow_i16x4_s_swar(b)) << 32);
+    let lo = narrow_i16x4_s_swar(a);
+    let hi = narrow_i16x4_s_swar(b);
+    lo = (lo | (lo >> 8)) & 0x0000ffff0000ffff;
+    hi = (hi | (hi >> 8)) & 0x0000ffff0000ffff;
+    lo = (lo | (lo >> 16)) & 0x00000000ffffffff;
+    hi = (hi | (hi >> 16)) & 0x00000000ffffffff;
+    return lo | (hi << 32);
   }
   /** Narrows each 16-bit signed integer lane to 8-bit unsigned integer lanes with saturation. */
   // @ts-expect-error: decorator
@@ -342,7 +348,13 @@ export namespace i8x8 {
     if (ASC_FEATURE_SIMD) {
       return i64x2.extract_lane(i8x16.narrow_i16x8_u(i64x2(a as i64, b as i64), i64x2(0, 0)), 0) as v64;
     }
-    return pack_low_bytes(narrow_i16x4_u_swar(a)) | (pack_low_bytes(narrow_i16x4_u_swar(b)) << 32);
+    let lo = narrow_i16x4_u_swar(a);
+    let hi = narrow_i16x4_u_swar(b);
+    lo = (lo | (lo >> 8)) & 0x0000ffff0000ffff;
+    hi = (hi | (hi >> 8)) & 0x0000ffff0000ffff;
+    lo = (lo | (lo >> 16)) & 0x00000000ffffffff;
+    hi = (hi | (hi >> 16)) & 0x00000000ffffffff;
+    return lo | (hi << 32);
   }
   /** Selects 8-bit lanes from either vector according to lane indexes [0-15]. */
   // @ts-expect-error: decorator

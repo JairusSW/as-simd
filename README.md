@@ -50,7 +50,7 @@ const lane3 = i8x8.extract_lane_s(sum, 3);
 ```ts
 import { i8x8 } from "as-simd";
 
-let x = i8x8.splat(5);           // [5,5,5,5,5,5,5,5]
+let x = i8x8.splat(5); // [5,5,5,5,5,5,5,5]
 x = i8x8.replace_lane(x, 2, -7); // [5,5,-7,5,5,5,5,5]
 const v = i8x8.extract_lane_s(x, 2); // -7
 ```
