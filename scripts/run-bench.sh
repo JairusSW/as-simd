@@ -82,6 +82,9 @@ for file in "${FILES[@]}"; do
     file_mode=""
     if [[ "$filename_lower" == simd-* || "$filename_lower" == *-simd.bench.ts ]]; then
         file_mode="SIMD"
+    elif [[ "$filename_lower" == i8x16-swar.bench.ts || "$filename_lower" == i16x8-swar.bench.ts || "$filename_lower" == i32x4-swar.bench.ts || "$filename_lower" == i64x2-swar.bench.ts ]]; then
+        # v128 SWAR wrappers still require SIMD-enabled builds for v128 support.
+        file_mode="SIMD"
     elif [[ "$filename_lower" == swar-* || "$filename_lower" == *-swar.bench.ts ]]; then
         file_mode="SWAR"
     fi

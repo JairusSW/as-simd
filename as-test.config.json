@@ -15,7 +15,10 @@
   "runOptions": { "reporter": "default" },
   "modes": {
     "swar": {
-      "coverage": false
+      "coverage": false,
+      "buildOptions": {
+        "args": ["--transform", "./transform/index.mjs"]
+      }
     },
     "simd": {
       "buildOptions": {
