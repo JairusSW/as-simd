@@ -15,7 +15,7 @@
     "build:transform": "tsc -p ./transform",
     "test:wasmtime": "wasmtime ./build/test.wasm",
     "bench:mode-compare:i8x8": "bun ./scripts/chart-i8x8-simd-v-swar.ts",
-    "prettier": "prettier -w .",
+    "format": "prettier -w .",
     "charts:build": "./scripts/build-charts.sh",
     "charts:serve": "serve ./charts"
   },

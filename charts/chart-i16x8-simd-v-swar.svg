@@ -2,152 +2,152 @@
 <rect x="0" y="0" width="1030" height="816" fill="#ffffff"/>
 <text x="16" y="24" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="700" fill="#111827">i16x8 SIMD vs SWAR</text>
 <text x="16" y="42" font-family="Inter, Arial, sans-serif" font-size="12" fill="#4b5563">Blue: SIMD, Green: SWAR</text>
-<text x="8" y="70" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">load</text>
-<rect x="170" y="59" width="466" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="67" width="560" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="70" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">210.6M -> 253.1M (20.2%)</text>
-<text x="8" y="90" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">splat</text>
-<rect x="170" y="79" width="496" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="87" width="513" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="90" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">224.0M -> 231.8M (3.5%)</text>
-<text x="8" y="110" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">extract-lane-u</text>
-<rect x="170" y="99" width="434" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="107" width="527" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="110" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">196.0M -> 238.1M (21.5%)</text>
-<text x="8" y="130" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">extract-lane-s</text>
-<rect x="170" y="119" width="434" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="127" width="524" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="130" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">196.2M -> 236.7M (20.6%)</text>
+<text x="8" y="70" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">abs</text>
+<rect x="170" y="59" width="409" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="67" width="553" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="70" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">244.7M -> 330.4M (35.0%)</text>
+<text x="8" y="90" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">bitmask</text>
+<rect x="170" y="79" width="402" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="87" width="560" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="90" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">240.1M -> 334.7M (39.4%)</text>
+<text x="8" y="110" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">extract-lane-s</text>
+<rect x="170" y="99" width="420" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="107" width="512" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="110" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">251.0M -> 305.8M (21.9%)</text>
+<text x="8" y="130" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">extract-lane-u</text>
+<rect x="170" y="119" width="418" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="127" width="499" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="130" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">249.8M -> 298.5M (19.5%)</text>
 <text x="8" y="150" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">neg</text>
-<rect x="170" y="139" width="439" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="147" width="380" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="150" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">198.5M -> 171.8M (-13.5%)</text>
+<rect x="170" y="139" width="394" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="147" width="508" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="150" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">235.8M -> 303.6M (28.8%)</text>
 <text x="8" y="170" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">all-true</text>
-<rect x="170" y="159" width="438" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="167" width="344" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="170" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">197.8M -> 155.6M (-21.3%)</text>
-<text x="8" y="190" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">bitmask</text>
-<rect x="170" y="179" width="462" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="187" width="296" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="190" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">209.0M -> 133.8M (-36.0%)</text>
-<text x="8" y="210" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">abs</text>
-<rect x="170" y="199" width="443" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="207" width="297" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="210" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">200.4M -> 134.2M (-33.0%)</text>
-<text x="8" y="230" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">store</text>
-<rect x="170" y="219" width="331" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="227" width="396" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="230" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">149.7M -> 179.2M (19.7%)</text>
-<text x="8" y="250" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">avgr-u</text>
-<rect x="170" y="239" width="349" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="247" width="326" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="250" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">157.6M -> 147.3M (-6.5%)</text>
-<text x="8" y="270" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">add</text>
-<rect x="170" y="259" width="347" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="267" width="309" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="270" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">157.0M -> 139.6M (-11.1%)</text>
-<text x="8" y="290" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">sub</text>
-<rect x="170" y="279" width="347" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="287" width="301" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="290" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">156.7M -> 136.0M (-13.2%)</text>
-<text x="8" y="310" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">eq</text>
-<rect x="170" y="299" width="365" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="307" width="278" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="310" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">164.8M -> 125.8M (-23.7%)</text>
-<text x="8" y="330" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">replace-lane</text>
-<rect x="170" y="319" width="299" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="327" width="341" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="330" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">135.2M -> 154.3M (14.1%)</text>
-<text x="8" y="350" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">ne</text>
-<rect x="170" y="339" width="353" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="347" width="268" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="350" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">159.7M -> 121.2M (-24.1%)</text>
-<text x="8" y="370" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">gt-u</text>
-<rect x="170" y="359" width="349" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="367" width="267" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="370" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">158.0M -> 120.7M (-23.6%)</text>
-<text x="8" y="390" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">gt-s</text>
-<rect x="170" y="379" width="361" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="387" width="255" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="390" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">163.2M -> 115.4M (-29.3%)</text>
-<text x="8" y="410" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">le-u</text>
-<rect x="170" y="399" width="354" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="407" width="259" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="410" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">159.9M -> 117.1M (-26.8%)</text>
-<text x="8" y="430" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">ge-u</text>
-<rect x="170" y="419" width="355" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="427" width="248" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="430" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">160.6M -> 112.1M (-30.2%)</text>
-<text x="8" y="450" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">ge-s</text>
-<rect x="170" y="439" width="354" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="447" width="242" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="450" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">160.2M -> 109.4M (-31.8%)</text>
-<text x="8" y="470" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">lt-s</text>
-<rect x="170" y="459" width="361" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="467" width="226" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="470" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">163.1M -> 102.1M (-37.4%)</text>
-<text x="8" y="490" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">shl</text>
-<rect x="170" y="479" width="316" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="487" width="267" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="490" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">142.8M -> 120.8M (-15.4%)</text>
-<text x="8" y="510" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">sub-sat-u</text>
-<rect x="170" y="499" width="360" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="507" width="220" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="510" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">162.9M -> 99.4M (-39.0%)</text>
-<text x="8" y="530" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">lt-u</text>
-<rect x="170" y="519" width="346" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="527" width="232" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="530" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">156.5M -> 105.0M (-32.9%)</text>
-<text x="8" y="550" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">shr-u</text>
-<rect x="170" y="539" width="313" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="547" width="261" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="550" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">141.3M -> 118.0M (-16.5%)</text>
-<text x="8" y="570" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">le-s</text>
-<rect x="170" y="559" width="356" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="567" width="217" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="570" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">160.8M -> 98.2M (-39.0%)</text>
-<text x="8" y="590" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">sub-sat-s</text>
-<rect x="170" y="579" width="359" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="587" width="210" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="590" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">162.2M -> 94.8M (-41.5%)</text>
-<text x="8" y="610" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">add-sat-u</text>
-<rect x="170" y="599" width="352" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="607" width="204" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="610" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">159.2M -> 92.3M (-42.0%)</text>
-<text x="8" y="630" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">add-sat-s</text>
-<rect x="170" y="619" width="358" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="627" width="195" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="630" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">161.9M -> 88.2M (-45.5%)</text>
-<text x="8" y="650" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">max-u</text>
-<rect x="170" y="639" width="349" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="647" width="204" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="650" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">157.8M -> 92.1M (-41.6%)</text>
-<text x="8" y="670" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">shr-s</text>
-<rect x="170" y="659" width="313" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="667" width="233" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="670" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">141.7M -> 105.3M (-25.6%)</text>
-<text x="8" y="690" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">min-u</text>
-<rect x="170" y="679" width="343" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="687" width="203" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="690" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">155.0M -> 91.7M (-40.9%)</text>
-<text x="8" y="710" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">max-s</text>
-<rect x="170" y="699" width="341" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="707" width="198" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="710" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">154.3M -> 89.3M (-42.1%)</text>
-<text x="8" y="730" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">mul</text>
-<rect x="170" y="719" width="346" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="727" width="191" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="730" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">156.6M -> 86.4M (-44.8%)</text>
-<text x="8" y="750" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">min-s</text>
-<rect x="170" y="739" width="342" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="747" width="191" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="750" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">154.7M -> 86.2M (-44.3%)</text>
+<rect x="170" y="159" width="382" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="167" width="495" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="170" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">228.3M -> 295.6M (29.5%)</text>
+<text x="8" y="190" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">load</text>
+<rect x="170" y="179" width="430" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="187" width="445" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="190" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">256.8M -> 266.2M (3.7%)</text>
+<text x="8" y="210" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">splat</text>
+<rect x="170" y="199" width="422" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="207" width="441" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="210" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">252.5M -> 263.3M (4.3%)</text>
+<text x="8" y="230" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">mul</text>
+<rect x="170" y="219" width="342" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="227" width="429" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="230" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">204.5M -> 256.6M (25.5%)</text>
+<text x="8" y="250" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">min-u</text>
+<rect x="170" y="239" width="340" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="247" width="431" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="250" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">203.3M -> 257.7M (26.7%)</text>
+<text x="8" y="270" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">min-s</text>
+<rect x="170" y="259" width="338" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="267" width="428" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="270" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">202.0M -> 256.1M (26.8%)</text>
+<text x="8" y="290" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">add</text>
+<rect x="170" y="279" width="351" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="287" width="407" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="290" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">209.9M -> 243.5M (16.0%)</text>
+<text x="8" y="310" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">add-sat-s</text>
+<rect x="170" y="299" width="319" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="307" width="436" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="310" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">190.8M -> 260.6M (36.6%)</text>
+<text x="8" y="330" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">sub-sat-s</text>
+<rect x="170" y="319" width="321" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="327" width="433" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="330" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">192.0M -> 258.9M (34.9%)</text>
+<text x="8" y="350" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">max-s</text>
+<rect x="170" y="339" width="322" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="347" width="432" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="350" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">192.2M -> 257.9M (34.2%)</text>
+<text x="8" y="370" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">add-sat-u</text>
+<rect x="170" y="359" width="320" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="367" width="433" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="370" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">191.4M -> 258.6M (35.1%)</text>
+<text x="8" y="390" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">max-u</text>
+<rect x="170" y="379" width="319" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="387" width="431" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="390" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">190.5M -> 257.6M (35.2%)</text>
+<text x="8" y="410" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">sub-sat-u</text>
+<rect x="170" y="399" width="320" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="407" width="429" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="410" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">191.1M -> 256.3M (34.1%)</text>
+<text x="8" y="430" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">avgr-u</text>
+<rect x="170" y="419" width="320" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="427" width="423" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="430" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">191.1M -> 253.1M (32.4%)</text>
+<text x="8" y="450" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">sub</text>
+<rect x="170" y="439" width="324" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="447" width="418" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="450" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">193.6M -> 249.6M (28.9%)</text>
+<text x="8" y="470" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">le-u</text>
+<rect x="170" y="459" width="311" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="467" width="418" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="470" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">186.0M -> 249.9M (34.4%)</text>
+<text x="8" y="490" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">le-s</text>
+<rect x="170" y="479" width="313" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="487" width="412" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="490" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">186.9M -> 246.6M (31.9%)</text>
+<text x="8" y="510" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">lt-u</text>
+<rect x="170" y="499" width="307" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="507" width="401" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="510" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">183.4M -> 239.4M (30.5%)</text>
+<text x="8" y="530" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">gt-s</text>
+<rect x="170" y="519" width="317" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="527" width="389" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="530" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">189.6M -> 232.6M (22.7%)</text>
+<text x="8" y="550" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">eq</text>
+<rect x="170" y="539" width="319" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="547" width="386" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="550" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">190.8M -> 230.9M (21.0%)</text>
+<text x="8" y="570" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">ge-s</text>
+<rect x="170" y="559" width="318" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="567" width="388" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="570" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">189.9M -> 231.6M (22.0%)</text>
+<text x="8" y="590" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">lt-s</text>
+<rect x="170" y="579" width="320" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="587" width="380" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="590" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">191.0M -> 227.4M (19.0%)</text>
+<text x="8" y="610" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">replace-lane</text>
+<rect x="170" y="599" width="320" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="607" width="373" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="610" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">191.3M -> 222.9M (16.5%)</text>
+<text x="8" y="630" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">gt-u</text>
+<rect x="170" y="619" width="308" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="627" width="376" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="630" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">183.8M -> 225.0M (22.4%)</text>
+<text x="8" y="650" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">ge-u</text>
+<rect x="170" y="639" width="306" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="647" width="372" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="650" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">182.6M -> 222.3M (21.7%)</text>
+<text x="8" y="670" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">ne</text>
+<rect x="170" y="659" width="309" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="667" width="366" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="670" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">184.9M -> 218.9M (18.4%)</text>
+<text x="8" y="690" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">shr-s</text>
+<rect x="170" y="679" width="275" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="687" width="378" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="690" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">164.2M -> 225.7M (37.4%)</text>
+<text x="8" y="710" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">shl</text>
+<rect x="170" y="699" width="277" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="707" width="375" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="710" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">165.8M -> 224.1M (35.1%)</text>
+<text x="8" y="730" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">shr-u</text>
+<rect x="170" y="719" width="277" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="727" width="371" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="730" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">165.4M -> 221.7M (34.0%)</text>
+<text x="8" y="750" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">store</text>
+<rect x="170" y="739" width="309" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="747" width="330" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="750" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">184.7M -> 197.3M (6.8%)</text>
 <text x="8" y="770" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">load-partial</text>
-<rect x="170" y="759" width="82" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="767" width="90" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="770" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">37.1M -> 40.7M (9.5%)</text>
+<rect x="170" y="759" width="75" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="767" width="85" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="770" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">45.1M -> 50.9M (12.8%)</text>
 <text x="8" y="790" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">store-partial</text>
-<rect x="170" y="779" width="73" height="6" fill="#3b82f6" opacity="0.9"/>
-<rect x="170" y="787" width="82" height="6" fill="#10b981" opacity="0.9"/>
-<text x="738" y="790" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">33.0M -> 37.1M (12.5%)</text>
+<rect x="170" y="779" width="68" height="6" fill="#3b82f6" opacity="0.9"/>
+<rect x="170" y="787" width="76" height="6" fill="#10b981" opacity="0.9"/>
+<text x="738" y="790" font-family="Inter, Arial, sans-serif" font-size="11" fill="#374151">40.5M -> 45.7M (12.7%)</text>
 </svg>

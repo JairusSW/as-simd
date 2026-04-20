@@ -7,7 +7,7 @@ const CHARTS_DIR = path.join(ROOT, "charts");
 const MODE_A = "simd";
 const MODE_B = "simd";
 
-type BenchResult = { description: string; elapsed: number; operations: number; };
+type BenchResult = { description: string; elapsed: number; operations: number };
 
 const ORDERS: Record<string, string[]> = {
   i8x16: ["splat", "load", "store", "load-partial", "store-partial", "extract-lane-s", "extract-lane-u", "replace-lane", "add", "sub", "mul", "min-s", "min-u", "max-s", "max-u", "avgr-u", "abs", "neg", "add-sat-s", "add-sat-u", "sub-sat-s", "sub-sat-u", "shl", "shr-s", "shr-u", "all-true", "bitmask", "popcnt", "eq", "ne", "lt-s", "lt-u", "le-s", "le-u", "gt-s", "gt-u", "ge-s", "ge-u"],
@@ -27,18 +27,32 @@ function loadSuite(mode: string, suite: string): Record<string, BenchResult> {
   }
   return out;
 }
-function opsPerSec(r: BenchResult): number { return (r.operations * 1000) / r.elapsed; }
-function pctDelta(a: number, b: number): number { return ((b - a) / a) * 100; }
-function fmtFloat(n: number, digits = 2): string { return Number.isFinite(n) ? n.toFixed(digits) : "n/a"; }
-function fmtMops(n: number): string { return `${fmtFloat(n / 1_000_000, 1)}M`; }
-function esc(s: string): string { return s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;"); }
+function opsPerSec(r: BenchResult): number {
+  return (r.operations * 1000) / r.elapsed;
+}
+function pctDelta(a: number, b: number): number {
+  return ((b - a) / a) * 100;
+}
+function fmtFloat(n: number, digits = 2): string {
+  return Number.isFinite(n) ? n.toFixed(digits) : "n/a";
+}
+function fmtMops(n: number): string {
+  return `${fmtFloat(n / 1_000_000, 1)}M`;
+}
+function esc(s: string): string {
+  return s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+}
 
 for (const suite of Object.keys(ORDERS)) {
   const simd = loadSuite(MODE_A, suite);
   const swar = loadSuite(MODE_B, `${suite}-swar`);
   const orderedOps = ORDERS[suite].slice();
   const seen = new Set(orderedOps);
-  for (const op of [...Object.keys(simd), ...Object.keys(swar)]) if (!seen.has(op)) { seen.add(op); orderedOps.push(op); }
+  for (const op of [...Object.keys(simd), ...Object.keys(swar)])
+    if (!seen.has(op)) {
+      seen.add(op);
+      orderedOps.push(op);
+    }
   const rows = orderedOps
     .map((op) => {
       const a = simd[op] || null;
@@ -62,15 +76,24 @@ for (const suite of Object.keys(ORDERS)) {
 
   const chartRows = rows.filter((r) => r.a && r.b);
   const maxOps = Math.max(1, ...chartRows.map((r) => Math.max(r.aOps, r.bOps)));
-  const rowH = 20, headerH = 56, leftW = 170, barW = 560, rightW = 300;
-  const height = headerH + chartRows.length * rowH + 20, width = leftW + barW + rightW;
+  const rowH = 20,
+    headerH = 56,
+    leftW = 170,
+    barW = 560,
+    rightW = 300;
+  const height = headerH + chartRows.length * rowH + 20,
+    width = leftW + barW + rightW;
   const svg: string[] = [];
   svg.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`);
   svg.push(`<rect x="0" y="0" width="${width}" height="${height}" fill="#ffffff"/>`);
   svg.push(`<text x="16" y="24" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="700" fill="#111827">${esc(suite)} SIMD vs SWAR</text>`);
   svg.push(`<text x="16" y="42" font-family="Inter, Arial, sans-serif" font-size="12" fill="#4b5563">Blue: SIMD, Green: SWAR</text>`);
   for (let i = 0; i < chartRows.length; i++) {
-    const r = chartRows[i], y = headerH + i * rowH, aw = Math.max(1, Math.round((r.aOps / maxOps) * barW)), bw = Math.max(1, Math.round((r.bOps / maxOps) * barW)), ty = y + 14;
+    const r = chartRows[i],
+      y = headerH + i * rowH,
+      aw = Math.max(1, Math.round((r.aOps / maxOps) * barW)),
+      bw = Math.max(1, Math.round((r.bOps / maxOps) * barW)),
+      ty = y + 14;
     svg.push(`<text x="8" y="${ty}" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827">${esc(r.op)}</text>`);
     svg.push(`<rect x="${leftW}" y="${y + 3}" width="${aw}" height="6" fill="#3b82f6" opacity="0.9"/>`);
     svg.push(`<rect x="${leftW}" y="${y + 11}" width="${bw}" height="6" fill="#10b981" opacity="0.9"/>`);

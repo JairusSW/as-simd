@@ -13,16 +13,7 @@ const MODE_B = "simd";
 const MD_OUT = path.join(CHARTS_DIR, "chart-i32x2-v-i32x4.md");
 const SVG_OUT = path.join(CHARTS_DIR, "chart-i32x2-v-i32x4.svg");
 
-const DECL_ORDER: string[] = [
-  "splat", "load", "store", "load-partial", "store-partial", "extract-lane", "replace-lane", "add", "sub", "mul",
-  "min-s", "min-u", "max-s", "max-u", "dot-i16x8-s", "abs", "neg",
-  "shl", "shr-s", "shr-u", "all-true", "bitmask",
-  "eq", "ne", "lt-s", "lt-u", "le-s", "le-u", "gt-s", "gt-u", "ge-s", "ge-u",
-  "extend-low-i16x8-s", "extend-low-i16x8-u", "extend-high-i16x8-s", "extend-high-i16x8-u",
-  "extadd-pairwise-i16x8-s", "extadd-pairwise-i16x8-u",
-  "extmul-low-i16x8-s", "extmul-low-i16x8-u", "extmul-high-i16x8-s", "extmul-high-i16x8-u",
-  "shuffle", "relaxed-laneselect",
-];
+const DECL_ORDER: string[] = ["splat", "load", "store", "load-partial", "store-partial", "extract-lane", "replace-lane", "add", "sub", "mul", "min-s", "min-u", "max-s", "max-u", "dot-i16x8-s", "abs", "neg", "shl", "shr-s", "shr-u", "all-true", "bitmask", "eq", "ne", "lt-s", "lt-u", "le-s", "le-u", "gt-s", "gt-u", "ge-s", "ge-u", "extend-low-i16x8-s", "extend-low-i16x8-u", "extend-high-i16x8-s", "extend-high-i16x8-u", "extadd-pairwise-i16x8-s", "extadd-pairwise-i16x8-u", "extmul-low-i16x8-s", "extmul-low-i16x8-u", "extmul-high-i16x8-s", "extmul-high-i16x8-u", "shuffle", "relaxed-laneselect"];
 
 type BenchResult = { description: string; elapsed: number; operations: number };
 
@@ -37,11 +28,21 @@ function loadSuite(mode: string, suite: string): Record<string, BenchResult> {
   }
   return out;
 }
-function opsPerSec(r: BenchResult): number { return (r.operations * 1000) / r.elapsed; }
-function pctDelta(a: number, b: number): number { return ((b - a) / a) * 100; }
-function fmtFloat(n: number, digits = 2): string { return Number.isFinite(n) ? n.toFixed(digits) : "n/a"; }
-function fmtMops(n: number): string { return `${fmtFloat(n / 1_000_000, 1)}M`; }
-function esc(s: string): string { return s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;"); }
+function opsPerSec(r: BenchResult): number {
+  return (r.operations * 1000) / r.elapsed;
+}
+function pctDelta(a: number, b: number): number {
+  return ((b - a) / a) * 100;
+}
+function fmtFloat(n: number, digits = 2): string {
+  return Number.isFinite(n) ? n.toFixed(digits) : "n/a";
+}
+function fmtMops(n: number): string {
+  return `${fmtFloat(n / 1_000_000, 1)}M`;
+}
+function esc(s: string): string {
+  return s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+}
 
 const left = loadSuite(MODE_A, SUITE_A);
 const right = loadSuite(MODE_B, SUITE_B);
@@ -60,15 +61,14 @@ const leftAliases: Record<string, string> = {
   "extmul-high-i16x8-u": "extmul-high-i16x4-u",
 };
 
-const rows = DECL_ORDER
-  .map((op) => {
-    const l = left[op] || left[leftAliases[op] ?? ""] || null;
-    const r = right[op] || null;
-    if (!l || !r) return null;
-    const lOps = opsPerSec(l);
-    const rOps = opsPerSec(r);
-    return { op, lOps, rOps, avgOps: (lOps + rOps) / 2, dOps: pctDelta(lOps, rOps) };
-  })
+const rows = DECL_ORDER.map((op) => {
+  const l = left[op] || left[leftAliases[op] ?? ""] || null;
+  const r = right[op] || null;
+  if (!l || !r) return null;
+  const lOps = opsPerSec(l);
+  const rOps = opsPerSec(r);
+  return { op, lOps, rOps, avgOps: (lOps + rOps) / 2, dOps: pctDelta(lOps, rOps) };
+})
   .filter((x): x is NonNullable<typeof x> => x != null)
   .sort((a, b) => b.avgOps - a.avgOps);
 
@@ -91,8 +91,13 @@ for (const r of rows) md.push(`| \`${r.op}\` | ${fmtFloat(r.lOps / 1_000_000, 1)
 fs.writeFileSync(MD_OUT, `${md.join("\n")}\n`);
 
 const maxOps = Math.max(1, ...rows.map((r) => Math.max(r.lOps, r.rOps)));
-const rowH = 20, headerH = 56, leftW = 230, barW = 560, rightW = 360;
-const height = headerH + rows.length * rowH + 20, width = leftW + barW + rightW;
+const rowH = 20,
+  headerH = 56,
+  leftW = 230,
+  barW = 560,
+  rightW = 360;
+const height = headerH + rows.length * rowH + 20,
+  width = leftW + barW + rightW;
 
 const svg: string[] = [];
 svg.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`);

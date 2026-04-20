@@ -13,18 +13,7 @@ const MODE_B = "simd";
 const MD_OUT = path.join(CHARTS_DIR, "chart-i16x4-v-i16x8.md");
 const SVG_OUT = path.join(CHARTS_DIR, "chart-i16x4-v-i16x8.svg");
 
-const DECL_ORDER: string[] = [
-  "splat", "load", "store", "load-partial", "store-partial", "extract-lane-s", "extract-lane-u", "replace-lane",
-  "add", "sub", "mul", "min-s", "min-u", "max-s", "max-u", "avgr-u",
-  "abs", "neg", "add-sat-s", "add-sat-u", "sub-sat-s", "sub-sat-u",
-  "shl", "shr-s", "shr-u", "all-true", "bitmask",
-  "eq", "ne", "lt-s", "lt-u", "le-s", "le-u", "gt-s", "gt-u", "ge-s", "ge-u",
-  "narrow-i32x4-s", "narrow-i32x4-u",
-  "extend-low-i8x16-s", "extend-low-i8x16-u", "extend-high-i8x16-s", "extend-high-i8x16-u",
-  "extadd-pairwise-i8x16-s", "extadd-pairwise-i8x16-u",
-  "q15mulr-sat-s", "extmul-low-i8x16-s", "extmul-low-i8x16-u", "extmul-high-i8x16-s", "extmul-high-i8x16-u",
-  "shuffle", "relaxed-laneselect", "relaxed-q15mulr-s", "relaxed-dot-i8x16-i7x16-s",
-];
+const DECL_ORDER: string[] = ["splat", "load", "store", "load-partial", "store-partial", "extract-lane-s", "extract-lane-u", "replace-lane", "add", "sub", "mul", "min-s", "min-u", "max-s", "max-u", "avgr-u", "abs", "neg", "add-sat-s", "add-sat-u", "sub-sat-s", "sub-sat-u", "shl", "shr-s", "shr-u", "all-true", "bitmask", "eq", "ne", "lt-s", "lt-u", "le-s", "le-u", "gt-s", "gt-u", "ge-s", "ge-u", "narrow-i32x4-s", "narrow-i32x4-u", "extend-low-i8x16-s", "extend-low-i8x16-u", "extend-high-i8x16-s", "extend-high-i8x16-u", "extadd-pairwise-i8x16-s", "extadd-pairwise-i8x16-u", "q15mulr-sat-s", "extmul-low-i8x16-s", "extmul-low-i8x16-u", "extmul-high-i8x16-s", "extmul-high-i8x16-u", "shuffle", "relaxed-laneselect", "relaxed-q15mulr-s", "relaxed-dot-i8x16-i7x16-s"];
 
 type BenchResult = {
   description: string;

@@ -13,13 +13,80 @@ export namespace i8x16_swar {
   @inline function pack(l: v64, h: v64): v128 { return i64x2(l as i64, h as i64); }
 
   // @ts-expect-error: decorator
-  @inline export function splat(x: i8): v128 { return pack(i8x8.splat(x), i8x8.splat(x)); }
+  @inline export function splat(x: i8): v128 {
+    if (ASC_FEATURE_SIMD) return i8x16.splat(x);
+    return pack(i8x8.splat(x), i8x8.splat(x));
+  }
   // @ts-expect-error: decorator
-  @inline export function extract_lane_s(x: v128, idx: u8): i8 { return (idx & 15) < 8 ? i8x8.extract_lane_s(lo(x), idx & 7) : i8x8.extract_lane_s(hi(x), idx & 7); }
+  @inline export function extract_lane_s(x: v128, idx: u8): i8 {
+    if (ASC_FEATURE_SIMD) {
+      switch (idx & 15) {
+        case 0: return i8x16.extract_lane_s(x, 0);
+        case 1: return i8x16.extract_lane_s(x, 1);
+        case 2: return i8x16.extract_lane_s(x, 2);
+        case 3: return i8x16.extract_lane_s(x, 3);
+        case 4: return i8x16.extract_lane_s(x, 4);
+        case 5: return i8x16.extract_lane_s(x, 5);
+        case 6: return i8x16.extract_lane_s(x, 6);
+        case 7: return i8x16.extract_lane_s(x, 7);
+        case 8: return i8x16.extract_lane_s(x, 8);
+        case 9: return i8x16.extract_lane_s(x, 9);
+        case 10: return i8x16.extract_lane_s(x, 10);
+        case 11: return i8x16.extract_lane_s(x, 11);
+        case 12: return i8x16.extract_lane_s(x, 12);
+        case 13: return i8x16.extract_lane_s(x, 13);
+        case 14: return i8x16.extract_lane_s(x, 14);
+        default: return i8x16.extract_lane_s(x, 15);
+      }
+    }
+    return (idx & 15) < 8 ? i8x8.extract_lane_s(lo(x), idx & 7) : i8x8.extract_lane_s(hi(x), idx & 7);
+  }
   // @ts-expect-error: decorator
-  @inline export function extract_lane_u(x: v128, idx: u8): u8 { return (idx & 15) < 8 ? i8x8.extract_lane_u(lo(x), idx & 7) : i8x8.extract_lane_u(hi(x), idx & 7); }
+  @inline export function extract_lane_u(x: v128, idx: u8): u8 {
+    if (ASC_FEATURE_SIMD) {
+      switch (idx & 15) {
+        case 0: return i8x16.extract_lane_u(x, 0);
+        case 1: return i8x16.extract_lane_u(x, 1);
+        case 2: return i8x16.extract_lane_u(x, 2);
+        case 3: return i8x16.extract_lane_u(x, 3);
+        case 4: return i8x16.extract_lane_u(x, 4);
+        case 5: return i8x16.extract_lane_u(x, 5);
+        case 6: return i8x16.extract_lane_u(x, 6);
+        case 7: return i8x16.extract_lane_u(x, 7);
+        case 8: return i8x16.extract_lane_u(x, 8);
+        case 9: return i8x16.extract_lane_u(x, 9);
+        case 10: return i8x16.extract_lane_u(x, 10);
+        case 11: return i8x16.extract_lane_u(x, 11);
+        case 12: return i8x16.extract_lane_u(x, 12);
+        case 13: return i8x16.extract_lane_u(x, 13);
+        case 14: return i8x16.extract_lane_u(x, 14);
+        default: return i8x16.extract_lane_u(x, 15);
+      }
+    }
+    return (idx & 15) < 8 ? i8x8.extract_lane_u(lo(x), idx & 7) : i8x8.extract_lane_u(hi(x), idx & 7);
+  }
   // @ts-expect-error: decorator
   @inline export function replace_lane(x: v128, idx: u8, value: i8): v128 {
+    if (ASC_FEATURE_SIMD) {
+      switch (idx & 15) {
+        case 0: return i8x16.replace_lane(x, 0, value);
+        case 1: return i8x16.replace_lane(x, 1, value);
+        case 2: return i8x16.replace_lane(x, 2, value);
+        case 3: return i8x16.replace_lane(x, 3, value);
+        case 4: return i8x16.replace_lane(x, 4, value);
+        case 5: return i8x16.replace_lane(x, 5, value);
+        case 6: return i8x16.replace_lane(x, 6, value);
+        case 7: return i8x16.replace_lane(x, 7, value);
+        case 8: return i8x16.replace_lane(x, 8, value);
+        case 9: return i8x16.replace_lane(x, 9, value);
+        case 10: return i8x16.replace_lane(x, 10, value);
+        case 11: return i8x16.replace_lane(x, 11, value);
+        case 12: return i8x16.replace_lane(x, 12, value);
+        case 13: return i8x16.replace_lane(x, 13, value);
+        case 14: return i8x16.replace_lane(x, 14, value);
+        default: return i8x16.replace_lane(x, 15, value);
+      }
+    }
     const i = idx & 15;
     const l = lo(x), h = hi(x);
     return i < 8 ? pack(i8x8.replace_lane(l, i, value), h) : pack(l, i8x8.replace_lane(h, i & 7, value));
@@ -123,6 +190,10 @@ export namespace i8x16_swar {
     const nn = select<i32>(0, len, len < 0);
     const n = select<i32>(16, nn, nn > 16);
     if (n == 0) return;
+    if (ASC_FEATURE_SIMD && n == 16) {
+      store<v128>(ptr + immOffset, value);
+      return;
+    }
     if (n <= 8) {
       i8x8.storePartial(ptr, lo(value), n, immOffset, immAlign);
       return;
@@ -133,63 +204,63 @@ export namespace i8x16_swar {
   }
 
   // @ts-expect-error: decorator
-  @inline export function add(a: v128, b: v128): v128 { return pack(i8x8.add(lo(a), lo(b)), i8x8.add(hi(a), hi(b))); }
+  @inline export function add(a: v128, b: v128): v128 { if (ASC_FEATURE_SIMD) return i8x16.add(a, b); return pack(i8x8.add(lo(a), lo(b)), i8x8.add(hi(a), hi(b))); }
   // @ts-expect-error: decorator
-  @inline export function sub(a: v128, b: v128): v128 { return pack(i8x8.sub(lo(a), lo(b)), i8x8.sub(hi(a), hi(b))); }
+  @inline export function sub(a: v128, b: v128): v128 { if (ASC_FEATURE_SIMD) return i8x16.sub(a, b); return pack(i8x8.sub(lo(a), lo(b)), i8x8.sub(hi(a), hi(b))); }
   // @ts-expect-error: decorator
   @inline export function mul(a: v128, b: v128): v128 { return pack(i8x8.mul(lo(a), lo(b)), i8x8.mul(hi(a), hi(b))); }
   // @ts-expect-error: decorator
-  @inline export function min_s(a: v128, b: v128): v128 { return pack(i8x8.min_s(lo(a), lo(b)), i8x8.min_s(hi(a), hi(b))); }
+  @inline export function min_s(a: v128, b: v128): v128 { if (ASC_FEATURE_SIMD) return i8x16.min_s(a, b); return pack(i8x8.min_s(lo(a), lo(b)), i8x8.min_s(hi(a), hi(b))); }
   // @ts-expect-error: decorator
-  @inline export function min_u(a: v128, b: v128): v128 { return pack(i8x8.min_u(lo(a), lo(b)), i8x8.min_u(hi(a), hi(b))); }
+  @inline export function min_u(a: v128, b: v128): v128 { if (ASC_FEATURE_SIMD) return i8x16.min_u(a, b); return pack(i8x8.min_u(lo(a), lo(b)), i8x8.min_u(hi(a), hi(b))); }
   // @ts-expect-error: decorator
-  @inline export function max_s(a: v128, b: v128): v128 { return pack(i8x8.max_s(lo(a), lo(b)), i8x8.max_s(hi(a), hi(b))); }
+  @inline export function max_s(a: v128, b: v128): v128 { if (ASC_FEATURE_SIMD) return i8x16.max_s(a, b); return pack(i8x8.max_s(lo(a), lo(b)), i8x8.max_s(hi(a), hi(b))); }
   // @ts-expect-error: decorator
-  @inline export function max_u(a: v128, b: v128): v128 { return pack(i8x8.max_u(lo(a), lo(b)), i8x8.max_u(hi(a), hi(b))); }
+  @inline export function max_u(a: v128, b: v128): v128 { if (ASC_FEATURE_SIMD) return i8x16.max_u(a, b); return pack(i8x8.max_u(lo(a), lo(b)), i8x8.max_u(hi(a), hi(b))); }
   // @ts-expect-error: decorator
-  @inline export function avgr_u(a: v128, b: v128): v128 { return pack(i8x8.avgr_u(lo(a), lo(b)), i8x8.avgr_u(hi(a), hi(b))); }
+  @inline export function avgr_u(a: v128, b: v128): v128 { if (ASC_FEATURE_SIMD) return i8x16.avgr_u(a, b); return pack(i8x8.avgr_u(lo(a), lo(b)), i8x8.avgr_u(hi(a), hi(b))); }
   // @ts-expect-error: decorator
-  @inline export function abs(a: v128): v128 { return pack(i8x8.abs(lo(a)), i8x8.abs(hi(a))); }
+  @inline export function abs(a: v128): v128 { if (ASC_FEATURE_SIMD) return i8x16.abs(a); return pack(i8x8.abs(lo(a)), i8x8.abs(hi(a))); }
   // @ts-expect-error: decorator
-  @inline export function neg(a: v128): v128 { return pack(i8x8.neg(lo(a)), i8x8.neg(hi(a))); }
+  @inline export function neg(a: v128): v128 { if (ASC_FEATURE_SIMD) return i8x16.neg(a); return pack(i8x8.neg(lo(a)), i8x8.neg(hi(a))); }
   // @ts-expect-error: decorator
-  @inline export function add_sat_s(a: v128, b: v128): v128 { return pack(i8x8.add_sat_s(lo(a), lo(b)), i8x8.add_sat_s(hi(a), hi(b))); }
+  @inline export function add_sat_s(a: v128, b: v128): v128 { if (ASC_FEATURE_SIMD) return i8x16.add_sat_s(a, b); return pack(i8x8.add_sat_s(lo(a), lo(b)), i8x8.add_sat_s(hi(a), hi(b))); }
   // @ts-expect-error: decorator
-  @inline export function add_sat_u(a: v128, b: v128): v128 { return pack(i8x8.add_sat_u(lo(a), lo(b)), i8x8.add_sat_u(hi(a), hi(b))); }
+  @inline export function add_sat_u(a: v128, b: v128): v128 { if (ASC_FEATURE_SIMD) return i8x16.add_sat_u(a, b); return pack(i8x8.add_sat_u(lo(a), lo(b)), i8x8.add_sat_u(hi(a), hi(b))); }
   // @ts-expect-error: decorator
-  @inline export function sub_sat_s(a: v128, b: v128): v128 { return pack(i8x8.sub_sat_s(lo(a), lo(b)), i8x8.sub_sat_s(hi(a), hi(b))); }
+  @inline export function sub_sat_s(a: v128, b: v128): v128 { if (ASC_FEATURE_SIMD) return i8x16.sub_sat_s(a, b); return pack(i8x8.sub_sat_s(lo(a), lo(b)), i8x8.sub_sat_s(hi(a), hi(b))); }
   // @ts-expect-error: decorator
-  @inline export function sub_sat_u(a: v128, b: v128): v128 { return pack(i8x8.sub_sat_u(lo(a), lo(b)), i8x8.sub_sat_u(hi(a), hi(b))); }
+  @inline export function sub_sat_u(a: v128, b: v128): v128 { if (ASC_FEATURE_SIMD) return i8x16.sub_sat_u(a, b); return pack(i8x8.sub_sat_u(lo(a), lo(b)), i8x8.sub_sat_u(hi(a), hi(b))); }
   // @ts-expect-error: decorator
-  @inline export function shl(a: v128, b: i32): v128 { return pack(i8x8.shl(lo(a), b), i8x8.shl(hi(a), b)); }
+  @inline export function shl(a: v128, b: i32): v128 { if (ASC_FEATURE_SIMD) return i8x16.shl(a, b); return pack(i8x8.shl(lo(a), b), i8x8.shl(hi(a), b)); }
   // @ts-expect-error: decorator
-  @inline export function shr_s(a: v128, b: i32): v128 { return pack(i8x8.shr_s(lo(a), b), i8x8.shr_s(hi(a), b)); }
+  @inline export function shr_s(a: v128, b: i32): v128 { if (ASC_FEATURE_SIMD) return i8x16.shr_s(a, b); return pack(i8x8.shr_s(lo(a), b), i8x8.shr_s(hi(a), b)); }
   // @ts-expect-error: decorator
-  @inline export function shr_u(a: v128, b: i32): v128 { return pack(i8x8.shr_u(lo(a), b), i8x8.shr_u(hi(a), b)); }
+  @inline export function shr_u(a: v128, b: i32): v128 { if (ASC_FEATURE_SIMD) return i8x16.shr_u(a, b); return pack(i8x8.shr_u(lo(a), b), i8x8.shr_u(hi(a), b)); }
   // @ts-expect-error: decorator
-  @inline export function all_true(a: v128): bool { return i8x8.all_true(lo(a)) && i8x8.all_true(hi(a)); }
+  @inline export function all_true(a: v128): bool { if (ASC_FEATURE_SIMD) return i8x16.all_true(a); return i8x8.all_true(lo(a)) && i8x8.all_true(hi(a)); }
   // @ts-expect-error: decorator
-  @inline export function bitmask(a: v128): i32 { return i8x8.bitmask(lo(a)) | (i8x8.bitmask(hi(a)) << 8); }
+  @inline export function bitmask(a: v128): i32 { if (ASC_FEATURE_SIMD) return i8x16.bitmask(a); return i8x8.bitmask(lo(a)) | (i8x8.bitmask(hi(a)) << 8); }
   // @ts-expect-error: decorator
-  @inline export function popcnt(a: v128): v128 { return pack(i8x8.popcnt(lo(a)), i8x8.popcnt(hi(a))); }
+  @inline export function popcnt(a: v128): v128 { if (ASC_FEATURE_SIMD) return i8x16.popcnt(a); return pack(i8x8.popcnt(lo(a)), i8x8.popcnt(hi(a))); }
   // @ts-expect-error: decorator
-  @inline export function eq(a: v128, b: v128): v128 { return pack(i8x8.eq(lo(a), lo(b)), i8x8.eq(hi(a), hi(b))); }
+  @inline export function eq(a: v128, b: v128): v128 { if (ASC_FEATURE_SIMD) return i8x16.eq(a, b); return pack(i8x8.eq(lo(a), lo(b)), i8x8.eq(hi(a), hi(b))); }
   // @ts-expect-error: decorator
-  @inline export function ne(a: v128, b: v128): v128 { return pack(i8x8.ne(lo(a), lo(b)), i8x8.ne(hi(a), hi(b))); }
+  @inline export function ne(a: v128, b: v128): v128 { if (ASC_FEATURE_SIMD) return i8x16.ne(a, b); return pack(i8x8.ne(lo(a), lo(b)), i8x8.ne(hi(a), hi(b))); }
   // @ts-expect-error: decorator
-  @inline export function lt_s(a: v128, b: v128): v128 { return pack(i8x8.lt_s(lo(a), lo(b)), i8x8.lt_s(hi(a), hi(b))); }
+  @inline export function lt_s(a: v128, b: v128): v128 { if (ASC_FEATURE_SIMD) return i8x16.lt_s(a, b); return pack(i8x8.lt_s(lo(a), lo(b)), i8x8.lt_s(hi(a), hi(b))); }
   // @ts-expect-error: decorator
-  @inline export function lt_u(a: v128, b: v128): v128 { return pack(i8x8.lt_u(lo(a), lo(b)), i8x8.lt_u(hi(a), hi(b))); }
+  @inline export function lt_u(a: v128, b: v128): v128 { if (ASC_FEATURE_SIMD) return i8x16.lt_u(a, b); return pack(i8x8.lt_u(lo(a), lo(b)), i8x8.lt_u(hi(a), hi(b))); }
   // @ts-expect-error: decorator
-  @inline export function le_s(a: v128, b: v128): v128 { return pack(i8x8.le_s(lo(a), lo(b)), i8x8.le_s(hi(a), hi(b))); }
+  @inline export function le_s(a: v128, b: v128): v128 { if (ASC_FEATURE_SIMD) return i8x16.le_s(a, b); return pack(i8x8.le_s(lo(a), lo(b)), i8x8.le_s(hi(a), hi(b))); }
   // @ts-expect-error: decorator
-  @inline export function le_u(a: v128, b: v128): v128 { return pack(i8x8.le_u(lo(a), lo(b)), i8x8.le_u(hi(a), hi(b))); }
+  @inline export function le_u(a: v128, b: v128): v128 { if (ASC_FEATURE_SIMD) return i8x16.le_u(a, b); return pack(i8x8.le_u(lo(a), lo(b)), i8x8.le_u(hi(a), hi(b))); }
   // @ts-expect-error: decorator
-  @inline export function gt_s(a: v128, b: v128): v128 { return pack(i8x8.gt_s(lo(a), lo(b)), i8x8.gt_s(hi(a), hi(b))); }
+  @inline export function gt_s(a: v128, b: v128): v128 { if (ASC_FEATURE_SIMD) return i8x16.gt_s(a, b); return pack(i8x8.gt_s(lo(a), lo(b)), i8x8.gt_s(hi(a), hi(b))); }
   // @ts-expect-error: decorator
-  @inline export function gt_u(a: v128, b: v128): v128 { return pack(i8x8.gt_u(lo(a), lo(b)), i8x8.gt_u(hi(a), hi(b))); }
+  @inline export function gt_u(a: v128, b: v128): v128 { if (ASC_FEATURE_SIMD) return i8x16.gt_u(a, b); return pack(i8x8.gt_u(lo(a), lo(b)), i8x8.gt_u(hi(a), hi(b))); }
   // @ts-expect-error: decorator
-  @inline export function ge_s(a: v128, b: v128): v128 { return pack(i8x8.ge_s(lo(a), lo(b)), i8x8.ge_s(hi(a), hi(b))); }
+  @inline export function ge_s(a: v128, b: v128): v128 { if (ASC_FEATURE_SIMD) return i8x16.ge_s(a, b); return pack(i8x8.ge_s(lo(a), lo(b)), i8x8.ge_s(hi(a), hi(b))); }
   // @ts-expect-error: decorator
-  @inline export function ge_u(a: v128, b: v128): v128 { return pack(i8x8.ge_u(lo(a), lo(b)), i8x8.ge_u(hi(a), hi(b))); }
+  @inline export function ge_u(a: v128, b: v128): v128 { if (ASC_FEATURE_SIMD) return i8x16.ge_u(a, b); return pack(i8x8.ge_u(lo(a), lo(b)), i8x8.ge_u(hi(a), hi(b))); }
 }
