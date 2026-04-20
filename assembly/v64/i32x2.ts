@@ -86,6 +86,22 @@ export namespace i32x2 {
     const mask = (0xffffffff as v64) << shift;
     return (x & ~mask) | (((value as v64) & 0xffffffff) << shift);
   }
+  /** Loads the first `len` lanes from memory and fills remaining lanes with `fill`. */
+  // @ts-expect-error: decorator
+  @inline export function loadPartial(ptr: usize, len: i32, immOffset: usize = 0, immAlign: usize = 1, fill: i32 = 0): v64 {
+    const p = ptr + immOffset;
+    if (len <= 0) return splat(fill);
+    if (len >= 2) return load<v64>(p);
+    return ((((fill as v64) & 0xffffffff) << 32) | ((load<u32>(p) as v64) & 0xffffffff));
+  }
+  /** Stores the first `len` lanes to memory. */
+  // @ts-expect-error: decorator
+  @inline export function storePartial(ptr: usize, value: v64, len: i32, immOffset: usize = 0, immAlign: usize = 1): void {
+    if (len <= 0) return;
+    const p = ptr + immOffset;
+    if (len >= 2) { store<v64>(p, value); return; }
+    store<i32>(p, (value & 0xffffffff) as i32);
+  }
   /** Adds each 32-bit integer lane. */
   // @ts-expect-error: decorator
   @inline export function add(a: v64, b: v64): v64 {

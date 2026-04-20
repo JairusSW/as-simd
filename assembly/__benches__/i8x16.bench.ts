@@ -1,3 +1,4 @@
+import { i8x16_swar } from "../v128/i8x16";
 import { bench, blackbox, dumpToFile } from "./lib/bench";
 
 const OPS: u64 = 25_000_000;
@@ -10,6 +11,7 @@ const OPS: u64 = 25_000_000;
 let s0: v128 = make128(0x0123456789abcdef, 0x8899aabbccddeeff);
 let s1: v128 = make128(0xfedcba9876543210, 0x7766554433221100);
 let s2: v128 = make128(0xaa55aa55aa55aa55, 0x55aa55aa55aa55aa);
+const IO_PTR: usize = memory.data(160);
 
 // @ts-expect-error: decorator
 @inline function next128(x: v128): v128 {
@@ -55,10 +57,42 @@ let s2: v128 = make128(0xaa55aa55aa55aa55, 0x55aa55aa55aa55aa);
   return <i32>(nextA64() & 7);
 }
 
+// @ts-expect-error: decorator
+@inline function nextPtr16(): usize {
+  return IO_PTR + ((nextA64() as usize) & 0x70);
+}
+
+// @ts-expect-error: decorator
+@inline function nextLen16(): i32 {
+  return <i32>(nextA64() & 31) - 8;
+}
+
 bench("i8x16.splat", () => {
   blackbox(i8x16.splat(nextI8()));
 }, OPS, 8);
 dumpToFile("i8x16", "splat");
+
+bench("i8x16.load", () => {
+  blackbox(load<v128>(nextPtr16()));
+}, OPS, 16);
+dumpToFile("i8x16", "load");
+
+bench("i8x16.store", () => {
+  store<v128>(nextPtr16(), nextVecA());
+  blackbox(load<u64>(IO_PTR));
+}, OPS, 16);
+dumpToFile("i8x16", "store");
+
+bench("i8x16.loadPartial", () => {
+  blackbox(i8x16_swar.loadPartial(nextPtr16(), nextLen16(), 0, 1, nextI8()));
+}, OPS, 16);
+dumpToFile("i8x16", "load-partial");
+
+bench("i8x16.storePartial", () => {
+  i8x16_swar.storePartial(nextPtr16(), nextVecA(), nextLen16(), 0, 1);
+  blackbox(load<u64>(IO_PTR));
+}, OPS, 16);
+dumpToFile("i8x16", "store-partial");
 
 bench("i8x16.extract_lane_s", () => {
   blackbox(i8x16.extract_lane_s(nextVecA(), 7));

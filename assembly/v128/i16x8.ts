@@ -23,6 +23,27 @@ export namespace i16x8_swar {
     const l = lo(x), h = hi(x);
     return i < 4 ? pack(i16x4.replace_lane(l, i, value), h) : pack(l, i16x4.replace_lane(h, i & 3, value));
   }
+  // @ts-expect-error: decorator
+  @inline export function loadPartial(ptr: usize, len: i32, immOffset: usize = 0, immAlign: usize = 1, fill: i16 = 0): v128 {
+    const nn = select<i32>(0, len, len < 0);
+    const n = select<i32>(8, nn, nn > 8);
+    if (n <= 4) return pack(i16x4.loadPartial(ptr, n, immOffset, immAlign, fill), i16x4.splat(fill));
+    const base = ptr + immOffset;
+    return pack(i16x4.loadPartial(base, 4, 0, immAlign, fill), i16x4.loadPartial(base + 8, n - 4, 0, immAlign, fill));
+  }
+  // @ts-expect-error: decorator
+  @inline export function storePartial(ptr: usize, value: v128, len: i32, immOffset: usize = 0, immAlign: usize = 1): void {
+    const nn = select<i32>(0, len, len < 0);
+    const n = select<i32>(8, nn, nn > 8);
+    if (n == 0) return;
+    if (n <= 4) {
+      i16x4.storePartial(ptr, lo(value), n, immOffset, immAlign);
+      return;
+    }
+    const base = ptr + immOffset;
+    i16x4.storePartial(base, lo(value), 4, 0, immAlign);
+    i16x4.storePartial(base + 8, hi(value), n - 4, 0, immAlign);
+  }
 
   // @ts-expect-error: decorator
   @inline export function add(a: v128, b: v128): v128 { return pack(i16x4.add(lo(a), lo(b)), i16x4.add(hi(a), hi(b))); }

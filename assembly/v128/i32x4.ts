@@ -21,6 +21,27 @@ export namespace i32x4_swar {
     const l = lo(x), h = hi(x);
     return i < 2 ? pack(i32x2.replace_lane(l, i, value), h) : pack(l, i32x2.replace_lane(h, i & 1, value));
   }
+  // @ts-expect-error: decorator
+  @inline export function loadPartial(ptr: usize, len: i32, immOffset: usize = 0, immAlign: usize = 1, fill: i32 = 0): v128 {
+    const nn = select<i32>(0, len, len < 0);
+    const n = select<i32>(4, nn, nn > 4);
+    if (n <= 2) return pack(i32x2.loadPartial(ptr, n, immOffset, immAlign, fill), i32x2.splat(fill));
+    const base = ptr + immOffset;
+    return pack(i32x2.loadPartial(base, 2, 0, immAlign, fill), i32x2.loadPartial(base + 8, n - 2, 0, immAlign, fill));
+  }
+  // @ts-expect-error: decorator
+  @inline export function storePartial(ptr: usize, value: v128, len: i32, immOffset: usize = 0, immAlign: usize = 1): void {
+    const nn = select<i32>(0, len, len < 0);
+    const n = select<i32>(4, nn, nn > 4);
+    if (n == 0) return;
+    if (n <= 2) {
+      i32x2.storePartial(ptr, lo(value), n, immOffset, immAlign);
+      return;
+    }
+    const base = ptr + immOffset;
+    i32x2.storePartial(base, lo(value), 2, 0, immAlign);
+    i32x2.storePartial(base + 8, hi(value), n - 2, 0, immAlign);
+  }
 
   // @ts-expect-error: decorator
   @inline export function add(a: v128, b: v128): v128 { return pack(i32x2.add(lo(a), lo(b)), i32x2.add(hi(a), hi(b))); }

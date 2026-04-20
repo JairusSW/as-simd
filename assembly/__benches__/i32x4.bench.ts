@@ -1,3 +1,4 @@
+import { i32x4_swar } from "../v128/i32x4";
 import { bench, blackbox, dumpToFile } from "./lib/bench";
 
 const OPS: u64 = 25_000_000;
@@ -8,6 +9,7 @@ const OPS: u64 = 25_000_000;
 let s0: v128 = make128(0x0123456789abcdef, 0x8899aabbccddeeff);
 let s1: v128 = make128(0xfedcba9876543210, 0x7766554433221100);
 let s2: v128 = make128(0xaa55aa55aa55aa55, 0x55aa55aa55aa55aa);
+const IO_PTR: usize = memory.data(160);
 
 // @ts-expect-error: decorator
 @inline function next128(x: v128): v128 {
@@ -28,8 +30,16 @@ let s2: v128 = make128(0xaa55aa55aa55aa55, 0x55aa55aa55aa55aa);
 @inline function nextI32(): i32 { return <i32>nextA64(); }
 // @ts-expect-error: decorator
 @inline function nextShift(): i32 { return <i32>(nextA64() & 31); }
+// @ts-expect-error: decorator
+@inline function nextPtr16(): usize { return IO_PTR + ((nextA64() as usize) & 0x70); }
+// @ts-expect-error: decorator
+@inline function nextLen4(): i32 { return <i32>(nextA64() & 7) - 2; }
 
 bench("i32x4.splat", () => { blackbox(i32x4.splat(nextI32())); }, OPS, 8); dumpToFile("i32x4", "splat");
+bench("i32x4.load", () => { blackbox(load<v128>(nextPtr16())); }, OPS, 16); dumpToFile("i32x4", "load");
+bench("i32x4.store", () => { store<v128>(nextPtr16(), nextVecA()); blackbox(load<u64>(IO_PTR)); }, OPS, 16); dumpToFile("i32x4", "store");
+bench("i32x4.loadPartial", () => { blackbox(i32x4_swar.loadPartial(nextPtr16(), nextLen4(), 0, 4, nextI32())); }, OPS, 16); dumpToFile("i32x4", "load-partial");
+bench("i32x4.storePartial", () => { i32x4_swar.storePartial(nextPtr16(), nextVecA(), nextLen4(), 0, 4); blackbox(load<u64>(IO_PTR)); }, OPS, 16); dumpToFile("i32x4", "store-partial");
 bench("i32x4.extract_lane", () => { blackbox(i32x4.extract_lane(nextVecA(), 1)); }, OPS, 8); dumpToFile("i32x4", "extract-lane");
 bench("i32x4.replace_lane", () => { blackbox(i32x4.replace_lane(nextVecA(), 1, nextI32())); }, OPS, 8); dumpToFile("i32x4", "replace-lane");
 bench("i32x4.add", () => { blackbox(i32x4.add(nextVecA(), nextVecB())); }, OPS, 8); dumpToFile("i32x4", "add");

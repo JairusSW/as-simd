@@ -14,7 +14,7 @@ const MD_OUT = path.join(CHARTS_DIR, "chart-i32x2-v-i32x4.md");
 const SVG_OUT = path.join(CHARTS_DIR, "chart-i32x2-v-i32x4.svg");
 
 const DECL_ORDER: string[] = [
-  "splat", "extract-lane", "replace-lane", "add", "sub", "mul",
+  "splat", "load", "store", "load-partial", "store-partial", "extract-lane", "replace-lane", "add", "sub", "mul",
   "min-s", "min-u", "max-s", "max-u", "dot-i16x8-s", "abs", "neg",
   "shl", "shr-s", "shr-u", "all-true", "bitmask",
   "eq", "ne", "lt-s", "lt-u", "le-s", "le-u", "gt-s", "gt-u", "ge-s", "ge-u",

@@ -8,6 +8,7 @@ let s1: u64 = 0x8899aabbccddeeff;
 let s2: u64 = 0xfedcba9876543210;
 let s3: u64 = 0x7766554433221100;
 let s4: u64 = 0xaa55aa55aa55aa55;
+const IO_PTR: usize = memory.data(96);
 
 // @ts-expect-error: decorator
 @inline function next64(x: u64): u64 {
@@ -30,9 +31,17 @@ let s4: u64 = 0xaa55aa55aa55aa55;
 @inline function nextLane4(): u8 { return <u8>(nextA() & 3); }
 // @ts-expect-error: decorator
 @inline function nextI32(): i32 { return <i32>nextA(); }
+// @ts-expect-error: decorator
+@inline function nextPtr8(): usize { return IO_PTR + ((nextA() as usize) & 0x38); }
+// @ts-expect-error: decorator
+@inline function nextLen2(): i32 { return <i32>(nextA() & 3) - 1; }
 
 bench("i32x2.ctor", () => { blackbox(i32x2(nextI32(), nextI32())); }, OPS, 8); dumpToFile("i32x2", "ctor");
 bench("i32x2.splat", () => { blackbox(i32x2.splat(nextI32())); }, OPS, 8); dumpToFile("i32x2", "splat");
+bench("i32x2.load", () => { blackbox(load<u64>(nextPtr8())); }, OPS, 8); dumpToFile("i32x2", "load");
+bench("i32x2.store", () => { store<u64>(nextPtr8(), nextA()); blackbox(load<u64>(IO_PTR)); }, OPS, 8); dumpToFile("i32x2", "store");
+bench("i32x2.loadPartial", () => { blackbox(i32x2.loadPartial(nextPtr8(), nextLen2(), 0, 4, nextI32())); }, OPS, 8); dumpToFile("i32x2", "load-partial");
+bench("i32x2.storePartial", () => { i32x2.storePartial(nextPtr8(), nextA(), nextLen2(), 0, 4); blackbox(load<u64>(IO_PTR)); }, OPS, 8); dumpToFile("i32x2", "store-partial");
 bench("i32x2.extract_lane", () => { blackbox(i32x2.extract_lane(nextA(), nextLane2())); }, OPS, 8); dumpToFile("i32x2", "extract-lane");
 bench("i32x2.replace_lane", () => { blackbox(i32x2.replace_lane(nextA(), nextLane2(), nextI32())); }, OPS, 8); dumpToFile("i32x2", "replace-lane");
 bench("i32x2.add", () => { blackbox(i32x2.add(nextA(), nextB())); }, OPS, 8); dumpToFile("i32x2", "add");

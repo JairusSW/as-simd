@@ -8,6 +8,7 @@ let s1: u64 = 0x8899aabbccddeeff;
 let s2: u64 = 0xfedcba9876543210;
 let s3: u64 = 0x7766554433221100;
 let s4: u64 = 0xaa55aa55aa55aa55;
+const IO_PTR: usize = memory.data(96);
 
 // @ts-expect-error: decorator
 @inline function next64(x: u64): u64 {
@@ -57,10 +58,42 @@ let s4: u64 = 0xaa55aa55aa55aa55;
   return <i8>(nextA() & 0xff);
 }
 
+// @ts-expect-error: decorator
+@inline function nextPtr8(): usize {
+  return IO_PTR + ((nextA() as usize) & 0x38);
+}
+
+// @ts-expect-error: decorator
+@inline function nextLen8(): i32 {
+  return <i32>(nextA() & 0xf) - 4;
+}
+
 bench("i8x8.splat", () => {
   blackbox(i8x8.splat(nextI8()));
 }, OPS, 8);
 dumpToFile("i8x8", "splat");
+
+bench("i8x8.load", () => {
+  blackbox(load<u64>(nextPtr8()));
+}, OPS, 8);
+dumpToFile("i8x8", "load");
+
+bench("i8x8.store", () => {
+  store<u64>(nextPtr8(), nextA());
+  blackbox(load<u64>(IO_PTR));
+}, OPS, 8);
+dumpToFile("i8x8", "store");
+
+bench("i8x8.loadPartial", () => {
+  blackbox(i8x8.loadPartial(nextPtr8(), nextLen8(), 0, 1, nextI8()));
+}, OPS, 8);
+dumpToFile("i8x8", "load-partial");
+
+bench("i8x8.storePartial", () => {
+  i8x8.storePartial(nextPtr8(), nextA(), nextLen8());
+  blackbox(load<u64>(IO_PTR));
+}, OPS, 8);
+dumpToFile("i8x8", "store-partial");
 
 bench("i8x8.extract_lane_s", () => {
   blackbox(i8x8.extract_lane_s(nextA(), nextLane8()));

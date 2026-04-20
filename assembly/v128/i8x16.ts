@@ -4,6 +4,7 @@ import { i8x8 } from "../v64/i8x8";
 export type i8x16_swar = v128;
 
 export namespace i8x16_swar {
+  const simd_partial_tmp = memory.data(16);
   // @ts-expect-error: decorator
   @inline function lo(x: v128): v64 { return i64x2.extract_lane(x, 0) as v64; }
   // @ts-expect-error: decorator
@@ -22,6 +23,113 @@ export namespace i8x16_swar {
     const i = idx & 15;
     const l = lo(x), h = hi(x);
     return i < 8 ? pack(i8x8.replace_lane(l, i, value), h) : pack(l, i8x8.replace_lane(h, i & 7, value));
+  }
+  // @ts-expect-error: decorator
+  @inline export function loadPartial(ptr: usize, len: i32, immOffset: usize = 0, immAlign: usize = 1, fill: i8 = 0): v128 {
+    const base = ptr + immOffset;
+    if (len <= 0) return splat(fill);
+    if (len >= 16) return load<v128>(base);
+
+    if (ASC_FEATURE_SIMD) {
+      const tmp = simd_partial_tmp;
+      store<v128>(tmp, i8x16.splat(fill));
+
+      if (len >= 8) {
+        store<u64>(tmp, load<u64>(base));
+        const tail = len - 8;
+        switch (tail) {
+          case 1: {
+            store<u8>(tmp + 8, load<u8>(base + 8));
+            break;
+          }
+          case 2: {
+            store<u16>(tmp + 8, load<u16>(base + 8));
+            break;
+          }
+          case 3: {
+            store<u16>(tmp + 8, load<u16>(base + 8));
+            store<u8>(tmp + 10, load<u8>(base + 10));
+            break;
+          }
+          case 4: {
+            store<u32>(tmp + 8, load<u32>(base + 8));
+            break;
+          }
+          case 5: {
+            store<u32>(tmp + 8, load<u32>(base + 8));
+            store<u8>(tmp + 12, load<u8>(base + 12));
+            break;
+          }
+          case 6: {
+            store<u32>(tmp + 8, load<u32>(base + 8));
+            store<u16>(tmp + 12, load<u16>(base + 12));
+            break;
+          }
+          case 7: {
+            store<u32>(tmp + 8, load<u32>(base + 8));
+            store<u16>(tmp + 12, load<u16>(base + 12));
+            store<u8>(tmp + 14, load<u8>(base + 14));
+            break;
+          }
+          default: break;
+        }
+      } else {
+        switch (len) {
+          case 1: {
+            store<u8>(tmp, load<u8>(base));
+            break;
+          }
+          case 2: {
+            store<u16>(tmp, load<u16>(base));
+            break;
+          }
+          case 3: {
+            store<u16>(tmp, load<u16>(base));
+            store<u8>(tmp + 2, load<u8>(base + 2));
+            break;
+          }
+          case 4: {
+            store<u32>(tmp, load<u32>(base));
+            break;
+          }
+          case 5: {
+            store<u32>(tmp, load<u32>(base));
+            store<u8>(tmp + 4, load<u8>(base + 4));
+            break;
+          }
+          case 6: {
+            store<u32>(tmp, load<u32>(base));
+            store<u16>(tmp + 4, load<u16>(base + 4));
+            break;
+          }
+          case 7: {
+            store<u32>(tmp, load<u32>(base));
+            store<u16>(tmp + 4, load<u16>(base + 4));
+            store<u8>(tmp + 6, load<u8>(base + 6));
+            break;
+          }
+          default: break;
+        }
+      }
+
+      return load<v128>(tmp);
+    }
+
+    if (len <= 8) return pack(i8x8.loadPartial(base, len, 0, immAlign, fill), i8x8.splat(fill));
+    return pack(i8x8.loadPartial(base, 8, 0, immAlign, fill), i8x8.loadPartial(base + 8, len - 8, 0, immAlign, fill));
+  }
+  // @ts-expect-error: decorator
+  @inline export function storePartial(ptr: usize, value: v128, len: i32, immOffset: usize = 0, immAlign: usize = 1): void {
+    const nn = select<i32>(0, len, len < 0);
+    const n = select<i32>(16, nn, nn > 16);
+    if (n == 0) return;
+    if (n <= 8) {
+      i8x8.storePartial(ptr, lo(value), n, immOffset, immAlign);
+      return;
+    }
+    const base = ptr + immOffset;
+    i8x8.storePartial(base, lo(value), 8, 0, immAlign);
+    i8x8.storePartial(base + 8, hi(value), n - 8, 0, immAlign);
   }
 
   // @ts-expect-error: decorator

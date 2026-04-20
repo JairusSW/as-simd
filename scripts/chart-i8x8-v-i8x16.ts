@@ -15,7 +15,7 @@ const MD_OUT = path.join(CHARTS_DIR, "chart-i8x8-v-i8x16.md");
 const SVG_OUT = path.join(CHARTS_DIR, "chart-i8x8-v-i8x16.svg");
 
 // i8x16 API declaration order (kebab-case bench op names)
-const DECL_ORDER: string[] = ["splat", "extract-lane-s", "extract-lane-u", "replace-lane", "add", "sub", "min-s", "min-u", "max-s", "max-u", "avgr-u", "abs", "neg", "add-sat-s", "add-sat-u", "sub-sat-s", "sub-sat-u", "shl", "shr-s", "shr-u", "all-true", "bitmask", "popcnt", "eq", "ne", "lt-s", "lt-u", "le-s", "le-u", "gt-s", "gt-u", "ge-s", "ge-u", "narrow-i16x8-s", "narrow-i16x8-u", "shuffle", "swizzle", "relaxed-swizzle", "relaxed-laneselect"];
+const DECL_ORDER: string[] = ["splat", "load", "store", "load-partial", "store-partial", "extract-lane-s", "extract-lane-u", "replace-lane", "add", "sub", "min-s", "min-u", "max-s", "max-u", "avgr-u", "abs", "neg", "add-sat-s", "add-sat-u", "sub-sat-s", "sub-sat-u", "shl", "shr-s", "shr-u", "all-true", "bitmask", "popcnt", "eq", "ne", "lt-s", "lt-u", "le-s", "le-u", "gt-s", "gt-u", "ge-s", "ge-u", "narrow-i16x8-s", "narrow-i16x8-u", "shuffle", "swizzle", "relaxed-swizzle", "relaxed-laneselect"];
 
 type BenchResult = {
   description: string;

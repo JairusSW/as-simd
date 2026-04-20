@@ -10,10 +10,10 @@ const MODE_B = "simd";
 type BenchResult = { description: string; elapsed: number; operations: number; };
 
 const ORDERS: Record<string, string[]> = {
-  i8x16: ["splat", "extract-lane-s", "extract-lane-u", "replace-lane", "add", "sub", "mul", "min-s", "min-u", "max-s", "max-u", "avgr-u", "abs", "neg", "add-sat-s", "add-sat-u", "sub-sat-s", "sub-sat-u", "shl", "shr-s", "shr-u", "all-true", "bitmask", "popcnt", "eq", "ne", "lt-s", "lt-u", "le-s", "le-u", "gt-s", "gt-u", "ge-s", "ge-u"],
-  i16x8: ["splat", "extract-lane-s", "extract-lane-u", "replace-lane", "add", "sub", "mul", "min-s", "min-u", "max-s", "max-u", "avgr-u", "abs", "neg", "add-sat-s", "add-sat-u", "sub-sat-s", "sub-sat-u", "shl", "shr-s", "shr-u", "all-true", "bitmask", "eq", "ne", "lt-s", "lt-u", "le-s", "le-u", "gt-s", "gt-u", "ge-s", "ge-u"],
-  i32x4: ["splat", "extract-lane", "replace-lane", "add", "sub", "mul", "min-s", "min-u", "max-s", "max-u", "dot-i16x8-s", "abs", "neg", "shl", "shr-s", "shr-u", "all-true", "bitmask", "eq", "ne", "lt-s", "lt-u", "le-s", "le-u", "gt-s", "gt-u", "ge-s", "ge-u"],
-  i64x2: ["splat", "extract-lane", "replace-lane", "add", "sub", "neg", "shl", "shr-s", "shr-u", "all-true", "bitmask", "eq", "ne", "lt-s", "le-s", "gt-s", "ge-s"],
+  i8x16: ["splat", "load", "store", "load-partial", "store-partial", "extract-lane-s", "extract-lane-u", "replace-lane", "add", "sub", "mul", "min-s", "min-u", "max-s", "max-u", "avgr-u", "abs", "neg", "add-sat-s", "add-sat-u", "sub-sat-s", "sub-sat-u", "shl", "shr-s", "shr-u", "all-true", "bitmask", "popcnt", "eq", "ne", "lt-s", "lt-u", "le-s", "le-u", "gt-s", "gt-u", "ge-s", "ge-u"],
+  i16x8: ["splat", "load", "store", "load-partial", "store-partial", "extract-lane-s", "extract-lane-u", "replace-lane", "add", "sub", "mul", "min-s", "min-u", "max-s", "max-u", "avgr-u", "abs", "neg", "add-sat-s", "add-sat-u", "sub-sat-s", "sub-sat-u", "shl", "shr-s", "shr-u", "all-true", "bitmask", "eq", "ne", "lt-s", "lt-u", "le-s", "le-u", "gt-s", "gt-u", "ge-s", "ge-u"],
+  i32x4: ["splat", "load", "store", "load-partial", "store-partial", "extract-lane", "replace-lane", "add", "sub", "mul", "min-s", "min-u", "max-s", "max-u", "dot-i16x8-s", "abs", "neg", "shl", "shr-s", "shr-u", "all-true", "bitmask", "eq", "ne", "lt-s", "lt-u", "le-s", "le-u", "gt-s", "gt-u", "ge-s", "ge-u"],
+  i64x2: ["splat", "load", "store", "load-partial", "store-partial", "extract-lane", "replace-lane", "add", "sub", "neg", "shl", "shr-s", "shr-u", "all-true", "bitmask", "eq", "ne", "lt-s", "le-s", "gt-s", "ge-s"],
 };
 
 function loadSuite(mode: string, suite: string): Record<string, BenchResult> {

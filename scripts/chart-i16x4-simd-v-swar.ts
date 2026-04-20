@@ -13,7 +13,7 @@ const MD_OUT = path.join(CHARTS_DIR, "chart-i16x4-simd-v-swar.md");
 const SVG_OUT = path.join(CHARTS_DIR, "chart-i16x4-simd-v-swar.svg");
 
 const DECL_ORDER: string[] = [
-  "ctor", "splat", "extract-lane-s", "extract-lane-u", "replace-lane",
+  "ctor", "splat", "load", "store", "load-partial", "store-partial", "extract-lane-s", "extract-lane-u", "replace-lane",
   "add", "sub", "mul", "min-s", "min-u", "max-s", "max-u", "avgr-u", "abs", "neg",
   "add-sat-s", "add-sat-u", "sub-sat-s", "sub-sat-u",
   "shl", "shr-s", "shr-u", "all-true", "bitmask",

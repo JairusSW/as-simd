@@ -102,6 +102,29 @@ describe("i16x4", () => {
     assertApiSync();
   });
 
+  test("partial load/store", () => {
+    const src = new Int16Array(6);
+    src[0] = 1000;
+    src[1] = 2000;
+    src[2] = -3000;
+    src[3] = 4000;
+    src[4] = 5000;
+    src[5] = 6000;
+    const loaded = i16x4.loadPartial(changetype<usize>(src.dataStart), 3, 2, 2, -1);
+    expect<i32>(i16x4.extract_lane_s(loaded, 0)).toBe(2000);
+    expect<i32>(i16x4.extract_lane_s(loaded, 1)).toBe(-3000);
+    expect<i32>(i16x4.extract_lane_s(loaded, 2)).toBe(4000);
+    expect<i32>(i16x4.extract_lane_s(loaded, 3)).toBe(-1);
+
+    const dst = new Int16Array(6);
+    for (let i = 0; i < dst.length; i++) dst[i] = 0x7777;
+    i16x4.storePartial(changetype<usize>(dst.dataStart), i16x4(11, 22, 33, 44), 2, 4, 2);
+    expect<i32>(dst[1]).toBe(0x7777);
+    expect<i32>(dst[2]).toBe(11);
+    expect<i32>(dst[3]).toBe(22);
+    expect<i32>(dst[4]).toBe(0x7777);
+  });
+
   test("full scalar parity", () => {
     state = 0x243f6a8885a308d3;
     let completedRuns = 0;

@@ -6,6 +6,7 @@ const OPS: u64 = 25_000_000;
 @inline function make128(lo: u64, hi: u64): v128 { return i64x2(lo as i64, hi as i64); }
 let s0: v128 = make128(0x0123456789abcdef, 0x8899aabbccddeeff);
 let s1: v128 = make128(0xfedcba9876543210, 0x7766554433221100);
+const IO_PTR: usize = memory.data(160);
 // @ts-expect-error: decorator
 @inline function next128(x: v128): v128 { x = v128.xor(x, i64x2.shl(x, 13)); x = v128.xor(x, i64x2.shr_u(x, 7)); x = v128.xor(x, i64x2.shl(x, 17)); return x; }
 // @ts-expect-error: decorator
@@ -18,8 +19,16 @@ let s1: v128 = make128(0xfedcba9876543210, 0x7766554433221100);
 @inline function nextI16(): i16 { return <i16>(nextA64() & 0xffff); }
 // @ts-expect-error: decorator
 @inline function nextShift(): i32 { return <i32>(nextA64() & 15); }
+// @ts-expect-error: decorator
+@inline function nextPtr16(): usize { return IO_PTR + ((nextA64() as usize) & 0x70); }
+// @ts-expect-error: decorator
+@inline function nextLen8(): i32 { return <i32>(nextA64() & 15) - 4; }
 
 bench("i16x8_swar.splat", () => { blackbox(i16x8_swar.splat(nextI16())); }, OPS, 16); dumpToFile("i16x8-swar", "splat");
+bench("i16x8_swar.load", () => { blackbox(load<v128>(nextPtr16())); }, OPS, 16); dumpToFile("i16x8-swar", "load");
+bench("i16x8_swar.store", () => { store<v128>(nextPtr16(), nextVecA()); blackbox(load<u64>(IO_PTR)); }, OPS, 16); dumpToFile("i16x8-swar", "store");
+bench("i16x8_swar.loadPartial", () => { blackbox(i16x8_swar.loadPartial(nextPtr16(), nextLen8(), 0, 2, nextI16())); }, OPS, 16); dumpToFile("i16x8-swar", "load-partial");
+bench("i16x8_swar.storePartial", () => { i16x8_swar.storePartial(nextPtr16(), nextVecA(), nextLen8(), 0, 2); blackbox(load<u64>(IO_PTR)); }, OPS, 16); dumpToFile("i16x8-swar", "store-partial");
 bench("i16x8_swar.extract_lane_s", () => { blackbox(i16x8_swar.extract_lane_s(nextVecA(), 3)); }, OPS, 16); dumpToFile("i16x8-swar", "extract-lane-s");
 bench("i16x8_swar.extract_lane_u", () => { blackbox(i16x8_swar.extract_lane_u(nextVecA(), 3)); }, OPS, 16); dumpToFile("i16x8-swar", "extract-lane-u");
 bench("i16x8_swar.replace_lane", () => { blackbox(i16x8_swar.replace_lane(nextVecA(), 3, nextI16())); }, OPS, 16); dumpToFile("i16x8-swar", "replace-lane");

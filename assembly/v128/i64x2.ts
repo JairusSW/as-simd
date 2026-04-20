@@ -17,6 +17,24 @@ export namespace i64x2_swar {
   // @ts-expect-error: decorator
   @inline export function replace_lane(x: v128, idx: u8, value: i64): v128 { return (idx & 1) == 0 ? p(value, h(x)) : p(l(x), value); }
   // @ts-expect-error: decorator
+  @inline export function loadPartial(ptr: usize, len: i32, immOffset: usize = 0, immAlign: usize = 1, fill: i64 = 0): v128 {
+    const nn = select<i32>(0, len, len < 0);
+    const n = select<i32>(2, nn, nn > 2);
+    if (n == 0) return p(fill, fill);
+    const base = ptr + immOffset;
+    if (n == 1) return p(load<i64>(base), fill);
+    return p(load<i64>(base), load<i64>(base + 8));
+  }
+  // @ts-expect-error: decorator
+  @inline export function storePartial(ptr: usize, value: v128, len: i32, immOffset: usize = 0, immAlign: usize = 1): void {
+    const nn = select<i32>(0, len, len < 0);
+    const n = select<i32>(2, nn, nn > 2);
+    if (n == 0) return;
+    const base = ptr + immOffset;
+    store<i64>(base, l(value));
+    if (n > 1) store<i64>(base + 8, h(value));
+  }
+  // @ts-expect-error: decorator
   @inline export function add(a: v128, b: v128): v128 { return p(l(a) + l(b), h(a) + h(b)); }
   // @ts-expect-error: decorator
   @inline export function sub(a: v128, b: v128): v128 { return p(l(a) - l(b), h(a) - h(b)); }

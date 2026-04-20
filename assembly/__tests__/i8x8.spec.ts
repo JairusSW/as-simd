@@ -116,6 +116,29 @@ describe("i8x8", () => {
     expect<u64>(outU).toBe(i8x8_scalar.narrow_i16x4_u(aU, bU));
   });
 
+  test("partial load/store", () => {
+    const src = new Uint8Array(12);
+    for (let i = 0; i < src.length; i++) src[i] = <u8>(10 + i);
+    const loaded = i8x8.loadPartial(changetype<usize>(src.dataStart), 5, 2, 1, -1);
+    expect<i32>(i8x8.extract_lane_s(loaded, 0)).toBe(12);
+    expect<i32>(i8x8.extract_lane_s(loaded, 1)).toBe(13);
+    expect<i32>(i8x8.extract_lane_s(loaded, 2)).toBe(14);
+    expect<i32>(i8x8.extract_lane_s(loaded, 3)).toBe(15);
+    expect<i32>(i8x8.extract_lane_s(loaded, 4)).toBe(16);
+    expect<i32>(i8x8.extract_lane_s(loaded, 5)).toBe(-1);
+    expect<i32>(i8x8.extract_lane_s(loaded, 6)).toBe(-1);
+    expect<i32>(i8x8.extract_lane_s(loaded, 7)).toBe(-1);
+
+    const dst = new Uint8Array(12);
+    for (let i = 0; i < dst.length; i++) dst[i] = 0xaa;
+    i8x8.storePartial(changetype<usize>(dst.dataStart), i8x8(1, 2, 3, 4, 5, 6, 7, 8), 3, 4, 1);
+    expect<i32>(dst[3]).toBe(0xaa);
+    expect<i32>(dst[4]).toBe(1);
+    expect<i32>(dst[5]).toBe(2);
+    expect<i32>(dst[6]).toBe(3);
+    expect<i32>(dst[7]).toBe(0xaa);
+  });
+
   test("full scalar parity", () => {
     state = 0x243f6a8885a308d3;
     let completedRuns = 0;

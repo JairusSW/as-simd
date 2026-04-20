@@ -113,6 +113,41 @@ export namespace i16x4 {
     const mask = (0xffff as v64) << shift;
     return (x & ~mask) | (((value as v64) & 0xffff) << shift);
   }
+  /** Loads the first `len` lanes from memory and fills remaining lanes with `fill`. */
+  // @ts-expect-error: decorator
+  @inline export function loadPartial(ptr: usize, len: i32, immOffset: usize = 0, immAlign: usize = 1, fill: i16 = 0): v64 {
+    if (len <= 0) return splat(fill);
+    const p = ptr + immOffset;
+    if (len >= 4) return load<v64>(p);
+    const fv = splat(fill);
+    switch (len) {
+      case 1: return (fv & 0xffffffffffff0000) | (load<u16>(p) as v64);
+      case 2: return (fv & 0xffffffff00000000) | (load<u32>(p) as v64);
+      default: return (fv & 0xffff000000000000) | (load<u32>(p) as v64) | ((load<u16>(p + 4) as v64) << 32);
+    }
+  }
+  /** Stores the first `len` lanes to memory. */
+  // @ts-expect-error: decorator
+  @inline export function storePartial(ptr: usize, value: v64, len: i32, immOffset: usize = 0, immAlign: usize = 1): void {
+    if (len <= 0) return;
+    const p = ptr + immOffset;
+    if (len >= 4) { store<v64>(p, value); return; }
+    switch (len) {
+      case 1: {
+        store<u16>(p, (value & 0xffff) as u16);
+        return;
+      }
+      case 2: {
+        store<u32>(p, (value & 0xffffffff) as u32);
+        return;
+      }
+      default: {
+        store<u32>(p, (value & 0xffffffff) as u32);
+        store<u16>(p + 4, ((value >> 32) & 0xffff) as u16);
+        return;
+      }
+    }
+  }
   /** Adds each 16-bit integer lane. */
   // @ts-expect-error: decorator
   @inline export function add(a: v64, b: v64): v64 {

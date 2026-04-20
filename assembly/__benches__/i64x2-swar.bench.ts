@@ -6,6 +6,7 @@ const OPS: u64 = 25_000_000;
 @inline function make128(lo: u64, hi: u64): v128 { return i64x2(lo as i64, hi as i64); }
 let s0: v128 = make128(0x0123456789abcdef, 0x8899aabbccddeeff);
 let s1: v128 = make128(0xfedcba9876543210, 0x7766554433221100);
+const IO_PTR: usize = memory.data(160);
 // @ts-expect-error: decorator
 @inline function next128(x: v128): v128 { x = v128.xor(x, i64x2.shl(x, 13)); x = v128.xor(x, i64x2.shr_u(x, 7)); x = v128.xor(x, i64x2.shl(x, 17)); return x; }
 // @ts-expect-error: decorator
@@ -18,8 +19,16 @@ let s1: v128 = make128(0xfedcba9876543210, 0x7766554433221100);
 @inline function nextI64(): i64 { return nextA64() as i64; }
 // @ts-expect-error: decorator
 @inline function nextShift(): i32 { return <i32>(nextA64() & 63); }
+// @ts-expect-error: decorator
+@inline function nextPtr16(): usize { return IO_PTR + ((nextA64() as usize) & 0x70); }
+// @ts-expect-error: decorator
+@inline function nextLen2(): i32 { return <i32>(nextA64() & 3) - 1; }
 
 bench("i64x2_swar.splat", () => { blackbox(i64x2_swar.splat(nextI64())); }, OPS, 16); dumpToFile("i64x2-swar", "splat");
+bench("i64x2_swar.load", () => { blackbox(load<v128>(nextPtr16())); }, OPS, 16); dumpToFile("i64x2-swar", "load");
+bench("i64x2_swar.store", () => { store<v128>(nextPtr16(), nextVecA()); blackbox(load<u64>(IO_PTR)); }, OPS, 16); dumpToFile("i64x2-swar", "store");
+bench("i64x2_swar.loadPartial", () => { blackbox(i64x2_swar.loadPartial(nextPtr16(), nextLen2(), 0, 8, nextI64())); }, OPS, 16); dumpToFile("i64x2-swar", "load-partial");
+bench("i64x2_swar.storePartial", () => { i64x2_swar.storePartial(nextPtr16(), nextVecA(), nextLen2(), 0, 8); blackbox(load<u64>(IO_PTR)); }, OPS, 16); dumpToFile("i64x2-swar", "store-partial");
 bench("i64x2_swar.extract_lane", () => { blackbox(i64x2_swar.extract_lane(nextVecA(), 1)); }, OPS, 16); dumpToFile("i64x2-swar", "extract-lane");
 bench("i64x2_swar.replace_lane", () => { blackbox(i64x2_swar.replace_lane(nextVecA(), 1, nextI64())); }, OPS, 16); dumpToFile("i64x2-swar", "replace-lane");
 bench("i64x2_swar.add", () => { blackbox(i64x2_swar.add(nextVecA(), nextVecB())); }, OPS, 16); dumpToFile("i64x2-swar", "add");

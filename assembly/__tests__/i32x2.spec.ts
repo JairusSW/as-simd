@@ -50,6 +50,24 @@ let checkId: i32 = 0;
 }
 
 describe("i32x2", () => {
+  test("partial load/store", () => {
+    const src = new Int32Array(4);
+    src[0] = 11;
+    src[1] = -22;
+    src[2] = 33;
+    src[3] = 44;
+    const loaded = i32x2.loadPartial(changetype<usize>(src.dataStart), 1, 4, 4, -1);
+    expect<i32>(i32x2.extract_lane(loaded, 0)).toBe(-22);
+    expect<i32>(i32x2.extract_lane(loaded, 1)).toBe(-1);
+
+    const dst = new Int32Array(4);
+    for (let i = 0; i < dst.length; i++) dst[i] = 777777;
+    i32x2.storePartial(changetype<usize>(dst.dataStart), i32x2(123, 456), 1, 8, 4);
+    expect<i32>(dst[1]).toBe(777777);
+    expect<i32>(dst[2]).toBe(123);
+    expect<i32>(dst[3]).toBe(777777);
+  });
+
   test("full scalar parity", () => {
     state = 0x243f6a8885a308d3;
     let completedRuns = 0;
