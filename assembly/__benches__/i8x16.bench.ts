@@ -3,32 +3,40 @@ import { bench_common } from "./common";
 import { bench, blackbox, dumpToFile } from "./lib/bench";
 
 const OPS: u64 = bench_common.DEFAULT_OPS;
-const IO_PTR: usize = memory.data(256);
 
 // @ts-expect-error: decorator
-@inline function next64(): u64 { return bench_common.next64(); }
+@inline function nextA(): u64 {
+  return blackbox(bench_common.nextA());
+}
 // @ts-expect-error: decorator
-@inline function next128(): u64 { return bench_common.next128(); }
+@inline function nextB(): u64 {
+  return blackbox(bench_common.nextB());
+}
 // @ts-expect-error: decorator
-@inline function next128Hi(): u64 { return bench_common.next128Hi(); }
+@inline function nextM(): u64 {
+  return blackbox(bench_common.nextM());
+}
 // @ts-expect-error: decorator
-@inline function nextA(): u64 { return blackbox(bench_common.nextA()); }
+@inline function next128(): u64 {
+  return blackbox(bench_common.next128());
+}
 // @ts-expect-error: decorator
-@inline function nextB(): u64 { return blackbox(bench_common.nextB()); }
+@inline function next128Hi(): u64 { return blackbox(bench_common.next128Hi()); }
 // @ts-expect-error: decorator
-@inline function nextM(): u64 { return blackbox(bench_common.nextM()); }
+@inline function nextI8(): i8 {
+  return blackbox((bench_common.nextA() & 0xff) as i8);
+}
 // @ts-expect-error: decorator
-@inline function nextI8(): i8 { return nextA() as i8; }
+@inline function nextLane16(): u8 {
+  return blackbox((bench_common.nextA() & 15) as u8);
+}
 // @ts-expect-error: decorator
-@inline function nextLane16(): u8 { return (nextA() & 15) as u8; }
-// @ts-expect-error: decorator
-@inline function nextShift(): i32 { return (nextA() & 7) as i32; }
+@inline function nextShift(): i32 {
+  return blackbox((bench_common.nextA() & 7) as i32);
+}
 // @ts-expect-error: decorator
 @inline function nextVec(): v128 {
-  return i8x16(
-    nextI8(), nextI8(), nextI8(), nextI8(), nextI8(), nextI8(), nextI8(), nextI8(),
-    nextI8(), nextI8(), nextI8(), nextI8(), nextI8(), nextI8(), nextI8(), nextI8(),
-  );
+  return blackbox(bench_common.nextV128());
 }
 
 bench("i8x16.splat", () => {

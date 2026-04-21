@@ -38,7 +38,7 @@ const LANES_I64 = StaticArray.fromArray<u8>([1,0]);
 // @ts-expect-error: decorator
 @inline function nextPtr16(): usize { return IO_PTR + ((nextA() as usize) & 0xf0); }
 // @ts-expect-error: decorator
-@inline function nextVec(): v128 { return i64x2(nextI64(), nextI64()); }
+@inline function nextVec(): v128 { return bench_common.nextV128(); }
 
 bench("v128.splat", () => { if (ASC_FEATURE_SIMD) blackbox(v128.splat<i8>(nextI8())); else { blackbox(v128_swar.splat<i8>(nextI8())); blackbox(v128_swar.take_hi()); } }, OPS, 8); dumpToFile("v128", "splat");
 bench("v128.extract-lane", () => { if (ASC_FEATURE_SIMD) blackbox(v128.extract_lane<i8>(nextVec(), 0)); else blackbox(v128_swar.extract_lane<i8>(next128(), next128Hi(), nextLane16())); }, OPS, 8); dumpToFile("v128", "extract-lane");

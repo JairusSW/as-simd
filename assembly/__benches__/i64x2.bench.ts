@@ -26,7 +26,7 @@ const IO_PTR: usize = memory.data(256);
 // @ts-expect-error: decorator
 @inline function nextPtr16(): usize { return IO_PTR + ((nextA() as usize) & 0xf0); }
 // @ts-expect-error: decorator
-@inline function nextVec(): v128 { return i64x2(nextI64(), nextI64()); }
+@inline function nextVec(): v128 { return bench_common.nextV128(); }
 
 bench("i64x2.ctor", () => { if (ASC_FEATURE_SIMD) blackbox(nextVec()); else { blackbox(i64x2_swar(nextI64(), nextI64())); blackbox(i64x2_swar.take_hi()); } }, OPS, 8); dumpToFile("i64x2", "ctor");
 bench("i64x2.splat", () => { if (ASC_FEATURE_SIMD) blackbox(i64x2.splat(nextI64())); else { blackbox(i64x2_swar.splat(nextI64())); blackbox(i64x2_swar.take_hi()); } }, OPS, 8); dumpToFile("i64x2", "splat");

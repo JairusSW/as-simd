@@ -89,6 +89,7 @@ console.log("Runtime: " + BENCH_RUNTIME_NAME + "\n");
 }
 
 export function bench(description: string, routine: () => void, ops: u64 = 1_000_000, bytesPerOp: u64 = 0): void {
+  bench_common.advanceSuite();
   preallocateMemory();
   // Run a full GC cycle before timing to reduce cross-bench noise.
   __collect();
@@ -241,3 +242,4 @@ export function blackbox<T>(value: T): T {
   store<T>(blackBoxArea, value);
   return load<T>(blackBoxArea);
 }
+import { bench_common } from "../common";

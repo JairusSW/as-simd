@@ -6,13 +6,6 @@ const OPS: u64 = bench_common.DEFAULT_OPS;
 const IO_PTR: usize = memory.data(96);
 
 // @ts-expect-error: decorator
-@inline function next64(): u64 { return bench_common.next64(); }
-// @ts-expect-error: decorator
-@inline function next128(): u64 { return bench_common.next128(); }
-// @ts-expect-error: decorator
-@inline function next128Hi(): u64 { return bench_common.next128Hi(); }
-
-// @ts-expect-error: decorator
 @inline function nextA(): u64 {
   return blackbox(bench_common.nextA());
 }
@@ -29,32 +22,32 @@ const IO_PTR: usize = memory.data(96);
 
 // @ts-expect-error: decorator
 @inline function nextShift(): i32 {
-  return <i32>(nextA() & 7);
+  return blackbox((bench_common.nextA() & 7) as i32);
 }
 
 // @ts-expect-error: decorator
 @inline function nextLane8(): u8 {
-  return <u8>(nextA() & 7);
+  return blackbox((bench_common.nextA() & 7) as u8);
 }
 
 // @ts-expect-error: decorator
 @inline function nextLane16(): u8 {
-  return <u8>(nextA() & 15);
+  return blackbox((bench_common.nextA() & 15) as u8);
 }
 
 // @ts-expect-error: decorator
 @inline function nextI8(): i8 {
-  return <i8>(nextA() & 0xff);
+  return blackbox((bench_common.nextA() & 0xff) as i8);
 }
 
 // @ts-expect-error: decorator
 @inline function nextPtr8(): usize {
-  return IO_PTR + ((nextA() as usize) & 0x38);
+  return blackbox(IO_PTR + ((bench_common.nextA() as usize) & 0x38));
 }
 
 // @ts-expect-error: decorator
 @inline function nextLen8(): i32 {
-  return <i32>(nextA() & 0xf) - 4;
+  return blackbox(((bench_common.nextA() & 0xf) as i32) - 4);
 }
 
 bench("i8x8.splat", () => {

@@ -26,7 +26,7 @@ const IO_PTR: usize = memory.data(256);
 // @ts-expect-error: decorator
 @inline function nextLen4(): i32 { return (nextA() & 7) as i32 - 2; }
 // @ts-expect-error: decorator
-@inline function nextVec(): v128 { return i32x4(nextI32(), nextI32(), nextI32(), nextI32()); }
+@inline function nextVec(): v128 { return bench_common.nextV128(); }
 
 bench("i32x4.ctor", () => { if (ASC_FEATURE_SIMD) blackbox(nextVec()); else { blackbox(i32x4_swar(nextI32(), nextI32(), nextI32(), nextI32())); blackbox(i32x4_swar.take_hi()); } }, OPS, 8); dumpToFile("i32x4", "ctor");
 bench("i32x4.splat", () => { if (ASC_FEATURE_SIMD) blackbox(i32x4.splat(nextI32())); else { blackbox(i32x4_swar.splat(nextI32())); blackbox(i32x4_swar.take_hi()); } }, OPS, 8); dumpToFile("i32x4", "splat");

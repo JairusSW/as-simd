@@ -6,6 +6,13 @@ export namespace bench_common {
   let s3: u64 = 0x7766554433221100;
   let s4: u64 = 0xaa55aa55aa55aa55;
   let s128: u64 = 0x9e3779b97f4a7c15;
+  let suite64: u64 = 0;
+  let suite64Alt: u64 = 0;
+  let suiteA: u64 = 0;
+  let suiteB: u64 = 0;
+  let suiteM: u64 = 0;
+  let suite128Lo: u64 = 0;
+  let suite128Hi: u64 = 0;
   let next128_hi: u64 = 0;
 
   // @ts-expect-error: decorator
@@ -16,44 +23,56 @@ export namespace bench_common {
     return x;
   }
 
+  function refreshSuite(): void {
+    s0 = next64Step(s0);
+    s1 = next64Step(s1);
+    s2 = next64Step(s2);
+    s3 = next64Step(s3);
+    s4 = next64Step(s4);
+    s128 = next64Step(s128);
+    suite64 = s0;
+    suite64Alt = s1;
+    suiteA = s2;
+    suiteB = s3;
+    suiteM = s4 ^ 0xaa55aa55aa55aa55;
+    suite128Lo = s0;
+    suite128Hi = s128;
+  }
+
+  // @ts-expect-error: decorator
+  @inline export function advanceSuite(): void {
+    refreshSuite();
+  }
+
   // @ts-expect-error: decorator
   @inline export function next64(): u64 {
-    s0 = next64Step(s0);
-    return s0;
+    return suite64;
   }
 
   // @ts-expect-error: decorator
   @inline export function next64Alt(): u64 {
-    s1 = next64Step(s1);
-    return s1;
+    return suite64Alt;
   }
 
   // @ts-expect-error: decorator
   @inline export function nextA(): u64 {
-    s0 = next64Step(s0);
-    s2 = next64Step(s2);
-    return s0 ^ (s2 >> 17);
+    return suiteA;
   }
 
   // @ts-expect-error: decorator
   @inline export function nextB(): u64 {
-    s1 = next64Step(s1);
-    s3 = next64Step(s3);
-    return s1 ^ (s3 << 13);
+    return suiteB;
   }
 
   // @ts-expect-error: decorator
   @inline export function nextM(): u64 {
-    s4 = next64Step(s4);
-    return s4 ^ 0xaa55aa55aa55aa55;
+    return suiteM;
   }
 
   // @ts-expect-error: decorator
   @inline export function next128(): u64 {
-    const lo = next64();
-    s128 = next64Step(s128);
-    next128_hi = s128;
-    return lo;
+    next128_hi = suite128Hi;
+    return suite128Lo;
   }
 
   // @ts-expect-error: decorator
@@ -63,7 +82,9 @@ export namespace bench_common {
 
   // @ts-expect-error: decorator
   @inline export function nextV128(): v128 {
-    return i64x2(next64() as i64, next64Alt() as i64);
+    const lo = next128();
+    const hi = next128Hi();
+    return i64x2(lo as i64, hi as i64);
   }
 
   // @ts-expect-error: decorator
