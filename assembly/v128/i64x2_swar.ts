@@ -1,231 +1,164 @@
-import { v128_swar } from "./v128_swar";
-import { swar_arena } from "./swar_arena";
-
-export type i64x2_swar = v128;
+let __as_simd_i64x2_hi: u64 = 0;
 
 export namespace i64x2_swar {
   // @ts-expect-error: decorator
-  @inline function l(x: v128): i64 {
-    if (ASC_FEATURE_SIMD) return i64x2.extract_lane(x, 0);
-    const lane_tmp = swar_arena.alloc16();
-    store<v128>(lane_tmp, x);
-    return load<i64>(lane_tmp);
+  @inline export function take_hi(): u64 { return __as_simd_i64x2_hi; }
+  // @ts-expect-error: decorator
+  @inline function set_pair(lo: u64, hi: u64): u64 {
+    __as_simd_i64x2_hi = hi;
+    return lo;
   }
   // @ts-expect-error: decorator
-  @inline function h(x: v128): i64 {
-    if (ASC_FEATURE_SIMD) return i64x2.extract_lane(x, 1);
-    const lane_tmp = swar_arena.alloc16();
-    store<v128>(lane_tmp, x);
-    return load<i64>(lane_tmp + sizeof<i64>());
-  }
+  @inline function as_i64(x: u64): i64 { return x as i64; }
   // @ts-expect-error: decorator
-  @inline function p(a: i64, b: i64): v128 {
-    if (ASC_FEATURE_SIMD) return i64x2(a, b);
-    const lane_tmp = swar_arena.alloc16();
-    store<i64>(lane_tmp, a);
-    store<i64>(lane_tmp + sizeof<i64>(), b);
-    return load<v128>(lane_tmp);
-  }
+  @inline function as_u64(x: i64): u64 { return x as u64; }
   // @ts-expect-error: decorator
-  @inline function m(pred: bool): i64 { return pred ? -1 : 0; }
+  @inline function mask(pred: bool): u64 { return pred ? 0xffff_ffff_ffff_ffff : 0; }
 
   // @ts-expect-error: decorator
-  @inline export function splat(x: i64): v128 {
-    if (ASC_FEATURE_SIMD) return i64x2.splat(x);
-    return p(x, x);
+  @inline export function splat(x: i64): u64 { return set_pair(as_u64(x), as_u64(x)); }
+  // @ts-expect-error: decorator
+  @inline export function extract_lane(lo: u64, hi: u64, idx: u8): i64 { return (idx & 1) == 0 ? as_i64(lo) : as_i64(hi); }
+  // @ts-expect-error: decorator
+  @inline export function replace_lane(lo: u64, hi: u64, idx: u8, value: i64): u64 {
+    const vv = as_u64(value);
+    return (idx & 1) == 0 ? set_pair(vv, hi) : set_pair(lo, vv);
   }
   // @ts-expect-error: decorator
-  @inline export function extract_lane(x: v128, idx: u8): i64 {
-    if (ASC_FEATURE_SIMD) return (idx & 1) == 0 ? i64x2.extract_lane(x, 0) : i64x2.extract_lane(x, 1);
-    return (idx & 1) == 0 ? l(x) : h(x);
-  }
-  // @ts-expect-error: decorator
-  @inline export function replace_lane(x: v128, idx: u8, value: i64): v128_swar {
-    if (ASC_FEATURE_SIMD) return (idx & 1) == 0 ? i64x2.replace_lane(x, 0, value) : i64x2.replace_lane(x, 1, value);
-    return (idx & 1) == 0 ? p(value, h(x)) : p(l(x), value);
-  }
-  // @ts-expect-error: decorator
-  @inline export function loadPartial(ptr: usize, len: i32, immOffset: usize = 0, immAlign: usize = 1, fill: i64 = 0): v128 {
+  @inline export function loadPartial(ptr: usize, len: i32, immOffset: usize = 0, immAlign: usize = 1, fill: i64 = 0): u64 {
     const nn = select<i32>(0, len, len < 0);
     const n = select<i32>(2, nn, nn > 2);
-    if (n == 0) return p(fill, fill);
-    const base = ptr + immOffset;
-    if (ASC_FEATURE_SIMD && n == 2) return load<v128>(base);
-    if (n == 1) return p(load<i64>(base), fill);
-    return p(load<i64>(base), load<i64>(base + 8));
+    const f = as_u64(fill);
+    if (n == 0) return set_pair(f, f);
+    const l = load<u64>(ptr, immOffset, immAlign);
+    if (n == 1) return set_pair(l, f);
+    return set_pair(l, load<u64>(ptr, immOffset + 8, immAlign));
   }
   // @ts-expect-error: decorator
-  @inline export function storePartial(ptr: usize, value: v128, len: i32, immOffset: usize = 0, immAlign: usize = 1): void {
+  @inline export function storePartial(ptr: usize, lo: u64, hi: u64, len: i32, immOffset: usize = 0, immAlign: usize = 1): void {
     const nn = select<i32>(0, len, len < 0);
     const n = select<i32>(2, nn, nn > 2);
     if (n == 0) return;
-    const base = ptr + immOffset;
-    if (ASC_FEATURE_SIMD && n == 2) {
-      store<v128>(base, value);
-      return;
-    }
-    store<i64>(base, l(value));
-    if (n > 1) store<i64>(base + 8, h(value));
+    store<u64>(ptr, lo, immOffset, immAlign);
+    if (n > 1) store<u64>(ptr, hi, immOffset + 8, immAlign);
+  }
+
+  // @ts-expect-error: decorator
+  @inline export function add(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(as_u64(as_i64(aLo) + as_i64(bLo)), as_u64(as_i64(aHi) + as_i64(bHi))); }
+  // @ts-expect-error: decorator
+  @inline export function sub(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(as_u64(as_i64(aLo) - as_i64(bLo)), as_u64(as_i64(aHi) - as_i64(bHi))); }
+  // @ts-expect-error: decorator
+  @inline export function mul(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(as_u64(as_i64(aLo) * as_i64(bLo)), as_u64(as_i64(aHi) * as_i64(bHi))); }
+  // @ts-expect-error: decorator
+  @inline export function abs(aLo: u64, aHi: u64): u64 {
+    const l = as_i64(aLo);
+    const h = as_i64(aHi);
+    const ml = l >> 63;
+    const mh = h >> 63;
+    return set_pair(as_u64((l ^ ml) - ml), as_u64((h ^ mh) - mh));
   }
   // @ts-expect-error: decorator
-  @inline export function add(a: v128, b: v128): v128 {
-    if (ASC_FEATURE_SIMD) return i64x2.add(a, b);
-    return p(l(a) + l(b), h(a) + h(b));
-  }
+  @inline export function neg(aLo: u64, aHi: u64): u64 { return set_pair(as_u64(-as_i64(aLo)), as_u64(-as_i64(aHi))); }
   // @ts-expect-error: decorator
-  @inline export function sub(a: v128, b: v128): v128 {
-    if (ASC_FEATURE_SIMD) return i64x2.sub(a, b);
-    return p(l(a) - l(b), h(a) - h(b));
-  }
-  // @ts-expect-error: decorator
-  @inline export function mul(a: v128, b: v128): v128 {
-    if (ASC_FEATURE_SIMD) return i64x2.mul(a, b);
-    return p(l(a) * l(b), h(a) * h(b));
-  }
-  // @ts-expect-error: decorator
-  @inline export function abs(a: v128): v128 {
-    if (ASC_FEATURE_SIMD) return i64x2.abs(a);
-    const al = l(a), ah = h(a);
-    const ml = al >> 63, mh = ah >> 63;
-    return p((al ^ ml) - ml, (ah ^ mh) - mh);
-  }
-  // @ts-expect-error: decorator
-  @inline export function neg(a: v128): v128 {
-    if (ASC_FEATURE_SIMD) return i64x2.neg(a);
-    return p(-l(a), -h(a));
-  }
-  // @ts-expect-error: decorator
-  @inline export function shl(a: v128, b: i32): v128 {
-    if (ASC_FEATURE_SIMD) return i64x2.shl(a, b);
+  @inline export function shl(aLo: u64, aHi: u64, b: i32): u64 {
     const s = b & 63;
-    return p(l(a) << s, h(a) << s);
+    return set_pair(aLo << s, aHi << s);
   }
   // @ts-expect-error: decorator
-  @inline export function shr_s(a: v128, b: i32): v128 {
-    if (ASC_FEATURE_SIMD) return i64x2.shr_s(a, b);
+  @inline export function shr_s(aLo: u64, aHi: u64, b: i32): u64 {
     const s = b & 63;
-    return p(l(a) >> s, h(a) >> s);
+    return set_pair(as_u64(as_i64(aLo) >> s), as_u64(as_i64(aHi) >> s));
   }
   // @ts-expect-error: decorator
-  @inline export function shr_u(a: v128, b: i32): v128 {
-    if (ASC_FEATURE_SIMD) return i64x2.shr_u(a, b);
+  @inline export function shr_u(aLo: u64, aHi: u64, b: i32): u64 {
     const s = b & 63;
-    return p((l(a) as u64 >> s) as i64, (h(a) as u64 >> s) as i64);
+    return set_pair(aLo >> s, aHi >> s);
   }
   // @ts-expect-error: decorator
-  @inline export function all_true(a: v128): bool {
-    if (ASC_FEATURE_SIMD) return i64x2.all_true(a);
-    return l(a) != 0 && h(a) != 0;
+  @inline export function all_true(aLo: u64, aHi: u64): bool { return aLo != 0 && aHi != 0; }
+  // @ts-expect-error: decorator
+  @inline export function bitmask(aLo: u64, aHi: u64): i32 { return (((aLo >> 63) & 1) as i32) | ((((aHi >> 63) & 1) as i32) << 1); }
+  // @ts-expect-error: decorator
+  @inline export function eq(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(mask(aLo == bLo), mask(aHi == bHi)); }
+  // @ts-expect-error: decorator
+  @inline export function ne(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(mask(aLo != bLo), mask(aHi != bHi)); }
+  // @ts-expect-error: decorator
+  @inline export function lt_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(mask(as_i64(aLo) < as_i64(bLo)), mask(as_i64(aHi) < as_i64(bHi))); }
+  // @ts-expect-error: decorator
+  @inline export function le_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(mask(as_i64(aLo) <= as_i64(bLo)), mask(as_i64(aHi) <= as_i64(bHi))); }
+  // @ts-expect-error: decorator
+  @inline export function gt_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(mask(as_i64(aLo) > as_i64(bLo)), mask(as_i64(aHi) > as_i64(bHi))); }
+  // @ts-expect-error: decorator
+  @inline export function ge_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(mask(as_i64(aLo) >= as_i64(bLo)), mask(as_i64(aHi) >= as_i64(bHi))); }
+
+  // @ts-expect-error: decorator
+  @inline export function extend_low_i32x4_s(aLo: u64, aHi: u64): u64 {
+    const a0 = (aLo & 0xffff_ffff) as i32 as i64;
+    const a1 = ((aLo >> 32) & 0xffff_ffff) as i32 as i64;
+    return set_pair(as_u64(a0), as_u64(a1));
   }
   // @ts-expect-error: decorator
-  @inline export function bitmask(a: v128): i32 {
-    if (ASC_FEATURE_SIMD) return i64x2.bitmask(a);
-    return (((l(a) as u64 >> 63) & 1) as i32) | ((((h(a) as u64 >> 63) & 1) as i32) << 1);
+  @inline export function extend_low_i32x4_u(aLo: u64, aHi: u64): u64 {
+    const a0 = (aLo & 0xffff_ffff) as u32 as u64;
+    const a1 = ((aLo >> 32) & 0xffff_ffff) as u32 as u64;
+    return set_pair(a0, a1);
   }
   // @ts-expect-error: decorator
-  @inline export function eq(a: v128, b: v128): v128 {
-    if (ASC_FEATURE_SIMD) return i64x2.eq(a, b);
-    return p(m(l(a) == l(b)), m(h(a) == h(b)));
+  @inline export function extend_high_i32x4_s(aLo: u64, aHi: u64): u64 {
+    const a0 = (aHi & 0xffff_ffff) as i32 as i64;
+    const a1 = ((aHi >> 32) & 0xffff_ffff) as i32 as i64;
+    return set_pair(as_u64(a0), as_u64(a1));
   }
   // @ts-expect-error: decorator
-  @inline export function ne(a: v128, b: v128): v128 {
-    if (ASC_FEATURE_SIMD) return i64x2.ne(a, b);
-    return p(m(l(a) != l(b)), m(h(a) != h(b)));
+  @inline export function extend_high_i32x4_u(aLo: u64, aHi: u64): u64 {
+    const a0 = (aHi & 0xffff_ffff) as u32 as u64;
+    const a1 = ((aHi >> 32) & 0xffff_ffff) as u32 as u64;
+    return set_pair(a0, a1);
   }
   // @ts-expect-error: decorator
-  @inline export function lt_s(a: v128, b: v128): v128 {
-    if (ASC_FEATURE_SIMD) return i64x2.lt_s(a, b);
-    return p(m(l(a) < l(b)), m(h(a) < h(b)));
+  @inline export function extmul_low_i32x4_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
+    const a0 = (aLo & 0xffff_ffff) as i32 as i64;
+    const a1 = ((aLo >> 32) & 0xffff_ffff) as i32 as i64;
+    const b0 = (bLo & 0xffff_ffff) as i32 as i64;
+    const b1 = ((bLo >> 32) & 0xffff_ffff) as i32 as i64;
+    return set_pair(as_u64(a0 * b0), as_u64(a1 * b1));
   }
   // @ts-expect-error: decorator
-  @inline export function le_s(a: v128, b: v128): v128 {
-    if (ASC_FEATURE_SIMD) return i64x2.le_s(a, b);
-    return p(m(l(a) <= l(b)), m(h(a) <= h(b)));
+  @inline export function extmul_low_i32x4_u(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
+    const a0 = (aLo & 0xffff_ffff) as u32 as u64;
+    const a1 = ((aLo >> 32) & 0xffff_ffff) as u32 as u64;
+    const b0 = (bLo & 0xffff_ffff) as u32 as u64;
+    const b1 = ((bLo >> 32) & 0xffff_ffff) as u32 as u64;
+    return set_pair(a0 * b0, a1 * b1);
   }
   // @ts-expect-error: decorator
-  @inline export function gt_s(a: v128, b: v128): v128 {
-    if (ASC_FEATURE_SIMD) return i64x2.gt_s(a, b);
-    return p(m(l(a) > l(b)), m(h(a) > h(b)));
+  @inline export function extmul_high_i32x4_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
+    const a0 = (aHi & 0xffff_ffff) as i32 as i64;
+    const a1 = ((aHi >> 32) & 0xffff_ffff) as i32 as i64;
+    const b0 = (bHi & 0xffff_ffff) as i32 as i64;
+    const b1 = ((bHi >> 32) & 0xffff_ffff) as i32 as i64;
+    return set_pair(as_u64(a0 * b0), as_u64(a1 * b1));
   }
   // @ts-expect-error: decorator
-  @inline export function ge_s(a: v128, b: v128): v128 {
-    if (ASC_FEATURE_SIMD) return i64x2.ge_s(a, b);
-    return p(m(l(a) >= l(b)), m(h(a) >= h(b)));
+  @inline export function extmul_high_i32x4_u(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
+    const a0 = (aHi & 0xffff_ffff) as u32 as u64;
+    const a1 = ((aHi >> 32) & 0xffff_ffff) as u32 as u64;
+    const b0 = (bHi & 0xffff_ffff) as u32 as u64;
+    const b1 = ((bHi >> 32) & 0xffff_ffff) as u32 as u64;
+    return set_pair(a0 * b0, a1 * b1);
   }
   // @ts-expect-error: decorator
-  @inline export function extend_low_i32x4_s(a: v128): v128 {
-    if (ASC_FEATURE_SIMD) return i64x2.extend_low_i32x4_s(a);
-    const x = l(a);
-    return p((x & 0xffffffff) as i32 as i64, ((x >> 32) & 0xffffffff) as i32 as i64);
+  @inline export function shuffle(aLo: u64, aHi: u64, bLo: u64, bHi: u64, l0: u8, l1: u8): u64 {
+    const i0 = l0 & 3;
+    const i1 = l1 & 3;
+    const x0 = i0 < 2 ? extract_lane(aLo, aHi, i0) : extract_lane(bLo, bHi, i0 - 2);
+    const x1 = i1 < 2 ? extract_lane(aLo, aHi, i1) : extract_lane(bLo, bHi, i1 - 2);
+    return set_pair(as_u64(x0), as_u64(x1));
   }
   // @ts-expect-error: decorator
-  @inline export function extend_low_i32x4_u(a: v128): v128 {
-    if (ASC_FEATURE_SIMD) return i64x2.extend_low_i32x4_u(a);
-    const x = l(a);
-    return p((x & 0xffffffff) as u32 as u64 as i64, ((x >> 32) & 0xffffffff) as u32 as u64 as i64);
-  }
-  // @ts-expect-error: decorator
-  @inline export function extend_high_i32x4_s(a: v128): v128 {
-    if (ASC_FEATURE_SIMD) return i64x2.extend_high_i32x4_s(a);
-    const x = h(a);
-    return p((x & 0xffffffff) as i32 as i64, ((x >> 32) & 0xffffffff) as i32 as i64);
-  }
-  // @ts-expect-error: decorator
-  @inline export function extend_high_i32x4_u(a: v128): v128 {
-    if (ASC_FEATURE_SIMD) return i64x2.extend_high_i32x4_u(a);
-    const x = h(a);
-    return p((x & 0xffffffff) as u32 as u64 as i64, ((x >> 32) & 0xffffffff) as u32 as u64 as i64);
-  }
-  // @ts-expect-error: decorator
-  @inline export function extmul_low_i32x4_s(a: v128, b: v128): v128 {
-    if (ASC_FEATURE_SIMD) return i64x2.extmul_low_i32x4_s(a, b);
-    const ax = l(a), bx = l(b);
-    const a0 = (ax & 0xffffffff) as i32 as i64;
-    const a1 = ((ax >> 32) & 0xffffffff) as i32 as i64;
-    const b0 = (bx & 0xffffffff) as i32 as i64;
-    const b1 = ((bx >> 32) & 0xffffffff) as i32 as i64;
-    return p(a0 * b0, a1 * b1);
-  }
-  // @ts-expect-error: decorator
-  @inline export function extmul_low_i32x4_u(a: v128, b: v128): v128 {
-    if (ASC_FEATURE_SIMD) return i64x2.extmul_low_i32x4_u(a, b);
-    const ax = l(a), bx = l(b);
-    const a0 = (ax & 0xffffffff) as u32 as u64;
-    const a1 = ((ax >> 32) & 0xffffffff) as u32 as u64;
-    const b0 = (bx & 0xffffffff) as u32 as u64;
-    const b1 = ((bx >> 32) & 0xffffffff) as u32 as u64;
-    return p((a0 * b0) as i64, (a1 * b1) as i64);
-  }
-  // @ts-expect-error: decorator
-  @inline export function extmul_high_i32x4_s(a: v128, b: v128): v128 {
-    if (ASC_FEATURE_SIMD) return i64x2.extmul_high_i32x4_s(a, b);
-    const ax = h(a), bx = h(b);
-    const a0 = (ax & 0xffffffff) as i32 as i64;
-    const a1 = ((ax >> 32) & 0xffffffff) as i32 as i64;
-    const b0 = (bx & 0xffffffff) as i32 as i64;
-    const b1 = ((bx >> 32) & 0xffffffff) as i32 as i64;
-    return p(a0 * b0, a1 * b1);
-  }
-  // @ts-expect-error: decorator
-  @inline export function extmul_high_i32x4_u(a: v128, b: v128): v128 {
-    if (ASC_FEATURE_SIMD) return i64x2.extmul_high_i32x4_u(a, b);
-    const ax = h(a), bx = h(b);
-    const a0 = (ax & 0xffffffff) as u32 as u64;
-    const a1 = ((ax >> 32) & 0xffffffff) as u32 as u64;
-    const b0 = (bx & 0xffffffff) as u32 as u64;
-    const b1 = ((bx >> 32) & 0xffffffff) as u32 as u64;
-    return p((a0 * b0) as i64, (a1 * b1) as i64);
-  }
-  // @ts-expect-error: decorator
-  @inline export function shuffle(a: v128, b: v128, l0: u8, l1: u8): v128 {
-    const i0 = l0 & 3, i1 = l1 & 3;
-    const x0 = i0 < 2 ? extract_lane(a, i0) : extract_lane(b, i0 - 2);
-    const x1 = i1 < 2 ? extract_lane(a, i1) : extract_lane(b, i1 - 2);
-    return p(x0, x1);
-  }
-  // @ts-expect-error: decorator
-  @inline export function relaxed_laneselect(a: v128, b: v128, m: v128): v128 {
-    if (ASC_FEATURE_RELAXED_SIMD) return i64x2.relaxed_laneselect(a, b, m);
-    return p(extract_lane(m, 0) < 0 ? extract_lane(a, 0) : extract_lane(b, 0), extract_lane(m, 1) < 0 ? extract_lane(a, 1) : extract_lane(b, 1));
+  @inline export function relaxed_laneselect(aLo: u64, aHi: u64, bLo: u64, bHi: u64, mLo: u64, mHi: u64): u64 {
+    const l = extract_lane(mLo, mHi, 0) < 0 ? aLo : bLo;
+    const h = extract_lane(mLo, mHi, 1) < 0 ? aHi : bHi;
+    return set_pair(l, h);
   }
 }
