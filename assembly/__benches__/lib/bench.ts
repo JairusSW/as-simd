@@ -67,6 +67,14 @@ const BENCH_RUNTIME_NAME: string = BENCH_RUNTIME_V8
         ? "llvm"
         : "runtime";
 
+let ASC_FEATURES: string = "";
+if (ASC_FEATURE_SIMD) ASC_FEATURES += "simd ";
+if (ASC_FEATURE_RELAXED_SIMD) ASC_FEATURES += "relaxed-simd ";
+if (ASC_FEATURE_SIGN_EXTENSION) ASC_FEATURES += "sign-extension ";
+
+console.log("Features: " + ASC_FEATURES);
+console.log("Mode: " + SIMD_ENABLED);
+console.log("Runtime: " + BENCH_RUNTIME_NAME + "\n");
 // @ts-expect-error: @inline is a valid decorator
 @inline function preallocateMemory(): void {
   if (preallocated) return;

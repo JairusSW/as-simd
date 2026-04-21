@@ -1,11 +1,14 @@
 import { v64 } from "../v64";
 import { i32x2 } from "../v64/i32x2";
+import { i64x2_swar } from "./i64x2";
 
 export type i32x4_swar = v128;
 
 export namespace i32x4_swar {
   // @ts-expect-error: decorator
-  @inline function lo(x: v128): v64 { return i64x2.extract_lane(x, 0) as v64; }
+  @inline function lo(x: v128): v64 {
+    if (ASC_FEATURE_SIMD) return i64x2.extract_lane(x, 0) as v64;
+    return i64x2_swar.extract_lane(x, 0) as v64; }
   // @ts-expect-error: decorator
   @inline function hi(x: v128): v64 { return i64x2.extract_lane(x, 1) as v64; }
   // @ts-expect-error: decorator
