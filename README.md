@@ -21,7 +21,7 @@
 ## Installation
 
 ```bash
-npm install JairusSW/as-simd
+npm install as-simd
 ```
 
 ## Docs
@@ -30,13 +30,13 @@ I'll write them soon. Usage is exactly the same as existing SIMD api though.
 
 ## Usage
 
-### Drop-in global flow (recommended)
+### Drop-in global flow (recommended for `v128`-family code)
 
 Use the full preset to keep global SIMD names available in existing source (`v128`, `i8x16`, `i16x8`, `i32x4`, `i64x2`) with `as-simd` transform wiring:
 
 ```json
 {
-  "extends": "./node_modules/as-simd/preset/full.json",
+  "extends": "as-simd/preset/full",
   "include": ["./node_modules/as-simd/globals.d.ts"]
 }
 ```
@@ -53,13 +53,13 @@ If your toolchain cannot use `extends`, copy these options into your `asconfig.j
 }
 ```
 
-### Strict no-SIMD flow
+### Strict no-SIMD flow (default asconfig)
 
 Strict mode disables SIMD and keeps only non-`v128` paths supported. If `v128`-family globals are used, the transform emits an actionable diagnostic.
 
 ```json
 {
-  "extends": "./node_modules/as-simd/preset/strict.json",
+  "extends": "as-simd/asconfig.json",
   "include": ["./node_modules/as-simd/globals.d.ts"]
 }
 ```
@@ -172,22 +172,16 @@ sudo apt-get install -y binaryen
 npm install
 ```
 
-4. Run either benchmark suite directly:
+4. Run benchmarks:
 
 ```bash
 npm run bench
 ```
 
-5. Build charts from the latest local logs:
+5. Build charts:
 
 ```bash
-npm run charts:build
-```
-
-Or run the full local benchmark flow in one step:
-
-```bash
-npm run bench
+npm run charts
 ```
 
 ## Contributing

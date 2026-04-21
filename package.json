@@ -9,7 +9,8 @@
   "scripts": {
     "test": "ast test",
     "test:integration:dropin": "node ./scripts/integration-dropin.mjs",
-    "prepublishOnly": "npm run build:transform && npm test && npm run test:integration:dropin",
+    "test:integration:simd-intent": "node ./scripts/integration-simd-intent.mjs",
+    "prepublishOnly": "npm run build:transform && npm test && npm run test:integration:dropin && npm run test:integration:simd-intent",
     "fuzz": "ast fuzz",
     "fuzz:simd-parity": "ast fuzz assembly/__fuzz__/i8x8.fuzz.ts assembly/__fuzz__/i8x16.fuzz.ts assembly/__fuzz__/i8x16-swar.fuzz.ts assembly/__fuzz__/i16x4.fuzz.ts assembly/__fuzz__/i16x8.fuzz.ts assembly/__fuzz__/i16x8-swar.fuzz.ts assembly/__fuzz__/i32x2.fuzz.ts assembly/__fuzz__/i32x4.fuzz.ts assembly/__fuzz__/i32x4-swar.fuzz.ts assembly/__fuzz__/i64x2-swar.fuzz.ts assembly/__fuzz__/v64.fuzz.ts --mode simd",
     "test:fuzz": "ast test --fuzz",
@@ -30,7 +31,8 @@
     "assemblyscript": "^0.28.14",
     "assemblyscript-prettier": "^3.0.4",
     "json-as": "^1.3.2",
-    "serve": "^14.2.6"
+    "serve": "^14.2.6",
+    "as-simd": "file:."
   },
   "overrides": {
     "assemblyscript": "$assemblyscript"
@@ -56,6 +58,7 @@
     "assembly/v128/**/*.ts",
     "assembly/scalar/**/*.ts",
     "transform/index.mjs",
+    "asconfig.json",
     "preset/*.json",
     "globals.d.ts",
     "index.ts",
@@ -68,6 +71,7 @@
     "./transform": "./transform/index.mjs",
     "./preset/full": "./preset/full.json",
     "./preset/strict": "./preset/strict.json",
+    "./asconfig.json": "./asconfig.json",
     "./globals": "./globals.d.ts",
     "./package.json": "./package.json"
   },

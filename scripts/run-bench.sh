@@ -7,7 +7,7 @@ cd "$ROOT_DIR"
 RUNTIMES=${RUNTIMES:-"incremental"}
 ENGINES=${ENGINES:-"turbofan"}
 MODE_FILTER=${JSON_MODE:-""}
-TURBOFAN_FLAGS=${TURBOFAN_FLAGS:-"--no-liftoff --experimental-wasm-revectorize"}
+TURBOFAN_FLAGS=${TURBOFAN_FLAGS:-"--no-liftoff"}
 BENCH_SAMPLES=${BENCH_SAMPLES:-1}
 D8_BIN=${D8_BIN:-""}
 WAVM_BIN=${WAVM_BIN:-"wavm"}
