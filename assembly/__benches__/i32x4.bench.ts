@@ -79,5 +79,7 @@ bench("i32x4.extmul_high_i16x8_s", () => { blackbox(i32x4.extmul_high_i16x8_s(ne
 bench("i32x4.extmul_high_i16x8_u", () => { blackbox(i32x4.extmul_high_i16x8_u(nextVecA(), nextVecB())); }, OPS, 8); dumpToFile("i32x4", "extmul-high-i16x8-u");
 bench("i32x4.shuffle", () => { blackbox(i32x4.shuffle(nextVecA(), nextVecB(), 0, 5, 2, 7)); }, OPS, 8); dumpToFile("i32x4", "shuffle");
 if (ASC_FEATURE_RELAXED_SIMD) {
-  bench("i32x4.relaxed_laneselect", () => { blackbox(i32x4.relaxed_laneselect(nextVecA(), nextVecB(), nextVecM())); }, OPS, 24); dumpToFile("i32x4", "relaxed-laneselect");
+  bench("i32x4.relaxed_laneselect", () => { blackbox(i32x4_swar.relaxed_laneselect(nextVecA(), nextVecB(), nextVecM())); }, OPS, 24); dumpToFile("i32x4", "relaxed-laneselect");
+} else {
+  bench("i32x4.relaxed_laneselect", () => { blackbox(i32x4_swar.relaxed_laneselect(nextVecA(), nextVecB(), nextVecM())); }, OPS, 24); dumpToFile("i32x4", "relaxed-laneselect");
 }

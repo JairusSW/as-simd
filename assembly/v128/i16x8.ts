@@ -229,7 +229,7 @@ export namespace i16x8_swar {
   }
   // @ts-expect-error: decorator
   @inline export function relaxed_laneselect(a: v128, b: v128, m: v128): v128 {
-    if (ASC_FEATURE_SIMD) return i16x8.relaxed_laneselect(a, b, m);
+    if (ASC_FEATURE_RELAXED_SIMD) return i16x8.relaxed_laneselect(a, b, m);
     let r = splat(0);
     r = replace_lane(r, 0, extract_lane_s(m, 0) < 0 ? extract_lane_s(a, 0) : extract_lane_s(b, 0));
     r = replace_lane(r, 1, extract_lane_s(m, 1) < 0 ? extract_lane_s(a, 1) : extract_lane_s(b, 1));

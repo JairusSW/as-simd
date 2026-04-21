@@ -8,7 +8,7 @@
   },
   "fuzz": {
     "input": ["./assembly/__fuzz__/*.fuzz.ts"],
-    "runs": 5000000,
+    "runs": 10000000,
     "target": "bindings"
   },
   "runOptions": { "reporter": "default" },

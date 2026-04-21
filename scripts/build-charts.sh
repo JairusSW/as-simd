@@ -1,9 +1,15 @@
-bun run ./scripts/chart-i8x8-swar-v-i8x8-simd.ts
-bun run ./scripts/chart-i8x8-swar-v-i8x16-simd.ts
-bun run ./scripts/chart-i16x4-swar-v-i16x4-simd.ts
-bun run ./scripts/chart-i16x4-swar-v-i16x8-simd.ts
-bun run ./scripts/chart-i32x2-swar-v-i32x4-simd.ts
-bun run ./scripts/chart-i32x2-swar-v-i32x2-simd.ts
-bun run ./scripts/chart-v128-swar-v-v128-simd.ts
-bun run ./scripts/chart-v64-swar-v-v128-simd.ts
-bun run ./scripts/chart-v64-swar-v-v64-simd.ts
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+mapfile -t chart_files < <(find "$SCRIPT_DIR" -maxdepth 1 -type f -name "*.chart.ts" | sort)
+
+if [[ ${#chart_files[@]} -eq 0 ]]; then
+  echo "No chart scripts found in $SCRIPT_DIR (*.chart.ts)"
+  exit 1
+fi
+
+for chart in "${chart_files[@]}"; do
+  bun run "$chart"
+done

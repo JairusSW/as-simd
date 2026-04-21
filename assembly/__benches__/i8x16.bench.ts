@@ -280,12 +280,12 @@ dumpToFile("i8x16", "swizzle");
 
 if (ASC_FEATURE_RELAXED_SIMD) {
   bench("i8x16.relaxed_swizzle", () => {
-    blackbox(i8x16.relaxed_swizzle(nextVecA(), nextVecB()));
+    blackbox(i8x16_swar.relaxed_swizzle(nextVecA(), nextVecB()));
   }, OPS, 8);
   dumpToFile("i8x16", "relaxed-swizzle");
 
   bench("i8x16.relaxed_laneselect", () => {
-    blackbox(i8x16.relaxed_laneselect(nextVecA(), nextVecB(), nextVecM()));
+    blackbox(i8x16_swar.relaxed_laneselect(nextVecA(), nextVecB(), nextVecM()));
   }, OPS, 48);
   dumpToFile("i8x16", "relaxed-laneselect");
 } else {

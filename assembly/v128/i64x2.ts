@@ -206,7 +206,7 @@ export namespace i64x2_swar {
   }
   // @ts-expect-error: decorator
   @inline export function relaxed_laneselect(a: v128, b: v128, m: v128): v128 {
-    if (ASC_FEATURE_SIMD) return i64x2.relaxed_laneselect(a, b, m);
+    if (ASC_FEATURE_RELAXED_SIMD) return i64x2.relaxed_laneselect(a, b, m);
     return p(extract_lane(m, 0) < 0 ? extract_lane(a, 0) : extract_lane(b, 0), extract_lane(m, 1) < 0 ? extract_lane(a, 1) : extract_lane(b, 1));
   }
 }

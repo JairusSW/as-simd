@@ -59,4 +59,8 @@ bench("i64x2.extmul_low_i32x4_u", () => { blackbox(i64x2.extmul_low_i32x4_u(next
 bench("i64x2.extmul_high_i32x4_s", () => { blackbox(i64x2.extmul_high_i32x4_s(nextVecA(), nextVecB())); }, OPS, 16); dumpToFile("i64x2", "extmul-high-i32x4-s");
 bench("i64x2.extmul_high_i32x4_u", () => { blackbox(i64x2.extmul_high_i32x4_u(nextVecA(), nextVecB())); }, OPS, 16); dumpToFile("i64x2", "extmul-high-i32x4-u");
 bench("i64x2.shuffle", () => { blackbox(i64x2.shuffle(nextVecA(), nextVecB(), 0, 3)); }, OPS, 16); dumpToFile("i64x2", "shuffle");
-bench("i64x2.relaxed_laneselect", () => { blackbox(i64x2.relaxed_laneselect(nextVecA(), nextVecB(), nextVecM())); }, OPS, 48); dumpToFile("i64x2", "relaxed-laneselect");
+if (ASC_FEATURE_RELAXED_SIMD) {
+  bench("i64x2.relaxed_laneselect", () => { blackbox(i64x2_swar.relaxed_laneselect(nextVecA(), nextVecB(), nextVecM())); }, OPS, 48); dumpToFile("i64x2", "relaxed-laneselect");
+} else {
+  bench("i64x2.relaxed_laneselect", () => { blackbox(i64x2_swar.relaxed_laneselect(nextVecA(), nextVecB(), nextVecM())); }, OPS, 48); dumpToFile("i64x2", "relaxed-laneselect");
+}

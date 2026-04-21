@@ -330,17 +330,34 @@ bench("i16x4.shuffle", () => {
 }, OPS, 8);
 dumpToFile("i16x4", "shuffle");
 
-bench("i16x4.relaxed_laneselect", () => {
-  blackbox(i16x4.relaxed_laneselect(nextA(), nextB(), nextM()));
-}, OPS, 24);
-dumpToFile("i16x4", "relaxed-laneselect");
+if (ASC_FEATURE_RELAXED_SIMD) {
+  bench("i16x4.relaxed_laneselect", () => {
+    blackbox(i16x4.relaxed_laneselect(nextA(), nextB(), nextM()));
+  }, OPS, 24);
+  dumpToFile("i16x4", "relaxed-laneselect");
 
-bench("i16x4.relaxed_q15mulr_s", () => {
-  blackbox(i16x4.relaxed_q15mulr_s(nextA(), nextB()));
-}, OPS, 8);
-dumpToFile("i16x4", "relaxed-q15mulr-s");
+  bench("i16x4.relaxed_q15mulr_s", () => {
+    blackbox(i16x4.relaxed_q15mulr_s(nextA(), nextB()));
+  }, OPS, 8);
+  dumpToFile("i16x4", "relaxed-q15mulr-s");
 
-bench("i16x4.relaxed_dot_i8x8_i7x8_s", () => {
-  blackbox(i16x4.relaxed_dot_i8x8_i7x8_s(nextA(), nextB()));
-}, OPS, 8);
-dumpToFile("i16x4", "relaxed-dot-i8x8-i7x8-s");
+  bench("i16x4.relaxed_dot_i8x8_i7x8_s", () => {
+    blackbox(i16x4.relaxed_dot_i8x8_i7x8_s(nextA(), nextB()));
+  }, OPS, 8);
+  dumpToFile("i16x4", "relaxed-dot-i8x8-i7x8-s");
+} else {
+  bench("i16x4.relaxed_laneselect", () => {
+    blackbox(i16x4.relaxed_laneselect(nextA(), nextB(), nextM()));
+  }, OPS, 24);
+  dumpToFile("i16x4", "relaxed-laneselect");
+
+  bench("i16x4.relaxed_q15mulr_s", () => {
+    blackbox(i16x4.q15mulr_sat_s(nextA(), nextB()));
+  }, OPS, 8);
+  dumpToFile("i16x4", "relaxed-q15mulr-s");
+
+  bench("i16x4.relaxed_dot_i8x8_i7x8_s", () => {
+    blackbox(i16x4.relaxed_dot_i8x8_i7x8_s(nextA(), nextB()));
+  }, OPS, 8);
+  dumpToFile("i16x4", "relaxed-dot-i8x8-i7x8-s");
+}

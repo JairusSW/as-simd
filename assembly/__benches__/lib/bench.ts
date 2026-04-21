@@ -6,7 +6,15 @@ declare function hostWriteFile(fileName: string, data: string): void;
 @external("env", "readFile")
 declare function hostReadFileBuffer(filePath: string): ArrayBuffer;
 
-const SIMD_ENABLED = ASC_FEATURE_SIMD ? "simd" : "swar";
+// @ts-expect-error: AS_BENCH_FORCE_SWAR may be undefined.
+const BENCH_FORCE_SWAR: bool = isDefined(AS_BENCH_FORCE_SWAR);
+// @ts-expect-error: AS_BENCH_FORCE_SIMD may be undefined.
+const BENCH_FORCE_SIMD: bool = isDefined(AS_BENCH_FORCE_SIMD);
+const SIMD_ENABLED = BENCH_FORCE_SWAR
+  ? "swar"
+  : BENCH_FORCE_SIMD
+    ? "simd"
+    : (ASC_FEATURE_SIMD ? "simd" : "swar");
 
 @json
 class BenchResult {
@@ -40,8 +48,24 @@ const PREALLOC_BYTES: usize = isDefined(BENCH_PREALLOC_BYTES) ? BENCH_PREALLOC_B
 let preallocated = false;
 // @ts-expect-error: BENCH_SAMPLES may be undefined.
 const BENCH_SAMPLE_COUNT: i32 = isDefined(BENCH_SAMPLES) ? BENCH_SAMPLES : 7;
+// @ts-expect-error: AS_BENCH_RUNTIME_V8 may be undefined.
+const BENCH_RUNTIME_V8: bool = isDefined(AS_BENCH_RUNTIME_V8);
 // @ts-expect-error: AS_BENCH_RUNTIME_LLVM may be undefined.
 const BENCH_RUNTIME_LLVM: bool = isDefined(AS_BENCH_RUNTIME_LLVM);
+// @ts-expect-error: AS_BENCH_RUNTIME_WAVM may be undefined.
+const BENCH_RUNTIME_WAVM: bool = isDefined(AS_BENCH_RUNTIME_WAVM);
+// @ts-expect-error: AS_BENCH_RUNTIME_WASMER may be undefined.
+const BENCH_RUNTIME_WASMER: bool = isDefined(AS_BENCH_RUNTIME_WASMER);
+const BENCH_RUNTIME_STDOUT: bool = !BENCH_RUNTIME_V8;
+const BENCH_RUNTIME_NAME: string = BENCH_RUNTIME_V8
+  ? "v8"
+  : BENCH_RUNTIME_WAVM
+    ? "wavm"
+    : BENCH_RUNTIME_WASMER
+      ? "wasmer"
+      : BENCH_RUNTIME_LLVM
+        ? "llvm"
+        : "runtime";
 
 // @ts-expect-error: @inline is a valid decorator
 @inline function preallocateMemory(): void {
@@ -178,8 +202,8 @@ export function dumpToFile(suite: string, type: string): void {
     + "\"ops_median\":" + r.ops_median.toString() + ","
     + "\"ops_stddev\":" + r.ops_stddev.toString()
     + "}";
-  const fileName = "./build/logs/as/" + SIMD_ENABLED + "/" + suite + "." + type + ".as.json";
-  if (BENCH_RUNTIME_LLVM) {
+  const fileName = "./build/logs/as/" + SIMD_ENABLED + "/" + suite + "." + type + "." + BENCH_RUNTIME_NAME + ".json";
+  if (BENCH_RUNTIME_STDOUT) {
     // LLVM/WASI path: emit structured payload to stdout for scripts/run-bench.sh.
     console.log("__AS_BENCH_JSON__" + fileName + "\t" + json);
     return;
@@ -188,7 +212,7 @@ export function dumpToFile(suite: string, type: string): void {
 }
 
 export function readFile(path: string): string {
-  if (BENCH_RUNTIME_LLVM) return "";
+  if (BENCH_RUNTIME_STDOUT) return "";
   return String.UTF8.decode(hostReadFileBuffer(path));
 }
 

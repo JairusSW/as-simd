@@ -1,4 +1,5 @@
 import { i16x8_swar } from "../v128/i16x8";
+import { i32x4_swar } from "../v128/i32x4";
 import { bench, blackbox, dumpToFile } from "./lib/bench";
 
 const OPS: u64 = 25_000_000;
@@ -325,7 +326,7 @@ dumpToFile("i16x8", "shuffle");
 
 if (ASC_FEATURE_RELAXED_SIMD) {
   bench("i16x8.relaxed_laneselect", () => {
-    blackbox(i16x8.relaxed_laneselect(nextVecA(), nextVecB(), nextVecM()));
+    blackbox(i16x8_swar.relaxed_laneselect(nextVecA(), nextVecB(), nextVecM()));
   }, OPS, 24);
   dumpToFile("i16x8", "relaxed-laneselect");
 
@@ -336,6 +337,21 @@ if (ASC_FEATURE_RELAXED_SIMD) {
 
   bench("i16x8.relaxed_dot_i8x16_i7x16_s", () => {
     blackbox(i16x8.relaxed_dot_i8x16_i7x16_s(nextVecA(), nextVecB()));
+  }, OPS, 8);
+  dumpToFile("i16x8", "relaxed-dot-i8x16-i7x16-s");
+} else {
+  bench("i16x8.relaxed_laneselect", () => {
+    blackbox(i16x8_swar.relaxed_laneselect(nextVecA(), nextVecB(), nextVecM()));
+  }, OPS, 24);
+  dumpToFile("i16x8", "relaxed-laneselect");
+
+  bench("i16x8.relaxed_q15mulr_s", () => {
+    blackbox(i16x8.q15mulr_sat_s(nextVecA(), nextVecB()));
+  }, OPS, 8);
+  dumpToFile("i16x8", "relaxed-q15mulr-s");
+
+  bench("i16x8.relaxed_dot_i8x16_i7x16_s", () => {
+    blackbox(i32x4_swar.dot_i16x8_s(nextVecA(), nextVecB()));
   }, OPS, 8);
   dumpToFile("i16x8", "relaxed-dot-i8x16-i7x16-s");
 }

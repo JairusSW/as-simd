@@ -1,386 +1,330 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1340" height="2282" viewBox="0 0 1340 2282">
-<rect x="0" y="0" width="1340" height="2282" fill="transparent"/>
-<text x="670" y="44" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="600" fill="#111827">i16x4 SWAR vs i16x8 SIMD</text>
-<text x="670" y="64" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="500" fill="#666666">Mon Apr 20 2026 - v0.0.0 - cdfff70 - main</text>
-<text y="89" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="#374151">v8 swar</tspan><tspan x="892" fill="#374151">llvm swar</tspan><tspan x="976" fill="#374151">v8 simd</tspan><tspan x="1060" fill="#374151">llvm simd</tspan></text>
-<text x="8" y="107" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extend-low-i8x8-u</text>
-<rect x="240" y="88" width="314" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="95" width="431" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="107" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">286.3M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">392.8M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">0.0M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">0.0M</tspan></text>
-<text x="8" y="139" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extend-high-i8x8-u</text>
-<rect x="240" y="120" width="305" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="127" width="434" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="139" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">277.9M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">395.9M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">0.0M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">0.0M</tspan></text>
-<text x="8" y="171" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extend-high-i8x8-s</text>
-<rect x="240" y="152" width="261" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="159" width="403" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="171" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">237.9M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">367.4M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">0.0M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">0.0M</tspan></text>
-<text x="8" y="203" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extend-low-i8x8-s</text>
-<rect x="240" y="184" width="269" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="191" width="390" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="203" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">245.0M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">355.8M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">0.0M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">0.0M</tspan></text>
-<text x="8" y="235" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">load</text>
-<rect x="240" y="216" width="367" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="223" width="560" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="230" width="266" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="237" width="120" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="235" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">334.8M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">510.9M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">243.1M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">109.1M</tspan></text>
-<text x="8" y="267" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">splat</text>
-<rect x="240" y="248" width="358" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="255" width="534" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="262" width="277" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="269" width="118" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="267" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">326.3M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">486.8M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">252.4M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">108.0M</tspan></text>
-<text x="8" y="299" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">neg</text>
-<rect x="240" y="280" width="315" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="287" width="508" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="294" width="291" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="301" width="119" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="299" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">287.4M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">463.6M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">265.4M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">108.9M</tspan></text>
-<text x="8" y="331" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extadd-pairwise-i8x8-u</text>
-<rect x="240" y="312" width="257" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="319" width="350" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="331" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">234.2M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">319.5M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">0.0M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">0.0M</tspan></text>
-<text x="8" y="363" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extadd-pairwise-i8x8-s</text>
-<rect x="240" y="344" width="246" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="351" width="343" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="363" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">224.5M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">312.5M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">0.0M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">0.0M</tspan></text>
-<text x="8" y="395" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">bitmask</text>
-<rect x="240" y="376" width="305" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="383" width="455" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="390" width="295" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="397" width="120" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="395" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">278.5M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">415.1M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">269.5M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">109.0M</tspan></text>
-<text x="8" y="427" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extend-high-i8x16-u</text>
-<rect x="240" y="408" width="305" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="415" width="434" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="422" width="307" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="429" width="121" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="427" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">277.9M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">395.9M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">279.9M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">110.2M</tspan></text>
-<text x="8" y="459" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">all-true</text>
-<rect x="240" y="440" width="291" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="447" width="470" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="454" width="279" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="461" width="119" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="459" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">265.2M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">428.8M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">254.6M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">108.6M</tspan></text>
-<text x="8" y="491" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">abs</text>
-<rect x="240" y="472" width="294" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="479" width="442" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="486" width="296" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="493" width="120" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="491" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">267.9M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">402.8M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">270.0M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">109.0M</tspan></text>
-<text x="8" y="523" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extend-low-i8x16-u</text>
-<rect x="240" y="504" width="314" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="511" width="431" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="518" width="286" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="525" width="120" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="523" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">286.3M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">392.8M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">260.7M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">109.6M</tspan></text>
-<text x="8" y="555" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extend-low-i8x16-s</text>
-<rect x="240" y="536" width="269" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="543" width="390" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="550" width="291" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="557" width="120" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="555" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">245.0M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">355.8M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">265.5M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">109.9M</tspan></text>
-<text x="8" y="587" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extend-high-i8x16-s</text>
-<rect x="240" y="568" width="261" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="575" width="403" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="582" width="277" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="589" width="121" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="587" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">237.9M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">367.4M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">252.5M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">109.9M</tspan></text>
-<text x="8" y="619" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extadd-pairwise-i8x16-u</text>
-<rect x="240" y="600" width="257" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="607" width="350" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="614" width="306" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="621" width="118" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="619" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">234.2M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">319.5M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">278.9M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">107.8M</tspan></text>
-<text x="8" y="651" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extadd-pairwise-i8x16-s</text>
-<rect x="240" y="632" width="246" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="639" width="343" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="646" width="307" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="653" width="117" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="651" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">224.5M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">312.5M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">279.6M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">107.0M</tspan></text>
-<text x="8" y="683" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extract-lane-s</text>
-<rect x="240" y="664" width="255" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="671" width="333" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="678" width="282" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="685" width="118" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="683" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">232.6M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">303.4M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">257.0M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">107.5M</tspan></text>
-<text x="8" y="715" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extract-lane-u</text>
-<rect x="240" y="696" width="247" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="703" width="330" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="710" width="286" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="717" width="119" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="715" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">225.6M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">301.3M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">261.0M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">108.5M</tspan></text>
-<text x="8" y="747" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extmul-low-i8x8-s</text>
-<rect x="240" y="728" width="192" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="735" width="271" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="747" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">175.2M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">247.5M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">0.0M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">0.0M</tspan></text>
-<text x="8" y="779" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">add</text>
-<rect x="240" y="760" width="260" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="767" width="339" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="774" width="235" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="781" width="90" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="779" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">237.0M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">308.8M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">214.3M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">82.4M</tspan></text>
-<text x="8" y="811" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">narrow-i32x2-u</text>
-<rect x="240" y="792" width="195" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="799" width="258" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="811" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">177.7M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">235.3M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">0.0M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">0.0M</tspan></text>
-<text x="8" y="843" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">avgr-u</text>
-<rect x="240" y="824" width="236" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="831" width="324" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="838" width="242" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="845" width="89" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="843" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">215.0M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">295.8M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">220.4M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">81.0M</tspan></text>
-<text x="8" y="875" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">narrow-i32x2-s</text>
-<rect x="240" y="856" width="195" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="863" width="249" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="875" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">178.1M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">227.4M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">0.0M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">0.0M</tspan></text>
-<text x="8" y="907" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extmul-low-i8x8-u</text>
-<rect x="240" y="888" width="201" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="895" width="243" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="907" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">183.4M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">221.4M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">0.0M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">0.0M</tspan></text>
-<text x="8" y="939" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">sub</text>
-<rect x="240" y="920" width="257" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="927" width="293" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="934" width="234" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="941" width="91" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="939" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">234.6M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">267.1M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">213.5M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">82.7M</tspan></text>
-<text x="8" y="971" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">eq</text>
-<rect x="240" y="952" width="234" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="959" width="318" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="966" width="230" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="973" width="88" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="971" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">213.6M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">290.5M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">209.9M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">80.4M</tspan></text>
-<text x="8" y="1003" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extmul-high-i8x8-s</text>
-<rect x="240" y="984" width="180" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="991" width="253" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1003" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">164.4M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">230.4M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">0.0M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">0.0M</tspan></text>
-<text x="8" y="1035" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">ne</text>
-<rect x="240" y="1016" width="231" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1023" width="311" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1030" width="226" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1037" width="89" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1035" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">210.8M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">284.0M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">206.0M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">80.8M</tspan></text>
-<text x="8" y="1067" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">max-u</text>
-<rect x="240" y="1048" width="212" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1055" width="296" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1062" width="241" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1069" width="88" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1067" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">193.2M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">270.0M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">220.3M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">80.7M</tspan></text>
-<text x="8" y="1099" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">lt-s</text>
-<rect x="240" y="1080" width="218" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1087" width="299" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1094" width="226" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1101" width="88" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1099" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">199.3M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">272.6M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">205.8M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">80.2M</tspan></text>
-<text x="8" y="1131" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extmul-high-i8x8-u</text>
-<rect x="240" y="1112" width="190" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1119" width="225" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1131" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">173.5M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">205.0M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">0.0M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">0.0M</tspan></text>
-<text x="8" y="1163" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">sub-sat-u</text>
-<rect x="240" y="1144" width="214" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1151" width="298" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1158" width="230" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1165" width="85" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1163" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">195.7M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">271.8M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">210.2M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">77.5M</tspan></text>
-<text x="8" y="1195" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">gt-u</text>
-<rect x="240" y="1176" width="232" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1183" width="298" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1190" width="210" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1197" width="86" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1195" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">211.9M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">271.7M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">191.6M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">78.4M</tspan></text>
-<text x="8" y="1227" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">ge-s</text>
-<rect x="240" y="1208" width="228" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1215" width="288" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1222" width="220" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1229" width="87" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1227" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">208.3M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">263.0M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">200.3M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">79.7M</tspan></text>
-<text x="8" y="1259" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">store</text>
-<rect x="240" y="1240" width="238" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1247" width="319" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1254" width="195" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1261" width="71" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1259" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">217.6M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">290.9M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">177.8M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">65.0M</tspan></text>
-<text x="8" y="1291" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">min-u</text>
-<rect x="240" y="1272" width="220" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1279" width="286" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1286" width="222" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1293" width="92" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1291" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">200.4M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">260.7M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">202.4M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">84.0M</tspan></text>
-<text x="8" y="1323" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">lt-u</text>
-<rect x="240" y="1304" width="212" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1311" width="303" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1318" width="216" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1325" width="86" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1323" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">193.8M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">276.3M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">197.5M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">78.7M</tspan></text>
-<text x="8" y="1355" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">gt-s</text>
-<rect x="240" y="1336" width="209" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1343" width="297" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1350" width="220" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1357" width="88" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1355" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">190.6M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">270.9M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">201.0M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">80.2M</tspan></text>
-<text x="8" y="1387" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">max-s</text>
-<rect x="240" y="1368" width="217" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1375" width="280" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1382" width="224" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1389" width="92" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1387" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">197.6M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">255.7M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">204.5M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">83.7M</tspan></text>
-<text x="8" y="1419" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">le-s</text>
-<rect x="240" y="1400" width="207" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1407" width="295" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1414" width="220" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1421" width="88" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1419" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">188.7M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">269.3M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">200.5M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">80.4M</tspan></text>
-<text x="8" y="1451" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">add-sat-s</text>
-<rect x="240" y="1432" width="205" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1439" width="274" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1446" width="236" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1453" width="89" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1451" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">186.9M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">250.1M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">215.6M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">80.9M</tspan></text>
-<text x="8" y="1483" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">add-sat-u</text>
-<rect x="240" y="1464" width="201" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1471" width="276" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1478" width="238" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1485" width="88" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1483" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">183.2M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">251.9M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">217.0M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">80.7M</tspan></text>
-<text x="8" y="1515" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extmul-low-i8x16-s</text>
-<rect x="240" y="1496" width="192" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1503" width="271" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1510" width="236" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1517" width="87" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1515" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">175.2M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">247.5M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">215.1M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">79.7M</tspan></text>
-<text x="8" y="1547" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">ge-u</text>
-<rect x="240" y="1528" width="228" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1535" width="254" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1542" width="217" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1549" width="87" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1547" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">207.8M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">232.1M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">198.3M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">79.1M</tspan></text>
-<text x="8" y="1579" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">min-s</text>
-<rect x="240" y="1560" width="214" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1567" width="254" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1574" width="221" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1581" width="87" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1579" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">195.1M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">231.5M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">201.4M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">79.5M</tspan></text>
-<text x="8" y="1611" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">le-u</text>
-<rect x="240" y="1592" width="210" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1599" width="257" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1606" width="218" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1613" width="88" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1611" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">191.8M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">234.2M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">199.1M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">80.4M</tspan></text>
-<text x="8" y="1643" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extmul-low-i8x16-u</text>
-<rect x="240" y="1624" width="201" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1631" width="243" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1638" width="236" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1645" width="88" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1643" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">183.4M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">221.4M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">215.1M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">80.4M</tspan></text>
-<text x="8" y="1675" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">sub-sat-s</text>
-<rect x="240" y="1656" width="200" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1663" width="243" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1670" width="238" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1677" width="86" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1675" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">182.6M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">221.2M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">216.7M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">78.6M</tspan></text>
-<text x="8" y="1707" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">narrow-i32x4-u</text>
-<rect x="240" y="1688" width="195" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1695" width="258" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1702" width="226" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1709" width="87" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1707" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">177.7M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">235.3M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">206.5M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">79.3M</tspan></text>
-<text x="8" y="1739" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">mul</text>
-<rect x="240" y="1720" width="208" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1727" width="239" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1734" width="225" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1741" width="86" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1739" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">189.7M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">218.4M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">205.7M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">78.8M</tspan></text>
-<text x="8" y="1771" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extmul-high-i8x16-s</text>
-<rect x="240" y="1752" width="180" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1759" width="253" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1766" width="224" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1773" width="96" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1771" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">164.4M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">230.4M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">204.3M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">87.3M</tspan></text>
-<text x="8" y="1803" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">narrow-i32x4-s</text>
-<rect x="240" y="1784" width="195" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1791" width="249" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1798" width="216" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1805" width="86" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1803" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">178.1M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">227.4M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">197.0M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">78.8M</tspan></text>
-<text x="8" y="1835" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extmul-high-i8x16-u</text>
-<rect x="240" y="1816" width="190" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1823" width="225" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1830" width="236" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1837" width="95" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1835" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">173.5M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">205.0M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">214.9M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">86.2M</tspan></text>
-<text x="8" y="1867" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">shl</text>
-<rect x="240" y="1848" width="193" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1855" width="265" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1862" width="198" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1869" width="69" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1867" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">176.2M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">241.3M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">180.5M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">63.3M</tspan></text>
-<text x="8" y="1899" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">shr-u</text>
-<rect x="240" y="1880" width="192" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1887" width="261" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1894" width="199" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1901" width="71" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1899" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">174.8M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">238.2M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">181.8M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">64.4M</tspan></text>
-<text x="8" y="1931" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">shr-s</text>
-<rect x="240" y="1912" width="183" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1919" width="251" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1926" width="198" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1933" width="70" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1931" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">167.1M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">229.4M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">181.1M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">64.0M</tspan></text>
-<text x="8" y="1963" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">replace-lane</text>
-<rect x="240" y="1944" width="174" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1951" width="236" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1958" width="206" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1965" width="71" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1963" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">158.5M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">215.3M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">187.9M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">65.2M</tspan></text>
-<text x="8" y="1995" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">q15mulr-sat-s</text>
-<rect x="240" y="1976" width="117" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1983" width="219" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1990" width="238" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="1997" width="73" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="1995" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">106.4M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">199.8M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">216.9M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">66.5M</tspan></text>
-<text x="8" y="2027" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">ctor</text>
-<rect x="240" y="2008" width="145" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="2015" width="176" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="2027" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">132.2M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">160.8M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">0.0M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">0.0M</tspan></text>
-<text x="8" y="2059" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">relaxed-q15mulr-s</text>
-<rect x="240" y="2040" width="111" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="2047" width="214" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="2054" width="232" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="2061" width="84" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="2059" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">100.9M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">194.8M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">211.3M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">77.0M</tspan></text>
-<text x="8" y="2091" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">relaxed-laneselect</text>
-<rect x="240" y="2072" width="135" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="2079" width="208" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="2086" width="193" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="2093" width="76" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="2091" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">123.3M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">189.8M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">176.0M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">69.4M</tspan></text>
-<text x="8" y="2123" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">relaxed-dot-i8x16-i7x16-s</text>
-<rect x="240" y="2104" width="93" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="2111" width="197" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="2118" width="233" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="2125" width="86" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="2123" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">84.4M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">180.1M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">212.5M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">78.7M</tspan></text>
-<text x="8" y="2155" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">relaxed-dot-i8x8-i7x8-s</text>
-<rect x="240" y="2136" width="93" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="2143" width="197" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="2155" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">84.4M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">180.1M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">0.0M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">0.0M</tspan></text>
-<text x="8" y="2187" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">shuffle</text>
-<rect x="240" y="2168" width="44" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="2175" width="49" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="2182" width="227" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="2189" width="84" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="2187" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">40.1M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">44.3M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">207.5M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">76.7M</tspan></text>
-<text x="8" y="2219" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">load-partial</text>
-<rect x="240" y="2200" width="66" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="2207" width="78" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="2214" width="53" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="2221" width="38" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="2219" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">60.1M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">71.4M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">48.7M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">34.9M</tspan></text>
-<text x="8" y="2251" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">store-partial</text>
-<rect x="240" y="2232" width="62" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="2239" width="77" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="2246" width="47" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<rect x="240" y="2253" width="34" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
-<text y="2251" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="808" fill="rgb(99,102,241)">■</tspan><tspan x="822" fill="#374151">56.8M</tspan><tspan x="892" fill="rgb(34,197,94)">■</tspan><tspan x="906" fill="#374151">70.0M</tspan><tspan x="976" fill="rgb(234,220,90)">■</tspan><tspan x="990" fill="#374151">42.6M</tspan><tspan x="1060" fill="rgb(239,68,68)">■</tspan><tspan x="1074" fill="#374151">31.2M</tspan></text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="2266" viewBox="0 0 1320 2266">
+<rect x="0" y="0" width="1320" height="2266" fill="transparent"/>
+<text x="660" y="44" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="600" fill="#111827">i16x4 SWAR vs i16x8 SIMD</text>
+<text x="660" y="64" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="500" fill="#666666">Mon Apr 20 2026 - v0.0.0 - 67508e6 - main</text>
+<text y="89" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="#374151">v8 swar</tspan><tspan x="912" fill="#374151">wavm swar</tspan><tspan x="996" fill="#374151">v8 simd</tspan><tspan x="1080" fill="#374151">wavm simd</tspan></text>
+<text x="172" y="107" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">splat</text>
+<rect x="220" y="88" width="324" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="95" width="538" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="102" width="356" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="109" width="405" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="107" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">246.0M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">408.6M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">270.3M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">308.0M</tspan></text>
+<text x="172" y="147" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">load</text>
+<rect x="220" y="128" width="211" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="135" width="560" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="142" width="300" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="149" width="311" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="147" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">160.6M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">425.5M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">228.2M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">236.1M</tspan></text>
+<text x="172" y="187" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">store</text>
+<rect x="220" y="168" width="280" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="175" width="343" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="182" width="221" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="189" width="187" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="187" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">212.5M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">260.6M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">167.6M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">141.9M</tspan></text>
+<text x="172" y="227" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">load-partial</text>
+<rect x="220" y="208" width="96" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="215" width="134" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="222" width="64" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="229" width="68" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="227" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">72.8M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">101.6M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">48.7M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">51.7M</tspan></text>
+<text x="172" y="267" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">store-partial</text>
+<rect x="220" y="248" width="88" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="255" width="110" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="262" width="61" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="269" width="57" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="267" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">66.8M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">83.5M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">46.7M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">43.1M</tspan></text>
+<text x="172" y="307" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extract-lane-s</text>
+<rect x="220" y="288" width="288" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="295" width="386" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="302" width="250" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="309" width="406" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="307" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">219.1M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">293.5M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">189.8M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">308.2M</tspan></text>
+<text x="172" y="347" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extract-lane-u</text>
+<rect x="220" y="328" width="210" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="335" width="386" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="342" width="224" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="349" width="404" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="347" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">159.4M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">293.3M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">169.8M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">307.2M</tspan></text>
+<text x="172" y="387" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">replace-lane</text>
+<rect x="220" y="368" width="164" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="375" width="273" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="382" width="268" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="389" width="202" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="387" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">124.4M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">207.3M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">203.9M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">153.3M</tspan></text>
+<text x="172" y="427" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">add</text>
+<rect x="220" y="408" width="211" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="415" width="344" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="422" width="198" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="429" width="207" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="427" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">160.6M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">261.6M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">150.6M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">157.2M</tspan></text>
+<text x="172" y="467" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">sub</text>
+<rect x="220" y="448" width="209" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="455" width="344" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="462" width="239" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="469" width="207" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="467" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">159.0M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">261.3M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">181.7M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">156.9M</tspan></text>
+<text x="172" y="507" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">mul</text>
+<rect x="220" y="488" width="179" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="495" width="296" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="502" width="276" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="509" width="206" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="507" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">136.3M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">224.9M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">209.9M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">156.8M</tspan></text>
+<text x="172" y="547" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">min-s</text>
+<rect x="220" y="528" width="194" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="535" width="311" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="542" width="281" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="549" width="205" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="547" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">147.6M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">236.5M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">213.4M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">156.1M</tspan></text>
+<text x="172" y="587" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">min-u</text>
+<rect x="220" y="568" width="194" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="575" width="311" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="582" width="268" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="589" width="208" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="587" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">147.3M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">236.3M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">203.4M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">158.1M</tspan></text>
+<text x="172" y="627" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">max-s</text>
+<rect x="220" y="608" width="197" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="615" width="161" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="622" width="253" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="629" width="207" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="627" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">149.7M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">122.3M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">192.2M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">157.4M</tspan></text>
+<text x="172" y="667" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">max-u</text>
+<rect x="220" y="648" width="195" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="655" width="311" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="662" width="281" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="669" width="207" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="667" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">148.1M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">236.3M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">213.1M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">157.3M</tspan></text>
+<text x="172" y="707" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">avgr-u</text>
+<rect x="220" y="688" width="220" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="695" width="355" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="702" width="273" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="709" width="208" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="707" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">167.5M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">269.4M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">207.2M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">157.8M</tspan></text>
+<text x="172" y="747" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">abs</text>
+<rect x="220" y="728" width="271" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="735" width="428" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="742" width="380" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="749" width="388" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="747" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">205.7M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">325.1M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">288.8M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">294.8M</tspan></text>
+<text x="172" y="787" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">neg</text>
+<rect x="220" y="768" width="318" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="775" width="510" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="782" width="243" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="789" width="405" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="787" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">241.8M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">387.6M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">184.7M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">307.9M</tspan></text>
+<text x="172" y="827" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">add-sat-s</text>
+<rect x="220" y="808" width="185" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="815" width="289" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="822" width="274" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="829" width="205" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="827" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">140.5M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">219.6M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">208.5M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">155.6M</tspan></text>
+<text x="172" y="867" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">add-sat-u</text>
+<rect x="220" y="848" width="193" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="855" width="296" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="862" width="264" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="869" width="209" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="867" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">146.3M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">225.1M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">200.4M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">158.7M</tspan></text>
+<text x="172" y="907" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">sub-sat-s</text>
+<rect x="220" y="888" width="194" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="895" width="283" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="902" width="275" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="909" width="207" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="907" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">147.3M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">214.8M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">209.1M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">157.1M</tspan></text>
+<text x="172" y="947" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">sub-sat-u</text>
+<rect x="220" y="928" width="199" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="935" width="311" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="942" width="257" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="949" width="206" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="947" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">151.4M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">236.2M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">195.5M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">156.2M</tspan></text>
+<text x="172" y="987" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">shl</text>
+<rect x="220" y="968" width="194" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="975" width="324" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="982" width="265" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="989" width="200" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="987" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">147.1M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">245.8M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">201.6M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">152.0M</tspan></text>
+<text x="172" y="1027" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">shr-s</text>
+<rect x="220" y="1008" width="178" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1015" width="299" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1022" width="260" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1029" width="201" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="1027" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">134.9M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">226.9M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">197.8M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">152.8M</tspan></text>
+<text x="172" y="1067" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">shr-u</text>
+<rect x="220" y="1048" width="199" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1055" width="313" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1062" width="267" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1069" width="202" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="1067" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">151.1M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">238.1M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">202.6M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">153.4M</tspan></text>
+<text x="172" y="1107" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">all-true</text>
+<rect x="220" y="1088" width="345" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1095" width="495" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1102" width="368" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1109" width="279" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="1107" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">262.2M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">376.2M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">279.4M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">212.2M</tspan></text>
+<text x="172" y="1147" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">bitmask</text>
+<rect x="220" y="1128" width="262" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1135" width="457" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1142" width="246" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1149" width="412" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="1147" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">199.3M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">347.6M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">187.1M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">313.1M</tspan></text>
+<text x="172" y="1187" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">eq</text>
+<rect x="220" y="1168" width="201" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1175" width="313" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1182" width="264" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1189" width="206" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="1187" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">152.5M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">237.7M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">200.8M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">156.9M</tspan></text>
+<text x="172" y="1227" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">ne</text>
+<rect x="220" y="1208" width="180" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1215" width="303" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1222" width="208" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1229" width="207" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="1227" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">136.5M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">230.5M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">158.2M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">157.0M</tspan></text>
+<text x="172" y="1267" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">lt-s</text>
+<rect x="220" y="1248" width="188" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1255" width="322" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1262" width="280" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1269" width="207" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="1267" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">142.9M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">244.5M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">212.4M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">157.4M</tspan></text>
+<text x="172" y="1307" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">lt-u</text>
+<rect x="220" y="1288" width="200" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1295" width="320" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1302" width="218" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1309" width="206" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="1307" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">151.8M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">243.5M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">165.8M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">156.5M</tspan></text>
+<text x="172" y="1347" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">le-s</text>
+<rect x="220" y="1328" width="190" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1335" width="311" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1342" width="277" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1349" width="207" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="1347" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">144.4M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">236.4M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">210.1M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">157.3M</tspan></text>
+<text x="172" y="1387" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">le-u</text>
+<rect x="220" y="1368" width="199" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1375" width="311" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1382" width="269" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1389" width="207" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="1387" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">151.4M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">236.3M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">204.2M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">157.0M</tspan></text>
+<text x="172" y="1427" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">gt-s</text>
+<rect x="220" y="1408" width="198" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1415" width="319" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1422" width="178" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1429" width="208" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="1427" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">150.5M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">242.4M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">135.4M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">157.9M</tspan></text>
+<text x="172" y="1467" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">gt-u</text>
+<rect x="220" y="1448" width="198" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1455" width="319" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1462" width="160" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1469" width="206" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="1467" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">150.6M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">242.4M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">121.8M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">156.6M</tspan></text>
+<text x="172" y="1507" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">ge-s</text>
+<rect x="220" y="1488" width="187" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1495" width="311" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1502" width="224" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1509" width="207" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="1507" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">142.1M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">236.2M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">170.2M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">157.5M</tspan></text>
+<text x="172" y="1547" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">ge-u</text>
+<rect x="220" y="1528" width="199" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1535" width="316" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1542" width="271" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1549" width="205" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="1547" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">150.9M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">240.3M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">206.2M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">155.6M</tspan></text>
+<text x="172" y="1587" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">narrow-i32x4-s</text>
+<rect x="220" y="1568" width="179" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1575" width="264" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1582" width="260" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1589" width="207" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="1587" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">136.3M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">200.7M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">197.6M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">157.2M</tspan></text>
+<text x="172" y="1627" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">narrow-i32x4-u</text>
+<rect x="220" y="1608" width="182" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1615" width="285" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1622" width="273" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1629" width="206" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="1627" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">137.9M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">216.8M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">207.5M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">156.4M</tspan></text>
+<text x="172" y="1667" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extend-low-i8x16-s</text>
+<rect x="220" y="1648" width="230" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1655" width="443" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1662" width="381" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1669" width="399" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="1667" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">174.7M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">336.2M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">289.3M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">303.4M</tspan></text>
+<text x="172" y="1707" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extend-low-i8x16-u</text>
+<rect x="220" y="1688" width="264" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1695" width="476" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1702" width="384" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1709" width="399" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="1707" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">200.7M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">361.6M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">291.7M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">302.8M</tspan></text>
+<text x="172" y="1747" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extend-high-i8x16-s</text>
+<rect x="220" y="1728" width="230" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1735" width="412" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1742" width="206" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1749" width="397" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="1747" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">174.9M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">312.7M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">156.4M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">301.2M</tspan></text>
+<text x="172" y="1787" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extend-high-i8x16-u</text>
+<rect x="220" y="1768" width="262" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1775" width="444" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1782" width="200" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1789" width="406" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="1787" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">199.4M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">337.1M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">152.2M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">308.8M</tspan></text>
+<text x="172" y="1827" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extadd-pairwise-i8x16-s</text>
+<rect x="220" y="1808" width="206" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1815" width="371" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1822" width="233" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1829" width="399" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="1827" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">156.4M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">281.5M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">177.2M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">303.5M</tspan></text>
+<text x="172" y="1867" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extadd-pairwise-i8x16-u</text>
+<rect x="220" y="1848" width="197" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1855" width="401" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1862" width="222" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1869" width="399" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="1867" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">149.7M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">305.0M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">168.5M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">303.0M</tspan></text>
+<text x="172" y="1907" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">q15mulr-sat-s</text>
+<rect x="220" y="1888" width="127" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1895" width="214" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1902" width="276" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1909" width="185" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="1907" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">96.5M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">162.9M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">210.0M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">140.6M</tspan></text>
+<text x="172" y="1947" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extmul-low-i8x16-s</text>
+<rect x="220" y="1928" width="174" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1935" width="266" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1942" width="200" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1949" width="206" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="1947" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">131.9M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">202.1M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">151.6M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">156.2M</tspan></text>
+<text x="172" y="1987" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extmul-low-i8x16-u</text>
+<rect x="220" y="1968" width="191" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1975" width="268" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1982" width="173" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="1989" width="205" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="1987" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">144.8M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">203.9M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">131.6M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">155.8M</tspan></text>
+<text x="172" y="2027" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extmul-high-i8x16-s</text>
+<rect x="220" y="2008" width="163" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="2015" width="252" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="2022" width="272" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="2029" width="204" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="2027" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">123.8M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">191.5M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">207.0M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">155.0M</tspan></text>
+<text x="172" y="2067" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">extmul-high-i8x16-u</text>
+<rect x="220" y="2048" width="175" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="2055" width="271" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="2062" width="189" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="2069" width="206" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="2067" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">132.6M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">205.8M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">143.4M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">156.7M</tspan></text>
+<text x="172" y="2107" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">shuffle</text>
+<rect x="220" y="2088" width="65" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="2095" width="145" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="2102" width="271" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="2109" width="207" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="2107" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">49.6M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">109.9M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">205.6M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">157.6M</tspan></text>
+<text x="172" y="2147" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">relaxed-laneselect</text>
+<rect x="220" y="2128" width="152" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="2135" width="257" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="2142" width="206" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="2149" width="36" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="2147" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">115.2M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">195.6M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">156.8M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">27.2M</tspan></text>
+<text x="172" y="2187" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">relaxed-q15mulr-s</text>
+<rect x="220" y="2168" width="127" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="2175" width="214" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="2182" width="279" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="2189" width="185" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="2187" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">96.8M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">162.6M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">212.1M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">140.5M</tspan></text>
+<text x="172" y="2227" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">relaxed-dot-i8x16-i7x16-s</text>
+<rect x="220" y="2208" width="123" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="2215" width="177" height="6" fill="rgb(34,197,94)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="2222" width="280" height="6" fill="rgb(234,220,90)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<rect x="220" y="2229" width="206" height="6" fill="rgb(239,68,68)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
+<text y="2227" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600"><tspan x="828" fill="rgb(99,102,241)">■</tspan><tspan x="842" fill="#374151">93.1M</tspan><tspan x="912" fill="rgb(34,197,94)">■</tspan><tspan x="926" fill="#374151">134.3M</tspan><tspan x="996" fill="rgb(234,220,90)">■</tspan><tspan x="1010" fill="#374151">212.7M</tspan><tspan x="1080" fill="rgb(239,68,68)">■</tspan><tspan x="1094" fill="#374151">156.1M</tspan></text>
 </svg>
