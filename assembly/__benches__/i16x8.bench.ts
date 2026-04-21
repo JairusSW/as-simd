@@ -1,6 +1,6 @@
-import { i16x8_swar } from "../v128/i16x8";
+import { i16x8_swar } from "../v128/i16x8_swar";
 import { i16x8 as i16x8w, i64x2 as i64x2w, v128 as v128w } from "../v128";
-import { i32x4_swar } from "../v128/i32x4";
+import { i32x4_swar } from "../v128/i32x4_swar";
 import { bench, blackbox, dumpToFile } from "./lib/bench";
 
 const OPS: u64 = 25_000_000;

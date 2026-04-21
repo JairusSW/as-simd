@@ -1,4 +1,4 @@
-import { i8x16_swar } from "../v128/i8x16";
+import { i8x16_swar } from "../v128/i8x16_swar";
 import { i8x16 as i8x16w, i64x2 as i64x2w, v128 as v128w } from "../v128";
 import { bench, blackbox, dumpToFile } from "./lib/bench";
 

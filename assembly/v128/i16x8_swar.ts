@@ -1,20 +1,35 @@
-import { v64 } from "../v64";
+import { v64 } from "../v64/v64";
 import { i16x4 } from "../v64/i16x4";
+import { i64x2_swar } from "./i64x2_swar";
+import { swar_arena } from "./swar_arena";
+import { v128_swar } from "./v128_swar";
 
 export type i16x8_swar = v128;
 
 export namespace i16x8_swar {
   // @ts-expect-error: decorator
-  @inline function lo(x: v128): v64 { return i64x2.extract_lane(x, 0) as v64; }
+  @inline function lo(x: v128): v64 {
+    if (ASC_FEATURE_SIMD) return i64x2.extract_lane(x, 0) as v64;
+    return i64x2_swar.extract_lane(x, 0) as v64;
+  }
   // @ts-expect-error: decorator
-  @inline function hi(x: v128): v64 { return i64x2.extract_lane(x, 1) as v64; }
+  @inline function hi(x: v128): v64 {
+    if (ASC_FEATURE_SIMD) return i64x2.extract_lane(x, 1) as v64;
+    return i64x2_swar.extract_lane(x, 1) as v64;
+  }
   // @ts-expect-error: decorator
-  @inline function pack(l: v64, h: v64): v128 { return i64x2(l as i64, h as i64); }
+  @inline function pack(l: v64, h: v64): v128 {
+    if (ASC_FEATURE_SIMD) return i64x2(l as i64, h as i64);
+    const tmp = swar_arena.alloc16();
+    store<i64>(tmp, l as i64);
+    store<i64>(tmp + 8, h as i64);
+    return load<v128>(tmp);
+  }
 
   // @ts-expect-error: decorator
   @inline export function splat(x: i16): v128 { if (ASC_FEATURE_SIMD) return i16x8.splat(x); return pack(i16x4.splat(x), i16x4.splat(x)); }
   // @ts-expect-error: decorator
-  @inline export function extract_lane_s(x: v128, idx: u8): i16 {
+  @inline export function extract_lane_s(x: v128_swar, idx: u8): i16 {
     if (ASC_FEATURE_SIMD) {
       switch (idx & 7) {
         case 0: return i16x8.extract_lane_s(x, 0);
@@ -76,7 +91,7 @@ export namespace i16x8_swar {
     const nn = select<i32>(0, len, len < 0);
     const n = select<i32>(8, nn, nn > 8);
     if (n == 0) return;
-    if (ASC_FEATURE_SIMD && n == 8) { store<v128>(ptr + immOffset, value); return; }
+    if (ASC_FEATURE_SIMD && n == 8) { store<v128>(ptr, value, immOffset, immAlign); return; }
     if (n <= 4) {
       i16x4.storePartial(ptr, lo(value), n, immOffset, immAlign);
       return;

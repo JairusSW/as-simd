@@ -1,5 +1,5 @@
 import { describe, expect, test } from "as-test";
-import { v64 } from "../v64";
+import { v64 } from "../v64/v64";
 import { i8x8 } from "../v64/i8x8";
 import { i16x4 } from "../v64/i16x4";
 import { i32x2 } from "../v64/i32x2";

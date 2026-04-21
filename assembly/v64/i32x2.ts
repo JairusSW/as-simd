@@ -1,4 +1,4 @@
-import { v64 } from ".";
+import { v64 } from "./v64";
 
 /** Initializes a 64-bit SWAR vector from two 32-bit integer values. Arguments do not need to be compile-time constants. */
 export function i32x2(a: i32, b: i32): v64 {

@@ -1,27 +1,35 @@
-import { v64 } from "../v64";
-import { i8x16_swar } from "./i8x16";
-import { i16x8_swar } from "./i16x8";
-import { i32x4_swar } from "./i32x4";
-import { i64x2_swar } from "./i64x2";
+import { v64 } from "../v64/v64";
+import { i8x16_swar } from "./i8x16_swar";
+import { i16x8_swar } from "./i16x8_swar";
+import { i32x4_swar } from "./i32x4_swar";
+import { i64x2_swar } from "./i64x2_swar";
+import { swar_arena } from "./swar_arena";
 
 export type v128_swar = v128;
 
-// @ts-expect-error: decorator
-@inline function mem_load<T>(ptr: usize, immAlign: usize = 1): T { return load<T>(ptr); }
-// @ts-expect-error: decorator
-@inline function mem_store<T>(ptr: usize, value: T, immAlign: usize = 1): void { store<T>(ptr, value); }
-
 export namespace v128_swar {
   // @ts-expect-error: decorator
-  @inline function lo(x: v128): v64 { return i64x2.extract_lane(x, 0) as v64; }
+  @inline function lo(x: v128): v64 {
+    if (ASC_FEATURE_SIMD) return i64x2.extract_lane(x, 0) as v64;
+    return i64x2_swar.extract_lane(x, 0) as v64;
+  }
   // @ts-expect-error: decorator
-  @inline function hi(x: v128): v64 { return i64x2.extract_lane(x, 1) as v64; }
+  @inline function hi(x: v128): v64 {
+    if (ASC_FEATURE_SIMD) return i64x2.extract_lane(x, 1) as v64;
+    return i64x2_swar.extract_lane(x, 1) as v64;
+  }
   // @ts-expect-error: decorator
-  @inline function pack(l: v64, h: v64): v128 { return i64x2(l as i64, h as i64); }
+  @inline function pack(l: v64, h: v64): v128 {
+    if (ASC_FEATURE_SIMD) return i64x2(l as i64, h as i64);
+    const tmp = swar_arena.alloc16();
+    store<i64>(tmp, l as i64);
+    store<i64>(tmp + 8, h as i64);
+    return load<v128>(tmp);
+  }
   // @ts-expect-error: decorator
   @inline function laneCount<T>(): i32 { return 16 / sizeof<T>(); }
   // @ts-expect-error: decorator
-  @inline function f64pack(a: f64, b: f64): v128 { return i64x2(reinterpret<i64>(a), reinterpret<i64>(b)); }
+  @inline function f64pack(a: f64, b: f64): v128 { return pack(reinterpret<i64>(a) as v64, reinterpret<i64>(b) as v64); }
 
   // @ts-expect-error: decorator
   @inline export function splat<T>(x: T): v128 { return pack(v64.splat<T>(x), v64.splat<T>(x)); }
@@ -57,13 +65,13 @@ export namespace v128_swar {
   @inline export function swizzle(a: v128, s: v128): v128 { return i8x16_swar.swizzle(a, s); }
 
   // @ts-expect-error: decorator
-  @inline export function load(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v128 { return mem_load<v128>(ptr + immOffset, immAlign); }
+  @inline export function load(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v128 { return load<v128>(ptr, immOffset, immAlign); }
   // @ts-expect-error: decorator
   @inline export function loadPartial(ptr: usize, len: i32, immOffset: usize = 0, immAlign: usize = 1, fill: i8 = 0): v128 {
     return i8x16_swar.loadPartial(ptr, len, immOffset, immAlign, fill);
   }
   // @ts-expect-error: decorator
-  @inline export function store(ptr: usize, value: v128, immOffset: usize = 0, immAlign: usize = 1): void { mem_store<v128>(ptr + immOffset, value, immAlign); }
+  @inline export function store(ptr: usize, value: v128, immOffset: usize = 0, immAlign: usize = 1): void { store<v128>(ptr, value, immOffset, immAlign); }
   // @ts-expect-error: decorator
   @inline export function storePartial(ptr: usize, value: v128, len: i32, immOffset: usize = 0, immAlign: usize = 1): void {
     i8x16_swar.storePartial(ptr, value, len, immOffset, immAlign);
@@ -75,61 +83,61 @@ export namespace v128_swar {
     if (sizeof<TFrom>() == 1) return isSigned<TFrom>() ? load8x8_s(base) : load8x8_u(base);
     if (sizeof<TFrom>() == 2) return isSigned<TFrom>() ? load16x4_s(base) : load16x4_u(base);
     if (sizeof<TFrom>() == 4) return isSigned<TFrom>() ? load32x2_s(base) : load32x2_u(base);
-    return mem_load<v128>(base, immAlign);
+    return load<v128>(base, 0, immAlign);
   }
   // @ts-expect-error: decorator
   @inline export function load_zero<TFrom>(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v128 {
     const base = ptr + immOffset;
-    if (sizeof<TFrom>() == 1) return i64x2(mem_load<u8>(base, immAlign) as i64, 0);
-    if (sizeof<TFrom>() == 2) return i64x2(mem_load<u16>(base, immAlign) as i64, 0);
-    if (sizeof<TFrom>() == 4) return i64x2(mem_load<u32>(base, immAlign) as i64, 0);
-    if (sizeof<TFrom>() == 8) return i64x2(mem_load<i64>(base, immAlign), 0);
-    return mem_load<v128>(base, immAlign);
+    if (sizeof<TFrom>() == 1) return pack(load<u8>(base, 0, immAlign) as v64, 0 as v64);
+    if (sizeof<TFrom>() == 2) return pack(load<u16>(base, 0, immAlign) as v64, 0 as v64);
+    if (sizeof<TFrom>() == 4) return pack(load<u32>(base, 0, immAlign) as v64, 0 as v64);
+    if (sizeof<TFrom>() == 8) return pack(load<i64>(base, 0, immAlign) as v64, 0 as v64);
+    return load<v128>(base, 0, immAlign);
   }
   // @ts-expect-error: decorator
   @inline export function load_lane<T>(ptr: usize, vec: v128, idx: u8, immOffset: usize = 0, immAlign: usize = 1): v128 {
-    return replace_lane<T>(vec, idx, mem_load<T>(ptr + immOffset, immAlign));
+    return replace_lane<T>(vec, idx, load<T>(ptr, immOffset, immAlign));
   }
   // @ts-expect-error: decorator
   @inline export function store_lane<T>(ptr: usize, vec: v128, idx: u8, immOffset: usize = 0, immAlign: usize = 1): void {
-    mem_store<T>(ptr + immOffset, extract_lane<T>(vec, idx), immAlign);
+    store<T>(ptr, extract_lane<T>(vec, idx), immOffset, immAlign);
   }
 
   // @ts-expect-error: decorator
   @inline export function load8x8_s(ptr: usize, immOffset: u32 = 0, immAlign: u32 = 1): v128 {
-    return i16x8_swar.extend_low_i8x16_s(i64x2(mem_load<i64>(ptr + immOffset, immAlign), 0));
+    return i16x8_swar.extend_low_i8x16_s(pack(load<i64>(ptr, immOffset, immAlign) as v64, 0 as v64));
   }
   // @ts-expect-error: decorator
   @inline export function load8x8_u(ptr: usize, immOffset: u32 = 0, immAlign: u32 = 1): v128 {
-    return i16x8_swar.extend_low_i8x16_u(i64x2(mem_load<i64>(ptr + immOffset, immAlign), 0));
+    return i16x8_swar.extend_low_i8x16_u(pack(load<i64>(ptr, immOffset, immAlign) as v64, 0 as v64));
   }
   // @ts-expect-error: decorator
   @inline export function load16x4_s(ptr: usize, immOffset: u32 = 0, immAlign: u32 = 1): v128 {
-    return i32x4_swar.extend_low_i16x8_s(i64x2(mem_load<i64>(ptr + immOffset, immAlign), 0));
+    return i32x4_swar.extend_low_i16x8_s(pack(load<i64>(ptr, immOffset, immAlign) as v64, 0 as v64));
   }
   // @ts-expect-error: decorator
   @inline export function load16x4_u(ptr: usize, immOffset: u32 = 0, immAlign: u32 = 1): v128 {
-    return i32x4_swar.extend_low_i16x8_u(i64x2(mem_load<i64>(ptr + immOffset, immAlign), 0));
+    return i32x4_swar.extend_low_i16x8_u(pack(load<i64>(ptr, immOffset, immAlign) as v64, 0 as v64));
   }
   // @ts-expect-error: decorator
   @inline export function load32x2_s(ptr: usize, immOffset: u32 = 0, immAlign: u32 = 1): v128 {
-    return i64x2_swar.extend_low_i32x4_s(i64x2(mem_load<i64>(ptr + immOffset, immAlign), 0));
+    return i64x2_swar.extend_low_i32x4_s(pack(load<i64>(ptr, immOffset, immAlign) as v64, 0 as v64));
   }
   // @ts-expect-error: decorator
   @inline export function load32x2_u(ptr: usize, immOffset: u32 = 0, immAlign: u32 = 1): v128 {
-    return i64x2_swar.extend_low_i32x4_u(i64x2(mem_load<i64>(ptr + immOffset, immAlign), 0));
+    return i64x2_swar.extend_low_i32x4_u(pack(load<i64>(ptr, immOffset, immAlign) as v64, 0 as v64));
   }
 
   // @ts-expect-error: decorator
-  @inline export function load_splat<T>(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v128 { return splat<T>(mem_load<T>(ptr + immOffset, immAlign)); }
+  @inline export function load_splat<T>(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v128 { return splat<T>(load<T>(ptr, immOffset, immAlign)); }
   // @ts-expect-error: decorator
-  @inline export function load8_splat(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v128 { return splat<i8>(mem_load<i8>(ptr + immOffset, immAlign)); }
+  @inline export function load8_splat(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v128 { return splat<i8>(load<i8>(ptr, immOffset, immAlign)); }
   // @ts-expect-error: decorator
-  @inline export function load16_splat(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v128 { return splat<i16>(mem_load<i16>(ptr + immOffset, immAlign)); }
+  @inline export function load16_splat(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v128 { return splat<i16>(load<i16>(ptr, immOffset, immAlign)); }
   // @ts-expect-error: decorator
-  @inline export function load32_splat(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v128 { return splat<i32>(mem_load<i32>(ptr + immOffset, immAlign)); }
+  @inline export function load32_splat(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v128 { return splat<i32>(load<i32>(ptr, immOffset, immAlign)); }
   // @ts-expect-error: decorator
-  @inline export function load64_splat(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v128 { return splat<i64>(mem_load<i64>(ptr + immOffset, immAlign)); }
+  @inline export function load64_splat(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v128 { return splat<i64>(load<i64>(ptr, immOffset, immAlign)); }
   // @ts-expect-error: decorator
   @inline export function load32_zero(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v128 { return load_zero<u32>(ptr, immOffset, immAlign); }
   // @ts-expect-error: decorator
@@ -323,12 +331,18 @@ export namespace v128_swar {
   @inline export function trunc_sat<TTo>(a: v128): v128 { return pack(v64.trunc_sat<TTo>(lo(a)), v64.trunc_sat<TTo>(hi(a))); }
   // @ts-expect-error: decorator
   @inline export function trunc_sat_zero<TTo>(a: v128): v128 {
-    return i32x4(
-      isSigned<TTo>() ? i32(extract_lane<f64>(a, 0)) : u32(select<f64>(0, extract_lane<f64>(a, 0), extract_lane<f64>(a, 0) < 0)),
-      isSigned<TTo>() ? i32(extract_lane<f64>(a, 1)) : u32(select<f64>(0, extract_lane<f64>(a, 1), extract_lane<f64>(a, 1) < 0)),
+    let out = i32x4_swar.splat(0);
+    out = i32x4_swar.replace_lane(
+      out,
       0,
-      0
+      isSigned<TTo>() ? i32(extract_lane<f64>(a, 0)) : u32(select<f64>(0, extract_lane<f64>(a, 0), extract_lane<f64>(a, 0) < 0))
     );
+    out = i32x4_swar.replace_lane(
+      out,
+      1,
+      isSigned<TTo>() ? i32(extract_lane<f64>(a, 1)) : u32(select<f64>(0, extract_lane<f64>(a, 1), extract_lane<f64>(a, 1) < 0))
+    );
+    return out;
   }
   // @ts-expect-error: decorator
   @inline export function narrow<TFrom>(a: v128, b: v128): v128 {
@@ -354,7 +368,10 @@ export namespace v128_swar {
   }
   // @ts-expect-error: decorator
   @inline export function demote_zero<T extends f64 = f64>(a: v128): v128 {
-    return i32x4(reinterpret<i32>(extract_lane<f64>(a, 0) as f32), reinterpret<i32>(extract_lane<f64>(a, 1) as f32), 0, 0);
+    let out = i32x4_swar.splat(0);
+    out = i32x4_swar.replace_lane(out, 0, reinterpret<i32>(extract_lane<f64>(a, 0) as f32));
+    out = i32x4_swar.replace_lane(out, 1, reinterpret<i32>(extract_lane<f64>(a, 1) as f32));
+    return out;
   }
   // @ts-expect-error: decorator
   @inline export function promote_low<T extends f32 = f32>(a: v128): v128 {

@@ -1,12 +1,31 @@
+import { v128_swar } from "./v128_swar";
+import { swar_arena } from "./swar_arena";
+
 export type i64x2_swar = v128;
 
 export namespace i64x2_swar {
   // @ts-expect-error: decorator
-  @inline function l(x: v128): i64 { return i64x2.extract_lane(x, 0); }
+  @inline function l(x: v128): i64 {
+    if (ASC_FEATURE_SIMD) return i64x2.extract_lane(x, 0);
+    const lane_tmp = swar_arena.alloc16();
+    store<v128>(lane_tmp, x);
+    return load<i64>(lane_tmp);
+  }
   // @ts-expect-error: decorator
-  @inline function h(x: v128): i64 { return i64x2.extract_lane(x, 1); }
+  @inline function h(x: v128): i64 {
+    if (ASC_FEATURE_SIMD) return i64x2.extract_lane(x, 1);
+    const lane_tmp = swar_arena.alloc16();
+    store<v128>(lane_tmp, x);
+    return load<i64>(lane_tmp + sizeof<i64>());
+  }
   // @ts-expect-error: decorator
-  @inline function p(a: i64, b: i64): v128 { return i64x2(a, b); }
+  @inline function p(a: i64, b: i64): v128 {
+    if (ASC_FEATURE_SIMD) return i64x2(a, b);
+    const lane_tmp = swar_arena.alloc16();
+    store<i64>(lane_tmp, a);
+    store<i64>(lane_tmp + sizeof<i64>(), b);
+    return load<v128>(lane_tmp);
+  }
   // @ts-expect-error: decorator
   @inline function m(pred: bool): i64 { return pred ? -1 : 0; }
 
@@ -21,7 +40,7 @@ export namespace i64x2_swar {
     return (idx & 1) == 0 ? l(x) : h(x);
   }
   // @ts-expect-error: decorator
-  @inline export function replace_lane(x: v128, idx: u8, value: i64): v128 {
+  @inline export function replace_lane(x: v128, idx: u8, value: i64): v128_swar {
     if (ASC_FEATURE_SIMD) return (idx & 1) == 0 ? i64x2.replace_lane(x, 0, value) : i64x2.replace_lane(x, 1, value);
     return (idx & 1) == 0 ? p(value, h(x)) : p(l(x), value);
   }

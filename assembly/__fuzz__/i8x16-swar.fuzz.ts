@@ -1,5 +1,5 @@
 import { expect, fuzz, FuzzSeed } from "as-test";
-import { i8x16_swar } from "../v128/i8x16";
+import { i8x16_swar } from "../v128/i8x16_swar";
 
 let state: u64 = 0;
 let checkId: i32 = 0;

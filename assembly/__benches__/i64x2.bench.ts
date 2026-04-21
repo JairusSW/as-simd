@@ -1,4 +1,4 @@
-import { i64x2_swar } from "../v128/i64x2";
+import { i64x2_swar } from "../v128/i64x2_swar";
 import { i64x2 as i64x2w, v128 as v128w } from "../v128";
 import { bench, blackbox, dumpToFile } from "./lib/bench";
 

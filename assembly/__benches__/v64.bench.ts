@@ -1,4 +1,4 @@
-import { v64 } from "../v64";
+import { v64 } from "../v64/v64";
 import { bench, blackbox, dumpToFile } from "./lib/bench";
 
 const OPS: u64 = 25_000_000;

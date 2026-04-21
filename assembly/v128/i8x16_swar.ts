@@ -1,16 +1,30 @@
-import { v64 } from "../v64";
+import { v64 } from "../v64/v64";
 import { i8x8 } from "../v64/i8x8";
+import { i64x2_swar } from "./i64x2_swar";
+import { swar_arena } from "./swar_arena";
+import { v128_swar } from "./v128_swar";
 
-export type i8x16_swar = v128;
+export type i8x16_swar = v128_swar;
 
 export namespace i8x16_swar {
-  const simd_partial_tmp = memory.data(16);
   // @ts-expect-error: decorator
-  @inline function lo(x: v128): v64 { return i64x2.extract_lane(x, 0) as v64; }
+  @inline function lo(x: v128): v64 {
+    if (ASC_FEATURE_SIMD) return i64x2.extract_lane(x, 0) as v64;
+    return i64x2_swar.extract_lane(x, 0) as v64;
+  }
   // @ts-expect-error: decorator
-  @inline function hi(x: v128): v64 { return i64x2.extract_lane(x, 1) as v64; }
+  @inline function hi(x: v128): v64 {
+    if (ASC_FEATURE_SIMD) return i64x2.extract_lane(x, 1) as v64;
+    return i64x2_swar.extract_lane(x, 1) as v64;
+  }
   // @ts-expect-error: decorator
-  @inline function pack(l: v64, h: v64): v128 { return i64x2(l as i64, h as i64); }
+  @inline function pack(l: v64, h: v64): v128 {
+    if (ASC_FEATURE_SIMD) return i64x2(l as i64, h as i64);
+    const tmp = swar_arena.alloc16();
+    store<i64>(tmp, l as i64);
+    store<i64>(tmp + 8, h as i64);
+    return load<v128>(tmp);
+  }
 
   // @ts-expect-error: decorator
   @inline export function splat(x: i8): v128 {
@@ -95,10 +109,10 @@ export namespace i8x16_swar {
   @inline export function loadPartial(ptr: usize, len: i32, immOffset: usize = 0, immAlign: usize = 1, fill: i8 = 0): v128 {
     const base = ptr + immOffset;
     if (len <= 0) return splat(fill);
-    if (len >= 16) return load<v128>(base);
+    if (len >= 16) return load<v128>(ptr, immOffset, immAlign);
 
     if (ASC_FEATURE_SIMD) {
-      const tmp = simd_partial_tmp;
+      const tmp = swar_arena.alloc16();
       store<v128>(tmp, i8x16.splat(fill));
 
       if (len >= 8) {
@@ -191,7 +205,7 @@ export namespace i8x16_swar {
     const n = select<i32>(16, nn, nn > 16);
     if (n == 0) return;
     if (ASC_FEATURE_SIMD && n == 16) {
-      store<v128>(ptr + immOffset, value);
+      store<v128>(ptr, value, immOffset, immAlign);
       return;
     }
     if (n <= 8) {
