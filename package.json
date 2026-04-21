@@ -1,13 +1,15 @@
 {
   "name": "as-simd",
-  "version": "0.0.0",
-  "description": "",
+  "version": "0.1.0",
+  "description": "Drop-in AssemblyScript SIMD-compatible SWAR wrappers with transform and presets.",
   "types": "assembly/index.ts",
   "author": "Jairus Tanaka",
   "contributors": [],
   "license": "MIT",
   "scripts": {
     "test": "ast test",
+    "test:integration:dropin": "node ./scripts/integration-dropin.mjs",
+    "prepublishOnly": "npm run build:transform && npm test && npm run test:integration:dropin",
     "fuzz": "ast fuzz",
     "fuzz:simd-parity": "ast fuzz assembly/__fuzz__/i8x8.fuzz.ts assembly/__fuzz__/i8x16.fuzz.ts assembly/__fuzz__/i8x16-swar.fuzz.ts assembly/__fuzz__/i16x4.fuzz.ts assembly/__fuzz__/i16x8.fuzz.ts assembly/__fuzz__/i16x8-swar.fuzz.ts assembly/__fuzz__/i32x2.fuzz.ts assembly/__fuzz__/i32x4.fuzz.ts assembly/__fuzz__/i32x4-swar.fuzz.ts assembly/__fuzz__/i64x2-swar.fuzz.ts assembly/__fuzz__/v64.fuzz.ts --mode simd",
     "test:fuzz": "ast test --fuzz",
@@ -48,6 +50,27 @@
   },
   "homepage": "https://github.com/JairusSW/as-simd#readme",
   "type": "module",
+  "files": [
+    "assembly/index.ts",
+    "assembly/v64/**/*.ts",
+    "assembly/v128/**/*.ts",
+    "assembly/scalar/**/*.ts",
+    "transform/index.mjs",
+    "preset/*.json",
+    "globals.d.ts",
+    "index.ts",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "exports": {
+    ".": "./index.ts",
+    "./transform": "./transform/index.mjs",
+    "./preset/full": "./preset/full.json",
+    "./preset/strict": "./preset/strict.json",
+    "./globals": "./globals.d.ts",
+    "./package.json": "./package.json"
+  },
   "publishConfig": {
     "@JairusSW:registry": "https://npm.pkg.github.com"
   }

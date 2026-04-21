@@ -30,6 +30,42 @@ I'll write them soon. Usage is exactly the same as existing SIMD api though.
 
 ## Usage
 
+### Drop-in global flow (recommended)
+
+Use the full preset to keep global SIMD names available in existing source (`v128`, `i8x16`, `i16x8`, `i32x4`, `i64x2`) with `as-simd` transform wiring:
+
+```json
+{
+  "extends": "./node_modules/as-simd/preset/full.json",
+  "include": ["./node_modules/as-simd/globals.d.ts"]
+}
+```
+
+If your toolchain cannot use `extends`, copy these options into your `asconfig.json`:
+
+```json
+{
+  "options": {
+    "transform": ["as-simd/transform"],
+    "enable": ["simd"]
+  },
+  "include": ["./node_modules/as-simd/globals.d.ts"]
+}
+```
+
+### Strict no-SIMD flow
+
+Strict mode disables SIMD and keeps only non-`v128` paths supported. If `v128`-family globals are used, the transform emits an actionable diagnostic.
+
+```json
+{
+  "extends": "./node_modules/as-simd/preset/strict.json",
+  "include": ["./node_modules/as-simd/globals.d.ts"]
+}
+```
+
+### Explicit import flow
+
 ```ts
 import { i8x8 } from "as-simd";
 

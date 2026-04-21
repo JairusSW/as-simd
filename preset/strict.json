@@ -1,0 +1,10 @@
+{
+  "options": {
+    "transform": [
+      "as-simd/transform"
+    ],
+    "disable": [
+      "simd"
+    ]
+  }
+}
