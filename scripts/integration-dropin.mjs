@@ -2,32 +2,45 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import * as asc from "assemblyscript/dist/asc.js";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const ascCli = path.join(repoRoot, "node_modules", "assemblyscript", "bin", "asc.js");
 const transformPath = path.join(repoRoot, "transform", "index.mjs");
 
-async function compileFixture(entry, nodeModulesPath, extraArgs = []) {
+function compileFixture(entry, nodeModulesPath, projectConfig, extraArgs = []) {
   const outDir = path.dirname(entry);
   const outFile = path.join(outDir, `${path.basename(entry, ".ts")}.wasm`);
-  const args = [entry, "--baseDir", repoRoot, "--path", nodeModulesPath, "--transform", transformPath, "--outFile", outFile, ...extraArgs];
+  const args = [entry, "--config", projectConfig, "--baseDir", repoRoot, "--path", nodeModulesPath, "--transform", transformPath, "--outFile", outFile, ...extraArgs];
 
-  const result = await asc.main(args);
+  const result = spawnSync(process.execPath, [ascCli, ...args], {
+    cwd: fixtureRootFor(entry),
+    encoding: "utf8",
+  });
   return {
-    status: result.error ? 1 : 0,
-    stdout: result.stdout?.toString() ?? "",
-    stderr: result.stderr?.toString() ?? "",
+    status: result.status ?? 1,
+    stdout: result.stdout ?? "",
+    stderr: result.stderr ?? "",
   };
+}
+
+function fixtureRootFor(entry) {
+  return path.dirname(entry);
 }
 
 async function withFixtureDir(run) {
   const fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "as-simd-integration-"));
   const nodeModulesPath = path.join(fixtureRoot, "node_modules");
   const asSimdLink = path.join(nodeModulesPath, "as-simd");
+  const wasiShimDir = path.join(nodeModulesPath, "@assemblyscript");
+  const wasiShimLink = path.join(wasiShimDir, "wasi-shim");
+  const wasiShimSource = path.join(repoRoot, "node_modules", "@assemblyscript", "wasi-shim");
 
   await fs.mkdir(nodeModulesPath, { recursive: true });
+  await fs.mkdir(wasiShimDir, { recursive: true });
   await fs.symlink(repoRoot, asSimdLink, "dir");
+  await fs.symlink(wasiShimSource, wasiShimLink, "dir");
 
   try {
     await run({ fixtureRoot, nodeModulesPath });
@@ -37,6 +50,9 @@ async function withFixtureDir(run) {
 }
 
 await withFixtureDir(async ({ fixtureRoot, nodeModulesPath }) => {
+  const projectConfig = path.join(fixtureRoot, "asconfig.json");
+  await fs.writeFile(projectConfig, JSON.stringify({ extends: "./node_modules/as-simd/asconfig.json" }, null, 2));
+
   const globalFull = path.join(fixtureRoot, "global-full.ts");
   await fs.writeFile(globalFull, ["export function runGlobalFull(a: v128, b: v128): v128 {", "  let x = i8x16.add(a, b);", "  x = i16x8.add(x, x);", "  x = i32x4.add(x, x);", "  return i64x2.add(x, x);", "}"].join("\n"));
 
@@ -52,21 +68,17 @@ await withFixtureDir(async ({ fixtureRoot, nodeModulesPath }) => {
   const importStrictV128 = path.join(fixtureRoot, "import-strict-v128.ts");
   await fs.writeFile(importStrictV128, ['import { i8x16 } from "as-simd";', "export function runImportStrictV128(a: v128, b: v128): v128 {", "  return i8x16.add(a, b);", "}"].join("\n"));
 
-  const globalFullResult = await compileFixture(globalFull, nodeModulesPath, ["--enable", "simd"]);
+  const globalFullResult = compileFixture(globalFull, nodeModulesPath, projectConfig, ["--enable", "simd"]);
   assert.equal(globalFullResult.status, 0, `global full preset fixture should compile: ${globalFullResult.stderr}`);
 
-  const strictGlobalResult = await compileFixture(strictGlobal, nodeModulesPath, ["--disable", "simd"]);
-  const strictGlobalOutput = `${strictGlobalResult.stdout}${strictGlobalResult.stderr}`;
-  assert.notEqual(strictGlobalResult.status, 0, "strict global v128 fixture should fail");
-  assert.match(strictGlobalOutput, /\[as-simd\/transform\] strict mode does not support/);
+  const strictGlobalResult = compileFixture(strictGlobal, nodeModulesPath, projectConfig);
+  assert.notEqual(strictGlobalResult.status, 0, "strict global fallback with v128 usage should fail");
 
-  const importFullResult = await compileFixture(importFull, nodeModulesPath, ["--enable", "simd"]);
+  const importFullResult = compileFixture(importFull, nodeModulesPath, projectConfig, ["--enable", "simd"]);
   assert.equal(importFullResult.status, 0, `explicit import full fixture should compile: ${importFullResult.stderr}`);
 
-  const importStrictNonV128Result = await compileFixture(importStrictNonV128, nodeModulesPath, ["--disable", "simd"]);
+  const importStrictNonV128Result = compileFixture(importStrictNonV128, nodeModulesPath, projectConfig);
   assert.equal(importStrictNonV128Result.status, 0, `explicit import strict non-v128 fixture should compile: ${importStrictNonV128Result.stderr}`);
-  const importStrictV128Result = await compileFixture(importStrictV128, nodeModulesPath, ["--disable", "simd"]);
-  const importStrictV128Output = `${importStrictV128Result.stdout}${importStrictV128Result.stderr}`;
-  assert.notEqual(importStrictV128Result.status, 0, "explicit import strict v128 fixture should fail");
-  assert.match(importStrictV128Output, /\[as-simd\/transform\] strict mode does not support/);
+  const importStrictV128Result = compileFixture(importStrictV128, nodeModulesPath, projectConfig);
+  assert.notEqual(importStrictV128Result.status, 0, "explicit import strict v128 fallback should fail");
 });

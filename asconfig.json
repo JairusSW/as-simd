@@ -1,5 +1,4 @@
 {
-  "extends": "./node_modules/@assemblyscript/wasi-shim/asconfig.json",
   "options": {
     "transform": ["as-simd/transform"],
     "enable": ["simd"]

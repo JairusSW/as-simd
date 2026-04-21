@@ -1,1 +1,3 @@
-console.log(ASC_FEATURE_SIMD.toString());
+export function simdFeatureEnabled(): bool {
+  return ASC_FEATURE_SIMD;
+}

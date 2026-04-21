@@ -30,36 +30,42 @@ I'll write them soon. Usage is exactly the same as existing SIMD api though.
 
 ## Usage
 
-### Drop-in global flow (recommended for `v128`-family code)
+### Drop-in global flow (recommended)
 
-Use the full preset to keep global SIMD names available in existing source (`v128`, `i8x16`, `i16x8`, `i32x4`, `i64x2`) with `as-simd` transform wiring:
+Use package asconfig to wire the transform and feature defaults:
 
 ```json
 {
-  "extends": "as-simd/preset/full",
+  "extends": "./node_modules/as-simd/asconfig.json",
   "include": ["./node_modules/as-simd/globals.d.ts"]
 }
 ```
 
-If your toolchain cannot use `extends`, copy these options into your `asconfig.json`:
+For WASI projects:
 
 ```json
 {
-  "options": {
-    "transform": ["as-simd/transform"],
-    "enable": ["simd"]
-  },
+  "extends": "./node_modules/as-simd/asconfig.wasi.json",
   "include": ["./node_modules/as-simd/globals.d.ts"]
 }
 ```
 
-### Strict no-SIMD flow (default asconfig)
+If your toolchain cannot use `extends`, copy these options:
+
+```json
+{
+  "options": { "transform": ["as-simd/transform"], "enable": ["simd"] },
+  "include": ["./node_modules/as-simd/globals.d.ts"]
+}
+```
+
+### Strict no-SIMD flow
 
 Strict mode disables SIMD and keeps only non-`v128` paths supported. If `v128`-family globals are used, the transform emits an actionable diagnostic.
 
 ```json
 {
-  "extends": "as-simd/asconfig.json",
+  "extends": "as-simd/preset/strict",
   "include": ["./node_modules/as-simd/globals.d.ts"]
 }
 ```
@@ -203,9 +209,9 @@ You can view the full license using the following link: [License](./LICENSE)
 
 ## Contact
 
-Please send all issues to [GitHub Issues](https://github.com/JairusSW/json-as/issues) and to converse, please send me an email at [me@jairus.dev](mailto:me@jairus.dev)
+Please send all issues to [GitHub Issues](https://github.com/JairusSW/as-simd/issues) and to converse, please send me an email at [me@jairus.dev](mailto:me@jairus.dev)
 
 - **Email:** Send me inquiries, questions, or requests at [me@jairus.dev](mailto:me@jairus.dev)
-- **GitHub:** Visit the official GitHub repository [Here](https://github.com/JairusSW/json-as)
+- **GitHub:** Visit the official GitHub repository [Here](https://github.com/JairusSW/as-simd)
 - **Website:** Visit my official website at [jairus.dev](https://jairus.dev/)
 - **Discord:** Contact me at [My Discord](https://discord.com/users/600700584038760448) or on the [AssemblyScript Discord Server](https://discord.gg/assemblyscript/)

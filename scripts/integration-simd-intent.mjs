@@ -130,9 +130,10 @@ try {
   const case6WatText = await fs.readFile(case6Wat, "utf8");
   assert.match(case6WatText, /\(global \$~lib\/native\/ASC_FEATURE_SIMD i32 \(i32.const 1\)\)/, "explicit user enable should keep SIMD on");
 
-  // Case 7: inherited package-owned simd enable is not explicit; v128-family usage still compiles via SWAR fallback wiring.
+  // Case 7: inherited package-owned simd enable is not explicit; v128-family usage should fail with strict diagnostic.
   const case7 = await runAscProgrammatic([entry, "--config", externalLeafNoOptIn, "--transform", transformPath, "--textFile", path.join(fixtureRoot, "case7.wat"), "--outFile", path.join(fixtureRoot, "case7.wasm")]);
-  assert.equal(case7.status, 0, `case7 compile failed:\n${case7.stderr}`);
+  assert.notEqual(case7.status, 0, "case7 should fail without explicit SIMD opt-in");
+  assert.match(`${case7.stdout}${case7.stderr}`, /\[as-simd\/transform\] strict mode does not support/);
 } finally {
   await fs.rm(packageOwnedConfig, { force: true });
   await fs.rm(fixtureRoot, { recursive: true, force: true });
