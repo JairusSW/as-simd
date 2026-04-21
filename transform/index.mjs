@@ -255,6 +255,86 @@ function forceFeatureGlobalOff(program, name) {
   }
 }
 
+function splitArgs(argText) {
+  return argText
+    .split(",")
+    .map((arg) => arg.trim())
+    .filter((arg) => arg.length > 0);
+}
+
+function rewriteI32x4Locals(text) {
+  let out = text;
+  out = out.replace(
+    /\b(const|let)\s+([A-Za-z_]\w*)\s*=\s*i32x4\s*\(([^)]*)\)\s*;/g,
+    (full, decl, name, argText) => {
+      const args = splitArgs(argText);
+      if (args.length !== 4) return full;
+      const [a, b, c, d] = args;
+      return `${decl} ${name}_lo: u64 = i32x4_pair.pack2(${a}, ${b});\n${decl} ${name}_hi: u64 = i32x4_pair.pack2(${c}, ${d});`;
+    }
+  );
+
+  out = out.replace(
+    /\b(const|let)\s+([A-Za-z_]\w*)\s*=\s*i32x4\.add\(\s*([A-Za-z_]\w*)\s*,\s*([A-Za-z_]\w*)\s*\)\s*;/g,
+    (full, decl, outName, left, right) => {
+      return `${decl} ${outName}_lo: u64 = i32x4_pair.add_lo(${left}_lo, ${left}_hi, ${right}_lo, ${right}_hi);\n${decl} ${outName}_hi: u64 = i32x4_pair.take_hi();`;
+    }
+  );
+
+  out = out.replace(
+    /\b(const|let)\s+([A-Za-z_]\w*)\s*=\s*i32x4\.load\(\s*([^,)]+)\s*([^)]*)\)\s*;/g,
+    (full, decl, outName, ptrExpr, rest) => {
+      return `${decl} ${outName}_lo: u64 = i32x4_pair.load_lo(${ptrExpr}${rest});\n${decl} ${outName}_hi: u64 = i32x4_pair.take_hi();`;
+    }
+  );
+
+  out = out.replace(
+    /\bi32x4\.store\(\s*([^,]+)\s*,\s*([A-Za-z_]\w*)([^)]*)\)\s*;/g,
+    (full, ptrExpr, vecName, rest) => `i32x4_pair.store_pair(${ptrExpr}, ${vecName}_lo, ${vecName}_hi${rest});`
+  );
+
+  out = out.replace(
+    /\bi32x4\.extract_lane\(\s*([A-Za-z_]\w*)\s*,\s*([^)]+)\)/g,
+    (full, vecName, laneExpr) => `i32x4_pair.extract_lane_pair(${vecName}_lo, ${vecName}_hi, ${laneExpr.trim()})`
+  );
+  return out;
+}
+
+function rewriteUserEntriesForSwar(parser) {
+  const targets = [];
+  for (const source of parser.sources) {
+    if (source.sourceKind !== asc.SourceKind.UserEntry) continue;
+    if (!findFirstV128FamilyUse(source.text)) continue;
+    targets.push(source);
+  }
+
+  for (const source of targets) {
+    let rewritten = source.text;
+    const hasI32x4 = /\bi32x4\b/.test(rewritten);
+    const hasOtherV128Family = /\b(v128|i8x16|i16x8|i64x2)\b/.test(rewritten);
+    if (hasOtherV128Family) {
+      const first = findFirstV128FamilyUse(rewritten);
+      if (first && first.symbol !== "i32x4") {
+        const line = source.lineAt(first.index);
+        const column = source.columnAt(first.index);
+        throw new Error(
+          `${STRICT_DIAGNOSTIC_PREFIX} SWAR fallback currently supports i32x4-only in transform mode; found '${first.symbol}' at ${source.normalizedPath}:${line}:${column}.`
+        );
+      }
+    }
+    if (!hasI32x4) continue;
+    rewritten = rewriteI32x4Locals(rewritten);
+    const importStmt = `import { i32x4_pair } from "as-simd/assembly/v128/i32x4_pair";\n`;
+    const finalText = `${importStmt}${rewritten}`;
+    const internalPath = source.internalPath;
+    const idx = parser.sources.indexOf(source);
+    if (idx >= 0) parser.sources.splice(idx, 1);
+    parser.donelog.delete(internalPath);
+    parser.seenlog.delete(internalPath);
+    parser.parseFile(finalText, source.normalizedPath, true);
+  }
+}
+
 export default class SwarV128AliasesTransform extends Transform {
   #simdIntent = null;
 
@@ -297,20 +377,10 @@ export default class SwarV128AliasesTransform extends Transform {
     const { forceSwar } = this.getExecutionPolicy(options);
 
     if (forceSwar) {
+      // Strict SWAR mode via pointer-based runtime.
       asc.setFeature(options, asc.FEATURE_SIMD, false);
       asc.setFeature(options, asc.FEATURE_RELAXED_SIMD, false);
-
-      for (const source of parser.sources) {
-        if (source.sourceKind !== asc.SourceKind.UserEntry) continue;
-        const hit = findFirstV128FamilyUse(source.text);
-        if (!hit) continue;
-        const line = source.lineAt(hit.index);
-        const column = source.columnAt(hit.index);
-        throw new Error(
-          `${STRICT_DIAGNOSTIC_PREFIX} strict mode does not support '${hit.symbol}' without explicit SIMD opt-in (${source.normalizedPath}:${line}:${column}). ` +
-            "Fix by explicitly enabling SIMD via CLI/asconfig ('--enable simd' or options.enable), or use a non-v128 API path."
-        );
-      }
+      rewriteUserEntriesForSwar(parser);
       return;
     }
 

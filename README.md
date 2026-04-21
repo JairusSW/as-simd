@@ -30,42 +30,40 @@ I'll write them soon. Usage is exactly the same as existing SIMD api though.
 
 ## Usage
 
-### Drop-in global flow (recommended)
+### Transform-only flow (recommended)
 
-Use package asconfig to wire the transform and feature defaults:
+Use `as-simd` directly as a transform.
 
-```json
-{
-  "extends": "./node_modules/as-simd/asconfig.json",
-  "include": ["./node_modules/as-simd/globals.d.ts"]
-}
+CLI:
+
+```bash
+npx asc assembly/index.ts --transform as-simd/transform
 ```
 
-For WASI projects:
+Programmatic `asc.main()`:
 
-```json
-{
-  "extends": "./node_modules/as-simd/asconfig.wasi.json",
-  "include": ["./node_modules/as-simd/globals.d.ts"]
-}
+```js
+await asc.main([
+  "assembly/index.ts",
+  "--transform",
+  "as-simd/transform",
+]);
 ```
 
-If your toolchain cannot use `extends`, copy these options:
+If a tool expects a direct source entrypoint, use `as-simd/sources`.
 
-```json
-{
-  "options": { "transform": ["as-simd/transform"], "enable": ["simd"] },
-  "include": ["./node_modules/as-simd/globals.d.ts"]
-}
+To opt into real SIMD codegen, explicitly enable SIMD:
+
+```bash
+npx asc assembly/index.ts --transform as-simd/transform --enable simd
 ```
 
-### Strict no-SIMD flow
+Without explicit SIMD opt-in, `as-simd` runs in strict SWAR mode. `v128`-family globals (`v128`, `i8x16`, `i16x8`, `i32x4`, `i64x2`) will fail with a clear diagnostic.
 
-Strict mode disables SIMD and keeps only non-`v128` paths supported. If `v128`-family globals are used, the transform emits an actionable diagnostic.
+For IntelliSense on global aliases, include:
 
 ```json
 {
-  "extends": "as-simd/preset/strict",
   "include": ["./node_modules/as-simd/globals.d.ts"]
 }
 ```

@@ -1,7 +1,7 @@
 {
   "name": "as-simd",
   "version": "0.0.0",
-  "description": "Drop-in AssemblyScript SIMD-compatible SWAR wrappers with transform and presets.",
+  "description": "Drop-in AssemblyScript SIMD-compatible SWAR wrappers with transform support.",
   "main": "./transform/index.mjs",
   "types": "assembly/index.ts",
   "author": "Jairus Tanaka",
@@ -59,9 +59,6 @@
     "assembly/v128/**/*.ts",
     "assembly/scalar/**/*.ts",
     "transform/index.mjs",
-    "asconfig.json",
-    "asconfig.wasi.json",
-    "preset/*.json",
     "globals.d.ts",
     "index.ts",
     "README.md",
@@ -69,12 +66,18 @@
     "CHANGELOG.md"
   ],
   "exports": {
-    ".": "./index.ts",
+    ".": {
+      "types": "./assembly/index.ts",
+      "default": "./transform/index.mjs"
+    },
+    "./sources": "./assembly/index.ts",
+    "./assembly/v128/v128_swar": "./assembly/v128/v128_swar.ts",
+    "./assembly/v128/i8x16_swar": "./assembly/v128/i8x16_swar.ts",
+    "./assembly/v128/i16x8_swar": "./assembly/v128/i16x8_swar.ts",
+    "./assembly/v128/i32x4_swar": "./assembly/v128/i32x4_swar.ts",
+    "./assembly/v128/i32x4_swar_runtime": "./assembly/v128/i32x4_swar_runtime.ts",
+    "./assembly/v128/i64x2_swar": "./assembly/v128/i64x2_swar.ts",
     "./transform": "./transform/index.mjs",
-    "./preset/full": "./preset/full.json",
-    "./preset/strict": "./preset/strict.json",
-    "./asconfig.json": "./asconfig.json",
-    "./asconfig.wasi.json": "./asconfig.wasi.json",
     "./globals": "./globals.d.ts",
     "./package.json": "./package.json"
   },
