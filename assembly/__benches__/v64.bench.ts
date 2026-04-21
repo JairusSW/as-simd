@@ -1,7 +1,8 @@
 import { v64 } from "../v64/v64";
+import { bench_common } from "./common";
 import { bench, blackbox, dumpToFile } from "./lib/bench";
 
-const OPS: u64 = 25_000_000;
+const OPS: u64 = bench_common.DEFAULT_OPS;
 const IO_PTR: usize = memory.data(256);
 
 const LANES_I8 = StaticArray.fromArray<u8>([7, 6, 5, 4, 3, 2, 1, 0]);
@@ -9,27 +10,23 @@ const LANES_I16 = StaticArray.fromArray<u8>([3, 2, 1, 0]);
 const LANES_I32 = StaticArray.fromArray<u8>([1, 0]);
 const LANES_I64 = StaticArray.fromArray<u8>([0]);
 
-let s0: u64 = 0x0123456789abcdef;
-let s1: u64 = 0x8899aabbccddeeff;
+// @ts-expect-error: decorator
+@inline function next64(): u64 { return bench_common.next64(); }
 
 // @ts-expect-error: decorator
-@inline function next64(x: u64): u64 {
-  x ^= x << 13;
-  x ^= x >> 7;
-  x ^= x << 17;
-  return x;
-}
+@inline function next128(): u64 { return bench_common.next128(); }
+
+// @ts-expect-error: decorator
+@inline function next128Hi(): u64 { return bench_common.next128Hi(); }
 
 // @ts-expect-error: decorator
 @inline function nextA(): v64 {
-  s0 = next64(s0);
-  return blackbox(s0);
+  return blackbox(next64());
 }
 
 // @ts-expect-error: decorator
 @inline function nextB(): v64 {
-  s1 = next64(s1);
-  return blackbox(s1);
+  return blackbox(bench_common.next64Alt());
 }
 
 // @ts-expect-error: decorator

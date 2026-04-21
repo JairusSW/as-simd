@@ -1,5 +1,12 @@
 let __as_simd_i16x8_hi: u64 = 0;
 
+export function i16x8_swar(a: i16, b: i16, c: i16, d: i16, e: i16, f: i16, g: i16, h: i16): u64 {
+  const lo = (a as u16 as u64) | ((b as u16 as u64) << 16) | ((c as u16 as u64) << 32) | ((d as u16 as u64) << 48);
+  const hi = (e as u16 as u64) | ((f as u16 as u64) << 16) | ((g as u16 as u64) << 32) | ((h as u16 as u64) << 48);
+  __as_simd_i16x8_hi = hi;
+  return lo;
+}
+
 export namespace i16x8_swar {
   // @ts-expect-error: decorator
   @inline export function take_hi(): u64 { return __as_simd_i16x8_hi; }

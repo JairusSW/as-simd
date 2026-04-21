@@ -1,41 +1,30 @@
 import { i8x8 } from "../v64/i8x8";
+import { bench_common } from "./common";
 import { bench, blackbox, dumpToFile } from "./lib/bench";
 
-const OPS: u64 = 25_000_000;
-
-let s0: u64 = 0x0123456789abcdef;
-let s1: u64 = 0x8899aabbccddeeff;
-let s2: u64 = 0xfedcba9876543210;
-let s3: u64 = 0x7766554433221100;
-let s4: u64 = 0xaa55aa55aa55aa55;
+const OPS: u64 = bench_common.DEFAULT_OPS;
 const IO_PTR: usize = memory.data(96);
 
 // @ts-expect-error: decorator
-@inline function next64(x: u64): u64 {
-  x ^= x << 13;
-  x ^= x >> 7;
-  x ^= x << 17;
-  return x;
-}
+@inline function next64(): u64 { return bench_common.next64(); }
+// @ts-expect-error: decorator
+@inline function next128(): u64 { return bench_common.next128(); }
+// @ts-expect-error: decorator
+@inline function next128Hi(): u64 { return bench_common.next128Hi(); }
 
 // @ts-expect-error: decorator
 @inline function nextA(): u64 {
-  s0 = next64(s0);
-  s2 = next64(s2);
-  return blackbox(s0 ^ (s2 >> 17));
+  return blackbox(bench_common.nextA());
 }
 
 // @ts-expect-error: decorator
 @inline function nextB(): u64 {
-  s1 = next64(s1);
-  s3 = next64(s3);
-  return blackbox(s1 ^ (s3 << 13));
+  return blackbox(bench_common.nextB());
 }
 
 // @ts-expect-error: decorator
 @inline function nextM(): u64 {
-  s4 = next64(s4);
-  return blackbox(s4 ^ 0xaa55aa55aa55aa55);
+  return blackbox(bench_common.nextM());
 }
 
 // @ts-expect-error: decorator

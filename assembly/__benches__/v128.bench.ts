@@ -1,184 +1,102 @@
-import { v128 as v128w, i64x2 as i64x2w } from "../v128";
+import { v128_swar } from "../index";
+import { bench_common } from "./common";
 import { bench, blackbox, dumpToFile } from "./lib/bench";
 
-const OPS: u64 = 25_000_000;
-const IO_PTR: usize = memory.data(320);
-
-const LANES_I8 = StaticArray.fromArray<u8>([15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]);
-const LANES_I16 = StaticArray.fromArray<u8>([7, 6, 5, 4, 3, 2, 1, 0]);
-const LANES_I32 = StaticArray.fromArray<u8>([3, 2, 1, 0]);
-const LANES_I64 = StaticArray.fromArray<u8>([1, 0]);
-
-// @ts-expect-error: decorator
-@inline function make128(lo: u64, hi: u64): v128 {
-  return i64x2(lo as i64, hi as i64);
-}
-
-let s0: v128 = make128(0x0123456789abcdef, 0x8899aabbccddeeff);
-let s1: v128 = make128(0xfedcba9876543210, 0x7766554433221100);
+const OPS: u64 = bench_common.DEFAULT_OPS;
+const IO_PTR: usize = memory.data(256);
+const LANES_I8 = StaticArray.fromArray<u8>([15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0]);
+const LANES_I16 = StaticArray.fromArray<u8>([7,6,5,4,3,2,1,0]);
+const LANES_I32 = StaticArray.fromArray<u8>([3,2,1,0]);
+const LANES_I64 = StaticArray.fromArray<u8>([1,0]);
 
 // @ts-expect-error: decorator
-@inline function next128(x: v128): v128 {
-  x = v128w.xor(x, i64x2w.shl(x, 13));
-  x = v128w.xor(x, i64x2w.shr_u(x, 7));
-  x = v128w.xor(x, i64x2w.shl(x, 17));
-  return x;
-}
+@inline function nextA(): u64 { return blackbox(bench_common.nextA()); }
+// @ts-expect-error: decorator
+@inline function nextB(): u64 { return blackbox(bench_common.nextB()); }
+// @ts-expect-error: decorator
+@inline function nextM(): u64 { return blackbox(bench_common.nextM()); }
+// @ts-expect-error: decorator
+@inline function next128(): u64 { return bench_common.next128(); }
+// @ts-expect-error: decorator
+@inline function next128Hi(): u64 { return bench_common.next128Hi(); }
+// @ts-expect-error: decorator
+@inline function nextI8(): i8 { return nextA() as i8; }
+// @ts-expect-error: decorator
+@inline function nextI16(): i16 { return nextA() as i16; }
+// @ts-expect-error: decorator
+@inline function nextI32(): i32 { return nextA() as i32; }
+// @ts-expect-error: decorator
+@inline function nextI64(): i64 { return nextA() as i64; }
+// @ts-expect-error: decorator
+@inline function nextF32(): f32 { return reinterpret<f32>(nextA() as u32); }
+// @ts-expect-error: decorator
+@inline function nextF64(): f64 { return reinterpret<f64>(nextA()); }
+// @ts-expect-error: decorator
+@inline function nextLane16(): u8 { return (nextA() & 15) as u8; }
+// @ts-expect-error: decorator
+@inline function nextShift8(): i32 { return (nextA() & 7) as i32; }
+// @ts-expect-error: decorator
+@inline function nextPtr16(): usize { return IO_PTR + ((nextA() as usize) & 0xf0); }
+// @ts-expect-error: decorator
+@inline function nextVec(): v128 { return i64x2(nextI64(), nextI64()); }
 
-// @ts-expect-error: decorator
-@inline function nextA(): v128 {
-  s0 = next128(s0);
-  return blackbox(s0);
-}
+bench("v128.splat", () => { if (ASC_FEATURE_SIMD) blackbox(v128.splat<i8>(nextI8())); else { blackbox(v128_swar.splat<i8>(nextI8())); blackbox(v128_swar.take_hi()); } }, OPS, 8); dumpToFile("v128", "splat");
+bench("v128.extract-lane", () => { if (ASC_FEATURE_SIMD) blackbox(v128.extract_lane<i8>(nextVec(), 0)); else blackbox(v128_swar.extract_lane<i8>(next128(), next128Hi(), nextLane16())); }, OPS, 8); dumpToFile("v128", "extract-lane");
+bench("v128.replace-lane", () => { if (ASC_FEATURE_SIMD) blackbox(v128.replace_lane<i8>(nextVec(), 0, nextI8())); else { blackbox(v128_swar.replace_lane<i8>(next128(), next128Hi(), nextLane16(), nextI8())); blackbox(v128_swar.take_hi()); } }, OPS, 8); dumpToFile("v128", "replace-lane");
+bench("v128.shuffle-i8", () => { blackbox(v128_swar.shuffle<i8>(next128(), next128Hi(), next128(), next128Hi(), LANES_I8)); blackbox(v128_swar.take_hi()); }, OPS, 16); dumpToFile("v128", "shuffle-i8");
+bench("v128.shuffle-i16", () => { blackbox(v128_swar.shuffle<i16>(next128(), next128Hi(), next128(), next128Hi(), LANES_I16)); blackbox(v128_swar.take_hi()); }, OPS, 16); dumpToFile("v128", "shuffle-i16");
+bench("v128.shuffle-i32", () => { blackbox(v128_swar.shuffle<i32>(next128(), next128Hi(), next128(), next128Hi(), LANES_I32)); blackbox(v128_swar.take_hi()); }, OPS, 16); dumpToFile("v128", "shuffle-i32");
+bench("v128.shuffle-i64", () => { blackbox(v128_swar.shuffle<i64>(next128(), next128Hi(), next128(), next128Hi(), LANES_I64)); blackbox(v128_swar.take_hi()); }, OPS, 16); dumpToFile("v128", "shuffle-i64");
+bench("v128.swizzle", () => { if (ASC_FEATURE_SIMD) blackbox(v128.swizzle(nextVec(), nextVec())); else { blackbox(v128_swar.swizzle(next128(), next128Hi(), next128(), next128Hi())); blackbox(v128_swar.take_hi()); } }, OPS, 8); dumpToFile("v128", "swizzle");
 
-// @ts-expect-error: decorator
-@inline function nextB(): v128 {
-  s1 = next128(s1);
-  return blackbox(s1);
-}
+bench("v128.add-i8", () => { if (ASC_FEATURE_SIMD) blackbox(v128.add<i8>(nextVec(), nextVec())); else { blackbox(v128_swar.add<i8>(next128(), next128Hi(), next128(), next128Hi())); blackbox(v128_swar.take_hi()); } }, OPS, 8); dumpToFile("v128", "add-i8");
+bench("v128.sub-i8", () => { if (ASC_FEATURE_SIMD) blackbox(v128.sub<i8>(nextVec(), nextVec())); else { blackbox(v128_swar.sub<i8>(next128(), next128Hi(), next128(), next128Hi())); blackbox(v128_swar.take_hi()); } }, OPS, 8); dumpToFile("v128", "sub-i8");
+bench("v128.mul-i8", () => { blackbox(v128_swar.mul<i8>(next128(), next128Hi(), next128(), next128Hi())); blackbox(v128_swar.take_hi()); }, OPS, 8); dumpToFile("v128", "mul-i8");
+bench("v128.div-f32", () => {
+  if (ASC_FEATURE_SIMD) {
+    blackbox(v128.div<f32>(v128.splat<f32>(nextF32()), v128.splat<f32>(nextF32())));
+  } else {
+    const aLo = v128_swar.splat<f32>(nextF32());
+    const aHi = v128_swar.take_hi();
+    const bLo = v128_swar.splat<f32>(nextF32());
+    const bHi = v128_swar.take_hi();
+    blackbox(v128_swar.div<f32>(aLo, aHi, bLo, bHi));
+    blackbox(v128_swar.take_hi());
+  }
+}, OPS, 8);
+dumpToFile("v128", "div-f32");
+bench("v128.neg-i8", () => { if (ASC_FEATURE_SIMD) blackbox(v128.neg<i8>(nextVec())); else { blackbox(v128_swar.neg<i8>(next128(), next128Hi())); blackbox(v128_swar.take_hi()); } }, OPS, 8); dumpToFile("v128", "neg-i8");
+bench("v128.add-sat-i8", () => { if (ASC_FEATURE_SIMD) blackbox(v128.add_sat<i8>(nextVec(), nextVec())); else { blackbox(v128_swar.add_sat<i8>(next128(), next128Hi(), next128(), next128Hi())); blackbox(v128_swar.take_hi()); } }, OPS, 8); dumpToFile("v128", "add-sat-i8");
+bench("v128.sub-sat-u8", () => { if (ASC_FEATURE_SIMD) blackbox(v128.sub_sat<u8>(nextVec(), nextVec())); else { blackbox(v128_swar.sub_sat<u8>(next128(), next128Hi(), next128(), next128Hi())); blackbox(v128_swar.take_hi()); } }, OPS, 8); dumpToFile("v128", "sub-sat-u8");
+bench("v128.shl-i8", () => { if (ASC_FEATURE_SIMD) blackbox(v128.shl<i8>(nextVec(), nextShift8())); else { blackbox(v128_swar.shl<i8>(next128(), next128Hi(), nextShift8())); blackbox(v128_swar.take_hi()); } }, OPS, 8); dumpToFile("v128", "shl-i8");
+bench("v128.shr-i8", () => { if (ASC_FEATURE_SIMD) blackbox(v128.shr<i8>(nextVec(), nextShift8())); else { blackbox(v128_swar.shr<i8>(next128(), next128Hi(), nextShift8())); blackbox(v128_swar.take_hi()); } }, OPS, 8); dumpToFile("v128", "shr-i8");
 
-// @ts-expect-error: decorator
-@inline function nextA64(): u64 {
-  return <u64>i64x2w.extract_lane(nextA(), 0);
-}
+bench("v128.and", () => { if (ASC_FEATURE_SIMD) blackbox(v128.and(nextVec(), nextVec())); else { blackbox(v128_swar.and(next128(), next128Hi(), next128(), next128Hi())); blackbox(v128_swar.take_hi()); } }, OPS, 8); dumpToFile("v128", "and");
+bench("v128.or", () => { if (ASC_FEATURE_SIMD) blackbox(v128.or(nextVec(), nextVec())); else { blackbox(v128_swar.or(next128(), next128Hi(), next128(), next128Hi())); blackbox(v128_swar.take_hi()); } }, OPS, 8); dumpToFile("v128", "or");
+bench("v128.xor", () => { if (ASC_FEATURE_SIMD) blackbox(v128.xor(nextVec(), nextVec())); else { blackbox(v128_swar.xor(next128(), next128Hi(), next128(), next128Hi())); blackbox(v128_swar.take_hi()); } }, OPS, 8); dumpToFile("v128", "xor");
+bench("v128.andnot", () => { if (ASC_FEATURE_SIMD) blackbox(v128.andnot(nextVec(), nextVec())); else { blackbox(v128_swar.andnot(next128(), next128Hi(), next128(), next128Hi())); blackbox(v128_swar.take_hi()); } }, OPS, 8); dumpToFile("v128", "andnot");
+bench("v128.not", () => { if (ASC_FEATURE_SIMD) blackbox(v128.not(nextVec())); else { blackbox(v128_swar.not(next128(), next128Hi())); blackbox(v128_swar.take_hi()); } }, OPS, 8); dumpToFile("v128", "not");
+bench("v128.bitselect", () => { if (ASC_FEATURE_SIMD) blackbox(v128.bitselect(nextVec(), nextVec(), nextVec())); else { blackbox(v128_swar.bitselect(next128(), next128Hi(), next128(), next128Hi(), next128(), next128Hi())); blackbox(v128_swar.take_hi()); } }, OPS, 24); dumpToFile("v128", "bitselect");
+bench("v128.any-true", () => { if (ASC_FEATURE_SIMD) blackbox(v128.any_true(nextVec())); else blackbox(v128_swar.any_true(next128(), next128Hi())); }, OPS, 8); dumpToFile("v128", "any-true");
+bench("v128.all-true-i8", () => { if (ASC_FEATURE_SIMD) blackbox(v128.all_true<i8>(nextVec())); else blackbox(v128_swar.all_true<i8>(next128(), next128Hi())); }, OPS, 8); dumpToFile("v128", "all-true-i8");
+bench("v128.bitmask-i8", () => { if (ASC_FEATURE_SIMD) blackbox(v128.bitmask<i8>(nextVec())); else blackbox(v128_swar.bitmask<i8>(next128(), next128Hi())); }, OPS, 8); dumpToFile("v128", "bitmask-i8");
+bench("v128.popcnt-i8", () => { if (ASC_FEATURE_SIMD) blackbox(v128.popcnt<i8>(nextVec())); else { blackbox(v128_swar.popcnt<i8>(next128(), next128Hi())); blackbox(v128_swar.take_hi()); } }, OPS, 8); dumpToFile("v128", "popcnt-i8");
+bench("v128.min-i16", () => { if (ASC_FEATURE_SIMD) blackbox(v128.min<i16>(nextVec(), nextVec())); else { blackbox(v128_swar.min<i16>(next128(), next128Hi(), next128(), next128Hi())); blackbox(v128_swar.take_hi()); } }, OPS, 8); dumpToFile("v128", "min-i16");
+bench("v128.max-i16", () => { if (ASC_FEATURE_SIMD) blackbox(v128.max<i16>(nextVec(), nextVec())); else { blackbox(v128_swar.max<i16>(next128(), next128Hi(), next128(), next128Hi())); blackbox(v128_swar.take_hi()); } }, OPS, 8); dumpToFile("v128", "max-i16");
+bench("v128.dot-i16", () => { blackbox(v128_swar.dot<i16>(next128(), next128Hi(), next128(), next128Hi())); blackbox(v128_swar.take_hi()); }, OPS, 8); dumpToFile("v128", "dot-i16");
+bench("v128.avgr-u8", () => { if (ASC_FEATURE_SIMD) blackbox(v128.avgr<u8>(nextVec(), nextVec())); else { blackbox(v128_swar.avgr<u8>(next128(), next128Hi(), next128(), next128Hi())); blackbox(v128_swar.take_hi()); } }, OPS, 8); dumpToFile("v128", "avgr-u8");
+bench("v128.abs-i8", () => { if (ASC_FEATURE_SIMD) blackbox(v128.abs<i8>(nextVec())); else { blackbox(v128_swar.abs<i8>(next128(), next128Hi())); blackbox(v128_swar.take_hi()); } }, OPS, 8); dumpToFile("v128", "abs-i8");
+bench("v128.eq-i8", () => { if (ASC_FEATURE_SIMD) blackbox(v128.eq<i8>(nextVec(), nextVec())); else { blackbox(v128_swar.eq<i8>(next128(), next128Hi(), next128(), next128Hi())); blackbox(v128_swar.take_hi()); } }, OPS, 8); dumpToFile("v128", "eq-i8");
+bench("v128.ne-i8", () => { if (ASC_FEATURE_SIMD) blackbox(v128.ne<i8>(nextVec(), nextVec())); else { blackbox(v128_swar.ne<i8>(next128(), next128Hi(), next128(), next128Hi())); blackbox(v128_swar.take_hi()); } }, OPS, 8); dumpToFile("v128", "ne-i8");
+bench("v128.lt-i8", () => { if (ASC_FEATURE_SIMD) blackbox(v128.lt<i8>(nextVec(), nextVec())); else { blackbox(v128_swar.lt<i8>(next128(), next128Hi(), next128(), next128Hi())); blackbox(v128_swar.take_hi()); } }, OPS, 8); dumpToFile("v128", "lt-i8");
+bench("v128.le-i8", () => { if (ASC_FEATURE_SIMD) blackbox(v128.le<i8>(nextVec(), nextVec())); else { blackbox(v128_swar.le<i8>(next128(), next128Hi(), next128(), next128Hi())); blackbox(v128_swar.take_hi()); } }, OPS, 8); dumpToFile("v128", "le-i8");
+bench("v128.gt-i8", () => { if (ASC_FEATURE_SIMD) blackbox(v128.gt<i8>(nextVec(), nextVec())); else { blackbox(v128_swar.gt<i8>(next128(), next128Hi(), next128(), next128Hi())); blackbox(v128_swar.take_hi()); } }, OPS, 8); dumpToFile("v128", "gt-i8");
+bench("v128.ge-i8", () => { if (ASC_FEATURE_SIMD) blackbox(v128.ge<i8>(nextVec(), nextVec())); else { blackbox(v128_swar.ge<i8>(next128(), next128Hi(), next128(), next128Hi())); blackbox(v128_swar.take_hi()); } }, OPS, 8); dumpToFile("v128", "ge-i8");
 
-// @ts-expect-error: decorator
-@inline function nextPtr16(): usize {
-  return IO_PTR + ((nextA64() as usize) & 0xf0);
-}
-
-// @ts-expect-error: decorator
-@inline function nextI8(): i8 { return <i8>(nextA64() & 0xff); }
-// @ts-expect-error: decorator
-@inline function nextI16(): i16 { return <i16>(nextA64() & 0xffff); }
-// @ts-expect-error: decorator
-@inline function nextI32(): i32 { return <i32>(nextA64() & 0xffffffff); }
-// @ts-expect-error: decorator
-@inline function nextI64(): i64 { return i64x2w.extract_lane(nextA(), 0); }
-// @ts-expect-error: decorator
-@inline function nextF32(): f32 { return reinterpret<f32>(<u32>nextA64()); }
-// @ts-expect-error: decorator
-@inline function nextF64(): f64 { return reinterpret<f64>(nextA64()); }
-// @ts-expect-error: decorator
-@inline function nextF32Vec(): v128 { return v128w.splat<f32>(nextF32()); }
-// @ts-expect-error: decorator
-@inline function nextF64Vec(): v128 { return v128w.splat<f64>(nextF64()); }
-// @ts-expect-error: decorator
-@inline function nextLane16(): u8 { return <u8>(nextA64() & 15); }
-// @ts-expect-error: decorator
-@inline function nextShift8(): i32 { return <i32>(nextA64() & 7); }
-
-bench("v128.splat", () => { blackbox(v128w.splat<i8>(nextI8())); }, OPS, 16); dumpToFile("v128", "splat");
-bench("v128.extract-lane", () => { blackbox(v128w.extract_lane<i8>(nextA(), nextLane16())); }, OPS, 16); dumpToFile("v128", "extract-lane");
-bench("v128.replace-lane", () => { blackbox(v128w.replace_lane<i8>(nextA(), nextLane16(), nextI8())); }, OPS, 16); dumpToFile("v128", "replace-lane");
-bench("v128.shuffle-i8", () => { blackbox(v128w.shuffle<i8>(nextA(), nextB(), LANES_I8)); }, OPS, 32); dumpToFile("v128", "shuffle-i8");
-bench("v128.shuffle-i16", () => { blackbox(v128w.shuffle<i16>(nextA(), nextB(), LANES_I16)); }, OPS, 32); dumpToFile("v128", "shuffle-i16");
-bench("v128.shuffle-i32", () => { blackbox(v128w.shuffle<i32>(nextA(), nextB(), LANES_I32)); }, OPS, 32); dumpToFile("v128", "shuffle-i32");
-bench("v128.shuffle-i64", () => { blackbox(v128w.shuffle<i64>(nextA(), nextB(), LANES_I64)); }, OPS, 32); dumpToFile("v128", "shuffle-i64");
-bench("v128.swizzle", () => { blackbox(v128w.swizzle(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "swizzle");
-
-bench("v128.load", () => { blackbox(v128w.load(nextPtr16())); }, OPS, 16); dumpToFile("v128", "load");
-bench("v128.load-partial", () => { blackbox(v128w.loadPartial(nextPtr16(), <i32>(nextA64() & 31) - 8)); }, OPS, 16); dumpToFile("v128", "load-partial");
-bench("v128.store", () => { v128w.store(nextPtr16(), nextA()); blackbox(v128w.load(IO_PTR)); }, OPS, 16); dumpToFile("v128", "store");
-bench("v128.store-partial", () => { v128w.storePartial(nextPtr16(), nextA(), <i32>(nextA64() & 31) - 8); blackbox(v128w.load(IO_PTR)); }, OPS, 16); dumpToFile("v128", "store-partial");
-bench("v128.load-ext", () => { blackbox(v128w.load_ext<i8>(nextPtr16())); }, OPS, 8); dumpToFile("v128", "load-ext");
-bench("v128.load-zero", () => { blackbox(v128w.load_zero<i16>(nextPtr16())); }, OPS, 8); dumpToFile("v128", "load-zero");
-bench("v128.load-lane", () => { blackbox(v128w.load_lane<i8>(nextPtr16(), nextA(), nextLane16())); }, OPS, 16); dumpToFile("v128", "load-lane");
-bench("v128.store-lane", () => { v128w.store_lane<i8>(nextPtr16(), nextA(), nextLane16()); blackbox(v128w.load(IO_PTR)); }, OPS, 16); dumpToFile("v128", "store-lane");
-bench("v128.load8x8-s", () => { blackbox(v128w.load8x8_s(nextPtr16())); }, OPS, 8); dumpToFile("v128", "load8x8-s");
-bench("v128.load8x8-u", () => { blackbox(v128w.load8x8_u(nextPtr16())); }, OPS, 8); dumpToFile("v128", "load8x8-u");
-bench("v128.load16x4-s", () => { blackbox(v128w.load16x4_s(nextPtr16())); }, OPS, 8); dumpToFile("v128", "load16x4-s");
-bench("v128.load16x4-u", () => { blackbox(v128w.load16x4_u(nextPtr16())); }, OPS, 8); dumpToFile("v128", "load16x4-u");
-bench("v128.load32x2-s", () => { blackbox(v128w.load32x2_s(nextPtr16())); }, OPS, 8); dumpToFile("v128", "load32x2-s");
-bench("v128.load32x2-u", () => { blackbox(v128w.load32x2_u(nextPtr16())); }, OPS, 8); dumpToFile("v128", "load32x2-u");
-bench("v128.load-splat", () => { blackbox(v128w.load_splat<i8>(nextPtr16())); }, OPS, 1); dumpToFile("v128", "load-splat");
-bench("v128.load8-splat", () => { blackbox(v128w.load8_splat(nextPtr16())); }, OPS, 1); dumpToFile("v128", "load8-splat");
-bench("v128.load16-splat", () => { blackbox(v128w.load16_splat(nextPtr16())); }, OPS, 2); dumpToFile("v128", "load16-splat");
-bench("v128.load32-splat", () => { blackbox(v128w.load32_splat(nextPtr16())); }, OPS, 4); dumpToFile("v128", "load32-splat");
-bench("v128.load64-splat", () => { blackbox(v128w.load64_splat(nextPtr16())); }, OPS, 8); dumpToFile("v128", "load64-splat");
-bench("v128.load32-zero", () => { blackbox(v128w.load32_zero(nextPtr16())); }, OPS, 4); dumpToFile("v128", "load32-zero");
-bench("v128.load64-zero", () => { blackbox(v128w.load64_zero(nextPtr16())); }, OPS, 8); dumpToFile("v128", "load64-zero");
-bench("v128.load8-lane", () => { blackbox(v128w.load8_lane(nextPtr16(), nextA(), nextLane16())); }, OPS, 1); dumpToFile("v128", "load8-lane");
-bench("v128.load16-lane", () => { blackbox(v128w.load16_lane(nextPtr16(), nextA(), nextLane16() & 7)); }, OPS, 2); dumpToFile("v128", "load16-lane");
-bench("v128.load32-lane", () => { blackbox(v128w.load32_lane(nextPtr16(), nextA(), nextLane16() & 3)); }, OPS, 4); dumpToFile("v128", "load32-lane");
-bench("v128.load64-lane", () => { blackbox(v128w.load64_lane(nextPtr16(), nextA(), nextLane16() & 1)); }, OPS, 8); dumpToFile("v128", "load64-lane");
-bench("v128.store8-lane", () => { v128w.store8_lane(nextPtr16(), nextA(), nextLane16()); blackbox(v128w.load(IO_PTR)); }, OPS, 1); dumpToFile("v128", "store8-lane");
-bench("v128.store16-lane", () => { v128w.store16_lane(nextPtr16(), nextA(), nextLane16() & 7); blackbox(v128w.load(IO_PTR)); }, OPS, 2); dumpToFile("v128", "store16-lane");
-bench("v128.store32-lane", () => { v128w.store32_lane(nextPtr16(), nextA(), nextLane16() & 3); blackbox(v128w.load(IO_PTR)); }, OPS, 4); dumpToFile("v128", "store32-lane");
-bench("v128.store64-lane", () => { v128w.store64_lane(nextPtr16(), nextA(), nextLane16() & 1); blackbox(v128w.load(IO_PTR)); }, OPS, 8); dumpToFile("v128", "store64-lane");
-
-bench("v128.add-i8", () => { blackbox(v128w.add<i8>(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "add-i8");
-bench("v128.sub-i8", () => { blackbox(v128w.sub<i8>(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "sub-i8");
-bench("v128.mul-i8", () => { blackbox(v128w.mul<i8>(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "mul-i8");
-bench("v128.div-f32", () => { blackbox(v128w.div<f32>(nextF32Vec(), nextF32Vec())); }, OPS, 16); dumpToFile("v128", "div-f32");
-bench("v128.neg-i8", () => { blackbox(v128w.neg<i8>(nextA())); }, OPS, 16); dumpToFile("v128", "neg-i8");
-bench("v128.add-sat-i8", () => { blackbox(v128w.add_sat<i8>(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "add-sat-i8");
-bench("v128.sub-sat-u8", () => { blackbox(v128w.sub_sat<u8>(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "sub-sat-u8");
-bench("v128.shl-i8", () => { blackbox(v128w.shl<i8>(nextA(), nextShift8())); }, OPS, 16); dumpToFile("v128", "shl-i8");
-bench("v128.shr-i8", () => { blackbox(v128w.shr<i8>(nextA(), nextShift8())); }, OPS, 16); dumpToFile("v128", "shr-i8");
-bench("v128.and", () => { blackbox(v128w.and(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "and");
-bench("v128.or", () => { blackbox(v128w.or(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "or");
-bench("v128.xor", () => { blackbox(v128w.xor(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "xor");
-bench("v128.andnot", () => { blackbox(v128w.andnot(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "andnot");
-bench("v128.not", () => { blackbox(v128w.not(nextA())); }, OPS, 16); dumpToFile("v128", "not");
-bench("v128.bitselect", () => { blackbox(v128w.bitselect(nextA(), nextB(), nextA())); }, OPS, 48); dumpToFile("v128", "bitselect");
-bench("v128.any-true", () => { blackbox(v128w.any_true(nextA())); }, OPS, 16); dumpToFile("v128", "any-true");
-bench("v128.all-true-i8", () => { blackbox(v128w.all_true<i8>(nextA())); }, OPS, 16); dumpToFile("v128", "all-true-i8");
-bench("v128.bitmask-i8", () => { blackbox(v128w.bitmask<i8>(nextA())); }, OPS, 16); dumpToFile("v128", "bitmask-i8");
-bench("v128.popcnt-i8", () => { blackbox(v128w.popcnt<i8>(nextA())); }, OPS, 16); dumpToFile("v128", "popcnt-i8");
-bench("v128.min-i16", () => { blackbox(v128w.min<i16>(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "min-i16");
-bench("v128.max-i16", () => { blackbox(v128w.max<i16>(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "max-i16");
-bench("v128.pmin-i16", () => { blackbox(v128w.pmin<i16>(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "pmin-i16");
-bench("v128.pmax-i16", () => { blackbox(v128w.pmax<i16>(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "pmax-i16");
-bench("v128.dot-i16", () => { blackbox(v128w.dot<i16>(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "dot-i16");
-bench("v128.avgr-u8", () => { blackbox(v128w.avgr<u8>(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "avgr-u8");
-bench("v128.abs-i8", () => { blackbox(v128w.abs<i8>(nextA())); }, OPS, 16); dumpToFile("v128", "abs-i8");
-bench("v128.sqrt-f32", () => { blackbox(v128w.sqrt<f32>(nextF32Vec())); }, OPS, 16); dumpToFile("v128", "sqrt-f32");
-bench("v128.ceil-f32", () => { blackbox(v128w.ceil<f32>(nextF32Vec())); }, OPS, 16); dumpToFile("v128", "ceil-f32");
-bench("v128.floor-f32", () => { blackbox(v128w.floor<f32>(nextF32Vec())); }, OPS, 16); dumpToFile("v128", "floor-f32");
-bench("v128.trunc-f32", () => { blackbox(v128w.trunc<f32>(nextF32Vec())); }, OPS, 16); dumpToFile("v128", "trunc-f32");
-bench("v128.nearest-f32", () => { blackbox(v128w.nearest<f32>(nextF32Vec())); }, OPS, 16); dumpToFile("v128", "nearest-f32");
-bench("v128.eq-i8", () => { blackbox(v128w.eq<i8>(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "eq-i8");
-bench("v128.ne-i8", () => { blackbox(v128w.ne<i8>(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "ne-i8");
-bench("v128.lt-i8", () => { blackbox(v128w.lt<i8>(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "lt-i8");
-bench("v128.le-i8", () => { blackbox(v128w.le<i8>(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "le-i8");
-bench("v128.gt-i8", () => { blackbox(v128w.gt<i8>(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "gt-i8");
-bench("v128.ge-i8", () => { blackbox(v128w.ge<i8>(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "ge-i8");
-bench("v128.convert-i32", () => { blackbox(v128w.convert<i32>(nextA())); }, OPS, 16); dumpToFile("v128", "convert-i32");
-bench("v128.convert-low-i32", () => { blackbox(v128w.convert_low<i32>(nextA())); }, OPS, 16); dumpToFile("v128", "convert-low-i32");
-bench("v128.trunc-sat-i32", () => { blackbox(v128w.trunc_sat<i32>(nextF32Vec())); }, OPS, 16); dumpToFile("v128", "trunc-sat-i32");
-bench("v128.trunc-sat-zero-i32", () => { blackbox(v128w.trunc_sat_zero<i32>(nextF64Vec())); }, OPS, 16); dumpToFile("v128", "trunc-sat-zero-i32");
-bench("v128.narrow-i16", () => { blackbox(v128w.narrow<i16>(nextA(), nextB())); }, OPS, 32); dumpToFile("v128", "narrow-i16");
-bench("v128.extend-low-i8", () => { blackbox(v128w.extend_low<i8>(nextA())); }, OPS, 16); dumpToFile("v128", "extend-low-i8");
-bench("v128.extend-high-i8", () => { blackbox(v128w.extend_high<i8>(nextA())); }, OPS, 16); dumpToFile("v128", "extend-high-i8");
-bench("v128.extadd-pairwise-i8", () => { blackbox(v128w.extadd_pairwise<i8>(nextA())); }, OPS, 16); dumpToFile("v128", "extadd-pairwise-i8");
-bench("v128.demote-zero", () => { blackbox(v128w.demote_zero<f64>(nextF64Vec())); }, OPS, 16); dumpToFile("v128", "demote-zero");
-bench("v128.promote-low", () => { blackbox(v128w.promote_low<f32>(nextF32Vec())); }, OPS, 16); dumpToFile("v128", "promote-low");
-bench("v128.q15mulr-sat", () => { blackbox(v128w.q15mulr_sat<i16>(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "q15mulr-sat");
-bench("v128.extmul-low-i8", () => { blackbox(v128w.extmul_low<i8>(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "extmul-low-i8");
-bench("v128.extmul-high-i8", () => { blackbox(v128w.extmul_high<i8>(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "extmul-high-i8");
 if (ASC_FEATURE_RELAXED_SIMD) {
-  bench("v128.relaxed-swizzle", () => { blackbox(v128w.relaxed_swizzle(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "relaxed-swizzle");
-  bench("v128.relaxed-trunc", () => { blackbox(v128w.relaxed_trunc<i32>(nextF32Vec())); }, OPS, 16); dumpToFile("v128", "relaxed-trunc");
-  bench("v128.relaxed-trunc-zero", () => { blackbox(v128w.relaxed_trunc_zero<i32>(nextF64Vec())); }, OPS, 16); dumpToFile("v128", "relaxed-trunc-zero");
-  bench("v128.relaxed-madd", () => { blackbox(v128w.relaxed_madd<i8>(nextA(), nextB(), nextA())); }, OPS, 48); dumpToFile("v128", "relaxed-madd");
-  bench("v128.relaxed-nmadd", () => { blackbox(v128w.relaxed_nmadd<i8>(nextA(), nextB(), nextA())); }, OPS, 48); dumpToFile("v128", "relaxed-nmadd");
-  bench("v128.relaxed-laneselect", () => { blackbox(v128w.relaxed_laneselect<i8>(nextA(), nextB(), nextA())); }, OPS, 48); dumpToFile("v128", "relaxed-laneselect");
-  bench("v128.relaxed-min", () => { blackbox(v128w.relaxed_min<i16>(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "relaxed-min");
-  bench("v128.relaxed-max", () => { blackbox(v128w.relaxed_max<i16>(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "relaxed-max");
-  bench("v128.relaxed-q15mulr", () => { blackbox(v128w.relaxed_q15mulr<i16>(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "relaxed-q15mulr");
-  bench("v128.relaxed-dot", () => { blackbox(v128w.relaxed_dot<i16>(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "relaxed-dot");
-  bench("v128.relaxed-dot-add", () => { blackbox(v128w.relaxed_dot_add<i16>(nextA(), nextB(), nextA())); }, OPS, 48); dumpToFile("v128", "relaxed-dot-add");
+  bench("v128.relaxed-swizzle", () => { blackbox(v128.relaxed_swizzle(nextVec(), nextVec())); }, OPS, 8); dumpToFile("v128", "relaxed-swizzle");
+  bench("v128.relaxed-laneselect", () => { blackbox(v128.relaxed_laneselect<i8>(nextVec(), nextVec(), nextVec())); }, OPS, 24); dumpToFile("v128", "relaxed-laneselect");
 } else {
-  bench("v128.relaxed-swizzle", () => { blackbox(v128w.swizzle(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "relaxed-swizzle");
-  bench("v128.relaxed-trunc", () => { blackbox(v128w.trunc_sat<i32>(nextF32Vec())); }, OPS, 16); dumpToFile("v128", "relaxed-trunc");
-  bench("v128.relaxed-trunc-zero", () => { blackbox(v128w.trunc_sat_zero<i32>(nextF64Vec())); }, OPS, 16); dumpToFile("v128", "relaxed-trunc-zero");
-  bench("v128.relaxed-madd", () => { blackbox(v128w.add<i8>(v128w.mul<i8>(nextA(), nextB()), nextA())); }, OPS, 48); dumpToFile("v128", "relaxed-madd");
-  bench("v128.relaxed-nmadd", () => { blackbox(v128w.add<i8>(v128w.neg<i8>(v128w.mul<i8>(nextA(), nextB())), nextA())); }, OPS, 48); dumpToFile("v128", "relaxed-nmadd");
-  bench("v128.relaxed-laneselect", () => { blackbox(v128w.bitselect(nextA(), nextB(), nextA())); }, OPS, 48); dumpToFile("v128", "relaxed-laneselect");
-  bench("v128.relaxed-min", () => { blackbox(v128w.min<i16>(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "relaxed-min");
-  bench("v128.relaxed-max", () => { blackbox(v128w.max<i16>(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "relaxed-max");
-  bench("v128.relaxed-q15mulr", () => { blackbox(v128w.q15mulr_sat<i16>(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "relaxed-q15mulr");
-  bench("v128.relaxed-dot", () => { blackbox(v128w.dot<i16>(nextA(), nextB())); }, OPS, 16); dumpToFile("v128", "relaxed-dot");
-  bench("v128.relaxed-dot-add", () => { blackbox(v128w.add<i32>(v128w.dot<i16>(nextA(), nextB()), nextA())); }, OPS, 48); dumpToFile("v128", "relaxed-dot-add");
+  bench("v128.relaxed-swizzle", () => { blackbox(v128_swar.relaxed_swizzle(next128(), next128Hi(), next128(), next128Hi())); blackbox(v128_swar.take_hi()); }, OPS, 8); dumpToFile("v128", "relaxed-swizzle");
+  bench("v128.relaxed-laneselect", () => { blackbox(v128_swar.relaxed_laneselect<i8>(next128(), next128Hi(), next128(), next128Hi(), next128(), next128Hi())); blackbox(v128_swar.take_hi()); }, OPS, 24); dumpToFile("v128", "relaxed-laneselect");
 }

@@ -1,5 +1,12 @@
 let __as_simd_i32x4_hi: u64 = 0;
 
+export function i32x4_swar(a: i32, b: i32, c: i32, d: i32): u64 {
+  const lo = (a as u32 as u64) | ((b as u32 as u64) << 32);
+  const hi = (c as u32 as u64) | ((d as u32 as u64) << 32);
+  __as_simd_i32x4_hi = hi;
+  return lo;
+}
+
 export namespace i32x4_swar {
   // @ts-expect-error: decorator
   @inline export function pack2(a: i32, b: i32): u64 { return (a as u32 as u64) | ((b as u32 as u64) << 32); }

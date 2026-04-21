@@ -1,5 +1,10 @@
 let __as_simd_i64x2_hi: u64 = 0;
 
+export function i64x2_swar(a: i64, b: i64): u64 {
+  __as_simd_i64x2_hi = b as u64;
+  return a as u64;
+}
+
 export namespace i64x2_swar {
   // @ts-expect-error: decorator
   @inline export function take_hi(): u64 { return __as_simd_i64x2_hi; }

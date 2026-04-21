@@ -182,6 +182,26 @@ npm install
 npm run bench
 ```
 
+Run modes separately:
+
+```bash
+npm run bench:swar
+npm run bench:simd
+```
+
+Run both sequentially:
+
+```bash
+npm run bench:split
+```
+
+Focused split benchmark (single dispatcher benchmark with mode-based branch):
+
+```bash
+npm run bench:swar:i32x4
+npm run bench:simd:i32x4
+```
+
 5. Build charts:
 
 ```bash

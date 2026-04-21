@@ -1,67 +1,60 @@
-import { i64x2_swar } from "../v128/i64x2_swar";
-import { i64x2 as i64x2w, v128 as v128w } from "../v128";
+import { i64x2_swar } from "../index";
+import { bench_common } from "./common";
 import { bench, blackbox, dumpToFile } from "./lib/bench";
 
-const OPS: u64 = 25_000_000;
-// @ts-expect-error: decorator
-@inline function make128(lo: u64, hi: u64): v128 { return i64x2(lo as i64, hi as i64); }
-let s0: v128 = make128(0x0123456789abcdef, 0x8899aabbccddeeff);
-let s1: v128 = make128(0xfedcba9876543210, 0x7766554433221100);
-let s2: v128 = make128(0xaa55aa55aa55aa55, 0x55aa55aa55aa55aa);
-const IO_PTR: usize = memory.data(160);
-// @ts-expect-error: decorator
-@inline function next128(x: v128): v128 { x = v128w.xor(x, i64x2w.shl(x, 13)); x = v128w.xor(x, i64x2w.shr_u(x, 7)); x = v128w.xor(x, i64x2w.shl(x, 17)); return x; }
-// @ts-expect-error: decorator
-@inline function nextVecA(): v128 { s0 = next128(s0); return blackbox(s0); }
-// @ts-expect-error: decorator
-@inline function nextVecB(): v128 { s1 = next128(s1); return blackbox(s1); }
-// @ts-expect-error: decorator
-@inline function nextVecM(): v128 { s2 = next128(s2); return blackbox(v128w.xor(s2, i64x2w.splat(0x5555555555555555 as i64))); }
-// @ts-expect-error: decorator
-@inline function nextA64(): u64 { return <u64>i64x2w.extract_lane(nextVecA(), 0); }
-// @ts-expect-error: decorator
-@inline function nextI64(): i64 { return nextA64() as i64; }
-// @ts-expect-error: decorator
-@inline function nextShift(): i32 { return <i32>(nextA64() & 63); }
-// @ts-expect-error: decorator
-@inline function nextPtr16(): usize { return IO_PTR + ((nextA64() as usize) & 0x70); }
-// @ts-expect-error: decorator
-@inline function nextLen2(): i32 { return <i32>(nextA64() & 3) - 1; }
+const OPS: u64 = bench_common.DEFAULT_OPS;
+const IO_PTR: usize = memory.data(256);
 
-bench("i64x2.splat", () => { blackbox(i64x2w.splat(nextI64())); }, OPS, 16); dumpToFile("i64x2", "splat");
-bench("i64x2.load", () => { blackbox(load<v128>(nextPtr16())); }, OPS, 16); dumpToFile("i64x2", "load");
-bench("i64x2.store", () => { store<v128>(nextPtr16(), nextVecA()); blackbox(load<u64>(IO_PTR)); }, OPS, 16); dumpToFile("i64x2", "store");
-bench("i64x2.loadPartial", () => { blackbox(i64x2_swar.loadPartial(nextPtr16(), nextLen2(), 0, 8, nextI64())); }, OPS, 16); dumpToFile("i64x2", "load-partial");
-bench("i64x2.storePartial", () => { i64x2_swar.storePartial(nextPtr16(), nextVecA(), nextLen2(), 0, 8); blackbox(load<u64>(IO_PTR)); }, OPS, 16); dumpToFile("i64x2", "store-partial");
-bench("i64x2.extract_lane", () => { blackbox(i64x2w.extract_lane(nextVecA(), 1)); }, OPS, 16); dumpToFile("i64x2", "extract-lane");
-bench("i64x2.replace_lane", () => { blackbox(i64x2w.replace_lane(nextVecA(), 1, nextI64())); }, OPS, 16); dumpToFile("i64x2", "replace-lane");
-bench("i64x2.add", () => { blackbox(i64x2w.add(nextVecA(), nextVecB())); }, OPS, 16); dumpToFile("i64x2", "add");
-bench("i64x2.sub", () => { blackbox(i64x2w.sub(nextVecA(), nextVecB())); }, OPS, 16); dumpToFile("i64x2", "sub");
-bench("i64x2.mul", () => { blackbox(i64x2w.mul(nextVecA(), nextVecB())); }, OPS, 16); dumpToFile("i64x2", "mul");
-bench("i64x2.abs", () => { blackbox(i64x2w.abs(nextVecA())); }, OPS, 16); dumpToFile("i64x2", "abs");
-bench("i64x2.neg", () => { blackbox(i64x2w.neg(nextVecA())); }, OPS, 16); dumpToFile("i64x2", "neg");
-bench("i64x2.shl", () => { blackbox(i64x2w.shl(nextVecA(), nextShift())); }, OPS, 16); dumpToFile("i64x2", "shl");
-bench("i64x2.shr_s", () => { blackbox(i64x2w.shr_s(nextVecA(), nextShift())); }, OPS, 16); dumpToFile("i64x2", "shr-s");
-bench("i64x2.shr_u", () => { blackbox(i64x2w.shr_u(nextVecA(), nextShift())); }, OPS, 16); dumpToFile("i64x2", "shr-u");
-bench("i64x2.all_true", () => { blackbox(i64x2w.all_true(nextVecA())); }, OPS, 16); dumpToFile("i64x2", "all-true");
-bench("i64x2.bitmask", () => { blackbox(i64x2w.bitmask(nextVecA())); }, OPS, 16); dumpToFile("i64x2", "bitmask");
-bench("i64x2.eq", () => { blackbox(i64x2w.eq(nextVecA(), nextVecB())); }, OPS, 16); dumpToFile("i64x2", "eq");
-bench("i64x2.ne", () => { blackbox(i64x2w.ne(nextVecA(), nextVecB())); }, OPS, 16); dumpToFile("i64x2", "ne");
-bench("i64x2.lt_s", () => { blackbox(i64x2w.lt_s(nextVecA(), nextVecB())); }, OPS, 16); dumpToFile("i64x2", "lt-s");
-bench("i64x2.le_s", () => { blackbox(i64x2w.le_s(nextVecA(), nextVecB())); }, OPS, 16); dumpToFile("i64x2", "le-s");
-bench("i64x2.gt_s", () => { blackbox(i64x2w.gt_s(nextVecA(), nextVecB())); }, OPS, 16); dumpToFile("i64x2", "gt-s");
-bench("i64x2.ge_s", () => { blackbox(i64x2w.ge_s(nextVecA(), nextVecB())); }, OPS, 16); dumpToFile("i64x2", "ge-s");
-bench("i64x2.extend_low_i32x4_s", () => { blackbox(i64x2w.extend_low_i32x4_s(nextVecA())); }, OPS, 16); dumpToFile("i64x2", "extend-low-i32x4-s");
-bench("i64x2.extend_low_i32x4_u", () => { blackbox(i64x2w.extend_low_i32x4_u(nextVecA())); }, OPS, 16); dumpToFile("i64x2", "extend-low-i32x4-u");
-bench("i64x2.extend_high_i32x4_s", () => { blackbox(i64x2w.extend_high_i32x4_s(nextVecA())); }, OPS, 16); dumpToFile("i64x2", "extend-high-i32x4-s");
-bench("i64x2.extend_high_i32x4_u", () => { blackbox(i64x2w.extend_high_i32x4_u(nextVecA())); }, OPS, 16); dumpToFile("i64x2", "extend-high-i32x4-u");
-bench("i64x2.extmul_low_i32x4_s", () => { blackbox(i64x2w.extmul_low_i32x4_s(nextVecA(), nextVecB())); }, OPS, 16); dumpToFile("i64x2", "extmul-low-i32x4-s");
-bench("i64x2.extmul_low_i32x4_u", () => { blackbox(i64x2w.extmul_low_i32x4_u(nextVecA(), nextVecB())); }, OPS, 16); dumpToFile("i64x2", "extmul-low-i32x4-u");
-bench("i64x2.extmul_high_i32x4_s", () => { blackbox(i64x2w.extmul_high_i32x4_s(nextVecA(), nextVecB())); }, OPS, 16); dumpToFile("i64x2", "extmul-high-i32x4-s");
-bench("i64x2.extmul_high_i32x4_u", () => { blackbox(i64x2w.extmul_high_i32x4_u(nextVecA(), nextVecB())); }, OPS, 16); dumpToFile("i64x2", "extmul-high-i32x4-u");
-bench("i64x2.shuffle", () => { blackbox(i64x2w.shuffle(nextVecA(), nextVecB(), 0, 3)); }, OPS, 16); dumpToFile("i64x2", "shuffle");
-if (ASC_FEATURE_RELAXED_SIMD) {
-  bench("i64x2.relaxed_laneselect", () => { blackbox(i64x2_swar.relaxed_laneselect(nextVecA(), nextVecB(), nextVecM())); }, OPS, 48); dumpToFile("i64x2", "relaxed-laneselect");
-} else {
-  bench("i64x2.relaxed_laneselect", () => { blackbox(i64x2_swar.relaxed_laneselect(nextVecA(), nextVecB(), nextVecM())); }, OPS, 48); dumpToFile("i64x2", "relaxed-laneselect");
-}
+// @ts-expect-error: decorator
+@inline function nextA(): u64 { return blackbox(bench_common.nextA()); }
+// @ts-expect-error: decorator
+@inline function nextB(): u64 { return blackbox(bench_common.nextB()); }
+// @ts-expect-error: decorator
+@inline function nextM(): u64 { return blackbox(bench_common.nextM()); }
+// @ts-expect-error: decorator
+@inline function next128(): u64 { return bench_common.next128(); }
+// @ts-expect-error: decorator
+@inline function next128Hi(): u64 { return bench_common.next128Hi(); }
+// @ts-expect-error: decorator
+@inline function nextI64(): i64 { return nextA() as i64; }
+// @ts-expect-error: decorator
+@inline function nextLane2(): u8 { return (nextA() & 1) as u8; }
+// @ts-expect-error: decorator
+@inline function nextShift(): i32 { return (nextA() & 63) as i32; }
+// @ts-expect-error: decorator
+@inline function nextLen2(): i32 { return (nextA() & 3) as i32 - 1; }
+// @ts-expect-error: decorator
+@inline function nextPtr16(): usize { return IO_PTR + ((nextA() as usize) & 0xf0); }
+// @ts-expect-error: decorator
+@inline function nextVec(): v128 { return i64x2(nextI64(), nextI64()); }
+
+bench("i64x2.ctor", () => { if (ASC_FEATURE_SIMD) blackbox(nextVec()); else { blackbox(i64x2_swar(nextI64(), nextI64())); blackbox(i64x2_swar.take_hi()); } }, OPS, 8); dumpToFile("i64x2", "ctor");
+bench("i64x2.splat", () => { if (ASC_FEATURE_SIMD) blackbox(i64x2.splat(nextI64())); else { blackbox(i64x2_swar.splat(nextI64())); blackbox(i64x2_swar.take_hi()); } }, OPS, 8); dumpToFile("i64x2", "splat");
+bench("i64x2.extract_lane", () => { if (ASC_FEATURE_SIMD) blackbox(i64x2.extract_lane(nextVec(), 0)); else blackbox(i64x2_swar.extract_lane(next128(), next128Hi(), nextLane2())); }, OPS, 8); dumpToFile("i64x2", "extract-lane");
+bench("i64x2.replace_lane", () => { if (ASC_FEATURE_SIMD) blackbox(i64x2.replace_lane(nextVec(), 0, nextI64())); else { blackbox(i64x2_swar.replace_lane(next128(), next128Hi(), nextLane2(), nextI64())); blackbox(i64x2_swar.take_hi()); } }, OPS, 8); dumpToFile("i64x2", "replace-lane");
+bench("i64x2.add", () => { if (ASC_FEATURE_SIMD) blackbox(i64x2.add(nextVec(), nextVec())); else { blackbox(i64x2_swar.add(next128(), next128Hi(), next128(), next128Hi())); blackbox(i64x2_swar.take_hi()); } }, OPS, 8); dumpToFile("i64x2", "add");
+bench("i64x2.sub", () => { if (ASC_FEATURE_SIMD) blackbox(i64x2.sub(nextVec(), nextVec())); else { blackbox(i64x2_swar.sub(next128(), next128Hi(), next128(), next128Hi())); blackbox(i64x2_swar.take_hi()); } }, OPS, 8); dumpToFile("i64x2", "sub");
+bench("i64x2.mul", () => { if (ASC_FEATURE_SIMD) blackbox(i64x2.mul(nextVec(), nextVec())); else { blackbox(i64x2_swar.mul(next128(), next128Hi(), next128(), next128Hi())); blackbox(i64x2_swar.take_hi()); } }, OPS, 8); dumpToFile("i64x2", "mul");
+bench("i64x2.abs", () => { if (ASC_FEATURE_SIMD) blackbox(i64x2.abs(nextVec())); else { blackbox(i64x2_swar.abs(next128(), next128Hi())); blackbox(i64x2_swar.take_hi()); } }, OPS, 8); dumpToFile("i64x2", "abs");
+bench("i64x2.neg", () => { if (ASC_FEATURE_SIMD) blackbox(i64x2.neg(nextVec())); else { blackbox(i64x2_swar.neg(next128(), next128Hi())); blackbox(i64x2_swar.take_hi()); } }, OPS, 8); dumpToFile("i64x2", "neg");
+bench("i64x2.shl", () => { if (ASC_FEATURE_SIMD) blackbox(i64x2.shl(nextVec(), nextShift())); else { blackbox(i64x2_swar.shl(next128(), next128Hi(), nextShift())); blackbox(i64x2_swar.take_hi()); } }, OPS, 8); dumpToFile("i64x2", "shl");
+bench("i64x2.shr_s", () => { if (ASC_FEATURE_SIMD) blackbox(i64x2.shr_s(nextVec(), nextShift())); else { blackbox(i64x2_swar.shr_s(next128(), next128Hi(), nextShift())); blackbox(i64x2_swar.take_hi()); } }, OPS, 8); dumpToFile("i64x2", "shr-s");
+bench("i64x2.shr_u", () => { if (ASC_FEATURE_SIMD) blackbox(i64x2.shr_u(nextVec(), nextShift())); else { blackbox(i64x2_swar.shr_u(next128(), next128Hi(), nextShift())); blackbox(i64x2_swar.take_hi()); } }, OPS, 8); dumpToFile("i64x2", "shr-u");
+bench("i64x2.all_true", () => { if (ASC_FEATURE_SIMD) blackbox(i64x2.all_true(nextVec())); else blackbox(i64x2_swar.all_true(next128(), next128Hi())); }, OPS, 8); dumpToFile("i64x2", "all-true");
+bench("i64x2.bitmask", () => { if (ASC_FEATURE_SIMD) blackbox(i64x2.bitmask(nextVec())); else blackbox(i64x2_swar.bitmask(next128(), next128Hi())); }, OPS, 8); dumpToFile("i64x2", "bitmask");
+bench("i64x2.eq", () => { if (ASC_FEATURE_SIMD) blackbox(i64x2.eq(nextVec(), nextVec())); else { blackbox(i64x2_swar.eq(next128(), next128Hi(), next128(), next128Hi())); blackbox(i64x2_swar.take_hi()); } }, OPS, 8); dumpToFile("i64x2", "eq");
+bench("i64x2.ne", () => { if (ASC_FEATURE_SIMD) blackbox(i64x2.ne(nextVec(), nextVec())); else { blackbox(i64x2_swar.ne(next128(), next128Hi(), next128(), next128Hi())); blackbox(i64x2_swar.take_hi()); } }, OPS, 8); dumpToFile("i64x2", "ne");
+bench("i64x2.lt_s", () => { if (ASC_FEATURE_SIMD) blackbox(i64x2.lt_s(nextVec(), nextVec())); else { blackbox(i64x2_swar.lt_s(next128(), next128Hi(), next128(), next128Hi())); blackbox(i64x2_swar.take_hi()); } }, OPS, 8); dumpToFile("i64x2", "lt-s");
+bench("i64x2.le_s", () => { if (ASC_FEATURE_SIMD) blackbox(i64x2.le_s(nextVec(), nextVec())); else { blackbox(i64x2_swar.le_s(next128(), next128Hi(), next128(), next128Hi())); blackbox(i64x2_swar.take_hi()); } }, OPS, 8); dumpToFile("i64x2", "le-s");
+bench("i64x2.gt_s", () => { if (ASC_FEATURE_SIMD) blackbox(i64x2.gt_s(nextVec(), nextVec())); else { blackbox(i64x2_swar.gt_s(next128(), next128Hi(), next128(), next128Hi())); blackbox(i64x2_swar.take_hi()); } }, OPS, 8); dumpToFile("i64x2", "gt-s");
+bench("i64x2.ge_s", () => { if (ASC_FEATURE_SIMD) blackbox(i64x2.ge_s(nextVec(), nextVec())); else { blackbox(i64x2_swar.ge_s(next128(), next128Hi(), next128(), next128Hi())); blackbox(i64x2_swar.take_hi()); } }, OPS, 8); dumpToFile("i64x2", "ge-s");
+bench("i64x2.extend_low_i32x4_s", () => { blackbox(i64x2_swar.extend_low_i32x4_s(next128(), next128Hi())); blackbox(i64x2_swar.take_hi()); }, OPS, 8); dumpToFile("i64x2", "extend-low-i32x4-s");
+bench("i64x2.extend_low_i32x4_u", () => { blackbox(i64x2_swar.extend_low_i32x4_u(next128(), next128Hi())); blackbox(i64x2_swar.take_hi()); }, OPS, 8); dumpToFile("i64x2", "extend-low-i32x4-u");
+bench("i64x2.extend_high_i32x4_s", () => { blackbox(i64x2_swar.extend_high_i32x4_s(next128(), next128Hi())); blackbox(i64x2_swar.take_hi()); }, OPS, 8); dumpToFile("i64x2", "extend-high-i32x4-s");
+bench("i64x2.extend_high_i32x4_u", () => { blackbox(i64x2_swar.extend_high_i32x4_u(next128(), next128Hi())); blackbox(i64x2_swar.take_hi()); }, OPS, 8); dumpToFile("i64x2", "extend-high-i32x4-u");
+bench("i64x2.extmul_low_i32x4_s", () => { blackbox(i64x2_swar.extmul_low_i32x4_s(next128(), next128Hi(), next128(), next128Hi())); blackbox(i64x2_swar.take_hi()); }, OPS, 8); dumpToFile("i64x2", "extmul-low-i32x4-s");
+bench("i64x2.extmul_low_i32x4_u", () => { blackbox(i64x2_swar.extmul_low_i32x4_u(next128(), next128Hi(), next128(), next128Hi())); blackbox(i64x2_swar.take_hi()); }, OPS, 8); dumpToFile("i64x2", "extmul-low-i32x4-u");
+bench("i64x2.extmul_high_i32x4_s", () => { blackbox(i64x2_swar.extmul_high_i32x4_s(next128(), next128Hi(), next128(), next128Hi())); blackbox(i64x2_swar.take_hi()); }, OPS, 8); dumpToFile("i64x2", "extmul-high-i32x4-s");
+bench("i64x2.extmul_high_i32x4_u", () => { blackbox(i64x2_swar.extmul_high_i32x4_u(next128(), next128Hi(), next128(), next128Hi())); blackbox(i64x2_swar.take_hi()); }, OPS, 8); dumpToFile("i64x2", "extmul-high-i32x4-u");
+bench("i64x2.shuffle", () => { blackbox(i64x2_swar.shuffle(next128(), next128Hi(), next128(), next128Hi(), 1, 0)); blackbox(i64x2_swar.take_hi()); }, OPS, 8); dumpToFile("i64x2", "shuffle");
+bench("i64x2.relaxed_laneselect", () => { blackbox(i64x2_swar.relaxed_laneselect(next128(), next128Hi(), next128(), next128Hi(), nextM(), nextB())); blackbox(i64x2_swar.take_hi()); }, OPS, 24); dumpToFile("i64x2", "relaxed-laneselect");

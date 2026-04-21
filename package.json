@@ -15,7 +15,7 @@
     "fuzz": "ast fuzz",
     "fuzz:simd-parity": "ast fuzz assembly/__fuzz__/i8x8.fuzz.ts assembly/__fuzz__/i8x16.fuzz.ts assembly/__fuzz__/i8x16-swar.fuzz.ts assembly/__fuzz__/i16x4.fuzz.ts assembly/__fuzz__/i16x8.fuzz.ts assembly/__fuzz__/i16x8-swar.fuzz.ts assembly/__fuzz__/i32x2.fuzz.ts assembly/__fuzz__/i32x4.fuzz.ts assembly/__fuzz__/i32x4-swar.fuzz.ts assembly/__fuzz__/i64x2-swar.fuzz.ts assembly/__fuzz__/v64.fuzz.ts --mode simd",
     "test:fuzz": "ast test --fuzz",
-    "build:test": "rm -rf ./build/ && asc assembly/test.ts --config none --transform ./transform/index.mjs -o ./build/test.wasm",
+    "build:test": "rm -rf ./build/ && asc assembly/test.ts --config none --transform ./transform/index.mjs --enable simd -o ./build/test.wasm",
     "build:transform": "node --check ./transform/index.mjs",
     "test:wasmtime": "wasmtime ./build/test.wasm",
     "bench": "./scripts/run-bench.sh",

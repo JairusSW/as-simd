@@ -3,420 +3,437 @@ import { i8x16_swar } from "./i8x16_swar";
 import { i16x8_swar } from "./i16x8_swar";
 import { i32x4_swar } from "./i32x4_swar";
 import { i64x2_swar } from "./i64x2_swar";
-import { swar_arena } from "./swar_arena";
 
-export type v128_swar = v128;
+let __as_simd_v128_hi: u64 = 0;
+
+export function v128_swar(lo: u64, hi: u64): u64 {
+  __as_simd_v128_hi = hi;
+  return lo;
+}
 
 export namespace v128_swar {
   // @ts-expect-error: decorator
-  @inline function lo(x: v128): v64 {
-    if (ASC_FEATURE_SIMD) return i64x2.extract_lane(x, 0) as v64;
-    return i64x2_swar.extract_lane(x, 0) as v64;
-  }
+  @inline export function take_hi(): u64 { return __as_simd_v128_hi; }
   // @ts-expect-error: decorator
-  @inline function hi(x: v128): v64 {
-    if (ASC_FEATURE_SIMD) return i64x2.extract_lane(x, 1) as v64;
-    return i64x2_swar.extract_lane(x, 1) as v64;
-  }
-  // @ts-expect-error: decorator
-  @inline function pack(l: v64, h: v64): v128 {
-    if (ASC_FEATURE_SIMD) return i64x2(l as i64, h as i64);
-    const tmp = swar_arena.alloc16();
-    store<i64>(tmp, l as i64);
-    store<i64>(tmp + 8, h as i64);
-    return load<v128>(tmp);
+  @inline function set_pair(lo: u64, hi: u64): u64 {
+    __as_simd_v128_hi = hi;
+    return lo;
   }
   // @ts-expect-error: decorator
   @inline function laneCount<T>(): i32 { return 16 / sizeof<T>(); }
   // @ts-expect-error: decorator
-  @inline function f64pack(a: f64, b: f64): v128 { return pack(reinterpret<i64>(a) as v64, reinterpret<i64>(b) as v64); }
+  @inline function f64pack(a: f64, b: f64): u64 { return set_pair(reinterpret<i64>(a) as u64, reinterpret<i64>(b) as u64); }
 
   // @ts-expect-error: decorator
-  @inline export function splat<T>(x: T): v128 { return pack(v64.splat<T>(x), v64.splat<T>(x)); }
-  // @ts-expect-error: decorator
-  @inline export function extract_lane<T>(x: v128, idx: u8): T {
-    const n = laneCount<T>();
-    const i = idx as i32 % n;
-    const half = n >> 1;
-    return i < half ? v64.extract_lane<T>(lo(x), i as u8) : v64.extract_lane<T>(hi(x), (i - half) as u8);
+  @inline export function splat<T>(x: T): u64 {
+    const l = v64.splat<T>(x) as u64;
+    return set_pair(l, l);
   }
   // @ts-expect-error: decorator
-  @inline export function replace_lane<T>(x: v128, idx: u8, value: T): v128 {
+  @inline export function extract_lane<T>(lo: u64, hi: u64, idx: u8): T {
     const n = laneCount<T>();
     const i = idx as i32 % n;
     const half = n >> 1;
-    const l = lo(x), h = hi(x);
-    return i < half ? pack(v64.replace_lane<T>(l, i as u8, value), h) : pack(l, v64.replace_lane<T>(h, (i - half) as u8, value));
+    return i < half ? v64.extract_lane<T>(lo as v64, i as u8) : v64.extract_lane<T>(hi as v64, (i - half) as u8);
+  }
+  // @ts-expect-error: decorator
+  @inline export function replace_lane<T>(lo: u64, hi: u64, idx: u8, value: T): u64 {
+    const n = laneCount<T>();
+    const i = idx as i32 % n;
+    const half = n >> 1;
+    return i < half ? set_pair(v64.replace_lane<T>(lo as v64, i as u8, value) as u64, hi) : set_pair(lo, v64.replace_lane<T>(hi as v64, (i - half) as u8, value) as u64);
   }
   /** Selects lanes from either vector according to lane indexes in `lanes`. */
-  export function shuffle<T>(a: v128, b: v128, lanes: StaticArray<u8>): v128 {
+  export function shuffle<T>(aLo: u64, aHi: u64, bLo: u64, bHi: u64, lanes: StaticArray<u8>): u64 {
     let out = splat<T>(0 as T);
+    let outHi = take_hi();
     const n = laneCount<T>();
     let i = 0;
     while (i < n) {
       const lane = unchecked(lanes[i]) as i32;
-      const val = lane < n ? extract_lane<T>(a, lane as u8) : extract_lane<T>(b, (lane - n) as u8);
-      out = replace_lane<T>(out, i as u8, val);
+      const val = lane < n ? extract_lane<T>(aLo, aHi, lane as u8) : extract_lane<T>(bLo, bHi, (lane - n) as u8);
+      out = replace_lane<T>(out, outHi, i as u8, val);
+      outHi = take_hi();
       i++;
     }
-    return out;
+    return set_pair(out, outHi);
   }
   // @ts-expect-error: decorator
-  @inline export function swizzle(a: v128, s: v128): v128 { return i8x16_swar.swizzle(a, s); }
-
-  // @ts-expect-error: decorator
-  @inline export function load(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v128 { return load<v128>(ptr, immOffset, immAlign); }
-  // @ts-expect-error: decorator
-  @inline export function loadPartial(ptr: usize, len: i32, immOffset: usize = 0, immAlign: usize = 1, fill: i8 = 0): v128 {
-    return i8x16_swar.loadPartial(ptr, len, immOffset, immAlign, fill);
-  }
-  // @ts-expect-error: decorator
-  @inline export function store(ptr: usize, value: v128, immOffset: usize = 0, immAlign: usize = 1): void { store<v128>(ptr, value, immOffset, immAlign); }
-  // @ts-expect-error: decorator
-  @inline export function storePartial(ptr: usize, value: v128, len: i32, immOffset: usize = 0, immAlign: usize = 1): void {
-    i8x16_swar.storePartial(ptr, value, len, immOffset, immAlign);
+  @inline export function swizzle(aLo: u64, aHi: u64, sLo: u64, sHi: u64): u64 {
+    const lo = i8x16_swar.swizzle(aLo, aHi, sLo, sHi);
+    return set_pair(lo, i8x16_swar.take_hi());
   }
 
   // @ts-expect-error: decorator
-  @inline export function load_ext<TFrom>(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v128 {
-    const base = ptr + immOffset;
-    if (sizeof<TFrom>() == 1) return isSigned<TFrom>() ? load8x8_s(base) : load8x8_u(base);
-    if (sizeof<TFrom>() == 2) return isSigned<TFrom>() ? load16x4_s(base) : load16x4_u(base);
-    if (sizeof<TFrom>() == 4) return isSigned<TFrom>() ? load32x2_s(base) : load32x2_u(base);
-    return load<v128>(base, 0, immAlign);
+  @inline export function load(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): u64 {
+    return set_pair(load<u64>(ptr, immOffset, immAlign), load<u64>(ptr, immOffset + 8, immAlign));
   }
   // @ts-expect-error: decorator
-  @inline export function load_zero<TFrom>(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v128 {
-    const base = ptr + immOffset;
-    if (sizeof<TFrom>() == 1) return pack(load<u8>(base, 0, immAlign) as v64, 0 as v64);
-    if (sizeof<TFrom>() == 2) return pack(load<u16>(base, 0, immAlign) as v64, 0 as v64);
-    if (sizeof<TFrom>() == 4) return pack(load<u32>(base, 0, immAlign) as v64, 0 as v64);
-    if (sizeof<TFrom>() == 8) return pack(load<i64>(base, 0, immAlign) as v64, 0 as v64);
-    return load<v128>(base, 0, immAlign);
+  @inline export function loadPartial(ptr: usize, len: i32, immOffset: usize = 0, immAlign: usize = 1, fill: i8 = 0): u64 {
+    const lo = i8x16_swar.loadPartial(ptr, len, immOffset, immAlign, fill);
+    return set_pair(lo, i8x16_swar.take_hi());
   }
   // @ts-expect-error: decorator
-  @inline export function load_lane<T>(ptr: usize, vec: v128, idx: u8, immOffset: usize = 0, immAlign: usize = 1): v128 {
-    return replace_lane<T>(vec, idx, load<T>(ptr, immOffset, immAlign));
+  @inline export function store(ptr: usize, lo: u64, hi: u64, immOffset: usize = 0, immAlign: usize = 1): void {
+    store<u64>(ptr, lo, immOffset, immAlign);
+    store<u64>(ptr, hi, immOffset + 8, immAlign);
   }
   // @ts-expect-error: decorator
-  @inline export function store_lane<T>(ptr: usize, vec: v128, idx: u8, immOffset: usize = 0, immAlign: usize = 1): void {
-    store<T>(ptr, extract_lane<T>(vec, idx), immOffset, immAlign);
+  @inline export function storePartial(ptr: usize, lo: u64, hi: u64, len: i32, immOffset: usize = 0, immAlign: usize = 1): void {
+    i8x16_swar.storePartial(ptr, lo, hi, len, immOffset, immAlign);
   }
 
   // @ts-expect-error: decorator
-  @inline export function load8x8_s(ptr: usize, immOffset: u32 = 0, immAlign: u32 = 1): v128 {
-    return i16x8_swar.extend_low_i8x16_s(pack(load<i64>(ptr, immOffset, immAlign) as v64, 0 as v64));
+  @inline export function load_ext<TFrom>(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): u64 {
+    if (sizeof<TFrom>() == 1) return isSigned<TFrom>() ? load8x8_s(ptr, immOffset, immAlign) : load8x8_u(ptr, immOffset, immAlign);
+    if (sizeof<TFrom>() == 2) return isSigned<TFrom>() ? load16x4_s(ptr, immOffset, immAlign) : load16x4_u(ptr, immOffset, immAlign);
+    if (sizeof<TFrom>() == 4) return isSigned<TFrom>() ? load32x2_s(ptr, immOffset, immAlign) : load32x2_u(ptr, immOffset, immAlign);
+    return load(ptr, immOffset, immAlign);
   }
   // @ts-expect-error: decorator
-  @inline export function load8x8_u(ptr: usize, immOffset: u32 = 0, immAlign: u32 = 1): v128 {
-    return i16x8_swar.extend_low_i8x16_u(pack(load<i64>(ptr, immOffset, immAlign) as v64, 0 as v64));
+  @inline export function load_zero<TFrom>(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): u64 {
+    if (sizeof<TFrom>() == 1) return set_pair(load<u8>(ptr, immOffset, immAlign) as u64, 0);
+    if (sizeof<TFrom>() == 2) return set_pair(load<u16>(ptr, immOffset, immAlign) as u64, 0);
+    if (sizeof<TFrom>() == 4) return set_pair(load<u32>(ptr, immOffset, immAlign) as u64, 0);
+    if (sizeof<TFrom>() == 8) return set_pair(load<u64>(ptr, immOffset, immAlign), 0);
+    return load(ptr, immOffset, immAlign);
   }
   // @ts-expect-error: decorator
-  @inline export function load16x4_s(ptr: usize, immOffset: u32 = 0, immAlign: u32 = 1): v128 {
-    return i32x4_swar.extend_low_i16x8_s(pack(load<i64>(ptr, immOffset, immAlign) as v64, 0 as v64));
+  @inline export function load_lane<T>(ptr: usize, vecLo: u64, vecHi: u64, idx: u8, immOffset: usize = 0, immAlign: usize = 1): u64 {
+    return replace_lane<T>(vecLo, vecHi, idx, load<T>(ptr, immOffset, immAlign));
   }
   // @ts-expect-error: decorator
-  @inline export function load16x4_u(ptr: usize, immOffset: u32 = 0, immAlign: u32 = 1): v128 {
-    return i32x4_swar.extend_low_i16x8_u(pack(load<i64>(ptr, immOffset, immAlign) as v64, 0 as v64));
-  }
-  // @ts-expect-error: decorator
-  @inline export function load32x2_s(ptr: usize, immOffset: u32 = 0, immAlign: u32 = 1): v128 {
-    return i64x2_swar.extend_low_i32x4_s(pack(load<i64>(ptr, immOffset, immAlign) as v64, 0 as v64));
-  }
-  // @ts-expect-error: decorator
-  @inline export function load32x2_u(ptr: usize, immOffset: u32 = 0, immAlign: u32 = 1): v128 {
-    return i64x2_swar.extend_low_i32x4_u(pack(load<i64>(ptr, immOffset, immAlign) as v64, 0 as v64));
-  }
-
-  // @ts-expect-error: decorator
-  @inline export function load_splat<T>(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v128 { return splat<T>(load<T>(ptr, immOffset, immAlign)); }
-  // @ts-expect-error: decorator
-  @inline export function load8_splat(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v128 { return splat<i8>(load<i8>(ptr, immOffset, immAlign)); }
-  // @ts-expect-error: decorator
-  @inline export function load16_splat(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v128 { return splat<i16>(load<i16>(ptr, immOffset, immAlign)); }
-  // @ts-expect-error: decorator
-  @inline export function load32_splat(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v128 { return splat<i32>(load<i32>(ptr, immOffset, immAlign)); }
-  // @ts-expect-error: decorator
-  @inline export function load64_splat(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v128 { return splat<i64>(load<i64>(ptr, immOffset, immAlign)); }
-  // @ts-expect-error: decorator
-  @inline export function load32_zero(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v128 { return load_zero<u32>(ptr, immOffset, immAlign); }
-  // @ts-expect-error: decorator
-  @inline export function load64_zero(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v128 { return load_zero<u64>(ptr, immOffset, immAlign); }
-  // @ts-expect-error: decorator
-  @inline export function load8_lane(ptr: usize, vec: v128, idx: u8, immOffset: usize = 0, immAlign: usize = 1): v128 { return load_lane<i8>(ptr, vec, idx, immOffset, immAlign); }
-  // @ts-expect-error: decorator
-  @inline export function load16_lane(ptr: usize, vec: v128, idx: u8, immOffset: usize = 0, immAlign: usize = 1): v128 { return load_lane<i16>(ptr, vec, idx, immOffset, immAlign); }
-  // @ts-expect-error: decorator
-  @inline export function load32_lane(ptr: usize, vec: v128, idx: u8, immOffset: usize = 0, immAlign: usize = 1): v128 { return load_lane<i32>(ptr, vec, idx, immOffset, immAlign); }
-  // @ts-expect-error: decorator
-  @inline export function load64_lane(ptr: usize, vec: v128, idx: u8, immOffset: usize = 0, immAlign: usize = 1): v128 { return load_lane<i64>(ptr, vec, idx, immOffset, immAlign); }
-  // @ts-expect-error: decorator
-  @inline export function store8_lane(ptr: usize, vec: v128, idx: u8, immOffset: usize = 0, immAlign: usize = 1): void { store_lane<i8>(ptr, vec, idx, immOffset, immAlign); }
-  // @ts-expect-error: decorator
-  @inline export function store16_lane(ptr: usize, vec: v128, idx: u8, immOffset: usize = 0, immAlign: usize = 1): void { store_lane<i16>(ptr, vec, idx, immOffset, immAlign); }
-  // @ts-expect-error: decorator
-  @inline export function store32_lane(ptr: usize, vec: v128, idx: u8, immOffset: usize = 0, immAlign: usize = 1): void { store_lane<i32>(ptr, vec, idx, immOffset, immAlign); }
-  // @ts-expect-error: decorator
-  @inline export function store64_lane(ptr: usize, vec: v128, idx: u8, immOffset: usize = 0, immAlign: usize = 1): void { store_lane<i64>(ptr, vec, idx, immOffset, immAlign); }
-
-  // @ts-expect-error: decorator
-  @inline export function add<T>(a: v128, b: v128): v128 {
-    if (sizeof<T>() == 1) return i8x16_swar.add(a, b);
-    if (sizeof<T>() == 2) return i16x8_swar.add(a, b);
-    if (sizeof<T>() == 4 && !isFloat<T>()) return i32x4_swar.add(a, b);
-    return pack(v64.add<T>(lo(a), lo(b)), v64.add<T>(hi(a), hi(b)));
-  }
-  // @ts-expect-error: decorator
-  @inline export function sub<T>(a: v128, b: v128): v128 {
-    if (sizeof<T>() == 1) return i8x16_swar.sub(a, b);
-    if (sizeof<T>() == 2) return i16x8_swar.sub(a, b);
-    if (sizeof<T>() == 4 && !isFloat<T>()) return i32x4_swar.sub(a, b);
-    return pack(v64.sub<T>(lo(a), lo(b)), v64.sub<T>(hi(a), hi(b)));
-  }
-  // @ts-expect-error: decorator
-  @inline export function mul<T>(a: v128, b: v128): v128 {
-    if (sizeof<T>() == 1) return i8x16_swar.mul(a, b);
-    if (sizeof<T>() == 2) return i16x8_swar.mul(a, b);
-    if (sizeof<T>() == 4 && !isFloat<T>()) return i32x4_swar.mul(a, b);
-    return pack(v64.mul<T>(lo(a), lo(b)), v64.mul<T>(hi(a), hi(b)));
-  }
-  // @ts-expect-error: decorator
-  @inline export function div<T>(a: v128, b: v128): v128 { return pack(v64.div<T>(lo(a), lo(b)), v64.div<T>(hi(a), hi(b))); }
-  // @ts-expect-error: decorator
-  @inline export function neg<T>(a: v128): v128 {
-    if (sizeof<T>() == 1) return i8x16_swar.neg(a);
-    if (sizeof<T>() == 2) return i16x8_swar.neg(a);
-    if (sizeof<T>() == 4 && !isFloat<T>()) return i32x4_swar.neg(a);
-    return pack(v64.neg<T>(lo(a)), v64.neg<T>(hi(a)));
-  }
-  // @ts-expect-error: decorator
-  @inline export function add_sat<T>(a: v128, b: v128): v128 {
-    if (sizeof<T>() == 1) return isSigned<T>() ? i8x16_swar.add_sat_s(a, b) : i8x16_swar.add_sat_u(a, b);
-    if (sizeof<T>() == 2) return isSigned<T>() ? i16x8_swar.add_sat_s(a, b) : i16x8_swar.add_sat_u(a, b);
-    return add<T>(a, b);
-  }
-  // @ts-expect-error: decorator
-  @inline export function sub_sat<T>(a: v128, b: v128): v128 {
-    if (sizeof<T>() == 1) return isSigned<T>() ? i8x16_swar.sub_sat_s(a, b) : i8x16_swar.sub_sat_u(a, b);
-    if (sizeof<T>() == 2) return isSigned<T>() ? i16x8_swar.sub_sat_s(a, b) : i16x8_swar.sub_sat_u(a, b);
-    return sub<T>(a, b);
-  }
-  // @ts-expect-error: decorator
-  @inline export function shl<T>(a: v128, b: i32): v128 {
-    if (sizeof<T>() == 1) return i8x16_swar.shl(a, b);
-    if (sizeof<T>() == 2) return i16x8_swar.shl(a, b);
-    if (sizeof<T>() == 4) return i32x4_swar.shl(a, b);
-    return i64x2_swar.shl(a, b);
-  }
-  // @ts-expect-error: decorator
-  @inline export function shr<T>(a: v128, b: i32): v128 {
-    if (sizeof<T>() == 1) return isSigned<T>() ? i8x16_swar.shr_s(a, b) : i8x16_swar.shr_u(a, b);
-    if (sizeof<T>() == 2) return isSigned<T>() ? i16x8_swar.shr_s(a, b) : i16x8_swar.shr_u(a, b);
-    if (sizeof<T>() == 4) return isSigned<T>() ? i32x4_swar.shr_s(a, b) : i32x4_swar.shr_u(a, b);
-    return isSigned<T>() ? i64x2_swar.shr_s(a, b) : i64x2_swar.shr_u(a, b);
+  @inline export function store_lane<T>(ptr: usize, vecLo: u64, vecHi: u64, idx: u8, immOffset: usize = 0, immAlign: usize = 1): void {
+    store<T>(ptr, extract_lane<T>(vecLo, vecHi, idx), immOffset, immAlign);
   }
 
   // @ts-expect-error: decorator
-  @inline export function and(a: v128, b: v128): v128 { return pack(v64.and(lo(a), lo(b)), v64.and(hi(a), hi(b))); }
-  // @ts-expect-error: decorator
-  @inline export function or(a: v128, b: v128): v128 { return pack(v64.or(lo(a), lo(b)), v64.or(hi(a), hi(b))); }
-  // @ts-expect-error: decorator
-  @inline export function xor(a: v128, b: v128): v128 { return pack(v64.xor(lo(a), lo(b)), v64.xor(hi(a), hi(b))); }
-  // @ts-expect-error: decorator
-  @inline export function andnot(a: v128, b: v128): v128 { return pack(v64.andnot(lo(a), lo(b)), v64.andnot(hi(a), hi(b))); }
-  // @ts-expect-error: decorator
-  @inline export function not(a: v128): v128 { return pack(v64.not(lo(a)), v64.not(hi(a))); }
-  // @ts-expect-error: decorator
-  @inline export function bitselect(v1: v128, v2: v128, mask: v128): v128 {
-    return pack(v64.bitselect(lo(v1), lo(v2), lo(mask)), v64.bitselect(hi(v1), hi(v2), hi(mask)));
+  @inline export function load8x8_s(ptr: usize, immOffset: u32 = 0, immAlign: u32 = 1): u64 {
+    const lo = i16x8_swar.extend_low_i8x16_s(load<u64>(ptr, immOffset, immAlign), 0);
+    return set_pair(lo, i16x8_swar.take_hi());
   }
   // @ts-expect-error: decorator
-  @inline export function any_true(a: v128): bool { return v64.any_true(lo(a)) || v64.any_true(hi(a)); }
-  // @ts-expect-error: decorator
-  @inline export function all_true<T>(a: v128): bool { return v64.all_true<T>(lo(a)) && v64.all_true<T>(hi(a)); }
-  // @ts-expect-error: decorator
-  @inline export function bitmask<T>(a: v128): i32 {
-    if (sizeof<T>() == 1) return i8x16_swar.bitmask(a);
-    if (sizeof<T>() == 2) return i16x8_swar.bitmask(a);
-    if (sizeof<T>() == 4) return i32x4_swar.bitmask(a);
-    return i64x2_swar.bitmask(a);
+  @inline export function load8x8_u(ptr: usize, immOffset: u32 = 0, immAlign: u32 = 1): u64 {
+    const lo = i16x8_swar.extend_low_i8x16_u(load<u64>(ptr, immOffset, immAlign), 0);
+    return set_pair(lo, i16x8_swar.take_hi());
   }
   // @ts-expect-error: decorator
-  @inline export function popcnt<T>(a: v128): v128 {
-    if (sizeof<T>() == 1) return i8x16_swar.popcnt(a);
-    return pack(v64.popcnt<T>(lo(a)), v64.popcnt<T>(hi(a)));
+  @inline export function load16x4_s(ptr: usize, immOffset: u32 = 0, immAlign: u32 = 1): u64 {
+    const lo = i32x4_swar.extend_low_i16x8_s(load<u64>(ptr, immOffset, immAlign), 0);
+    return set_pair(lo, i32x4_swar.take_hi());
   }
   // @ts-expect-error: decorator
-  @inline export function min<T>(a: v128, b: v128): v128 {
-    if (sizeof<T>() == 1) return isSigned<T>() ? i8x16_swar.min_s(a, b) : i8x16_swar.min_u(a, b);
-    if (sizeof<T>() == 2) return isSigned<T>() ? i16x8_swar.min_s(a, b) : i16x8_swar.min_u(a, b);
-    if (sizeof<T>() == 4 && !isFloat<T>()) return isSigned<T>() ? i32x4_swar.min_s(a, b) : i32x4_swar.min_u(a, b);
-    return pack(v64.min<T>(lo(a), lo(b)), v64.min<T>(hi(a), hi(b)));
+  @inline export function load16x4_u(ptr: usize, immOffset: u32 = 0, immAlign: u32 = 1): u64 {
+    const lo = i32x4_swar.extend_low_i16x8_u(load<u64>(ptr, immOffset, immAlign), 0);
+    return set_pair(lo, i32x4_swar.take_hi());
   }
   // @ts-expect-error: decorator
-  @inline export function max<T>(a: v128, b: v128): v128 {
-    if (sizeof<T>() == 1) return isSigned<T>() ? i8x16_swar.max_s(a, b) : i8x16_swar.max_u(a, b);
-    if (sizeof<T>() == 2) return isSigned<T>() ? i16x8_swar.max_s(a, b) : i16x8_swar.max_u(a, b);
-    if (sizeof<T>() == 4 && !isFloat<T>()) return isSigned<T>() ? i32x4_swar.max_s(a, b) : i32x4_swar.max_u(a, b);
-    return pack(v64.max<T>(lo(a), lo(b)), v64.max<T>(hi(a), hi(b)));
+  @inline export function load32x2_s(ptr: usize, immOffset: u32 = 0, immAlign: u32 = 1): u64 {
+    const lo = i64x2_swar.extend_low_i32x4_s(load<u64>(ptr, immOffset, immAlign), 0);
+    return set_pair(lo, i64x2_swar.take_hi());
   }
   // @ts-expect-error: decorator
-  @inline export function pmin<T>(a: v128, b: v128): v128 { return min<T>(a, b); }
-  // @ts-expect-error: decorator
-  @inline export function pmax<T>(a: v128, b: v128): v128 { return max<T>(a, b); }
-  // @ts-expect-error: decorator
-  @inline export function dot<T extends i16>(a: v128, b: v128): v128 { return i32x4_swar.dot_i16x8_s(a, b); }
-  // @ts-expect-error: decorator
-  @inline export function avgr<T>(a: v128, b: v128): v128 { return sizeof<T>() == 1 ? i8x16_swar.avgr_u(a, b) : i16x8_swar.avgr_u(a, b); }
-  // @ts-expect-error: decorator
-  @inline export function abs<T>(a: v128): v128 {
-    if (sizeof<T>() == 1) return i8x16_swar.abs(a);
-    if (sizeof<T>() == 2) return i16x8_swar.abs(a);
-    if (sizeof<T>() == 4 && !isFloat<T>()) return i32x4_swar.abs(a);
-    return pack(v64.abs<T>(lo(a)), v64.abs<T>(hi(a)));
+  @inline export function load32x2_u(ptr: usize, immOffset: u32 = 0, immAlign: u32 = 1): u64 {
+    const lo = i64x2_swar.extend_low_i32x4_u(load<u64>(ptr, immOffset, immAlign), 0);
+    return set_pair(lo, i64x2_swar.take_hi());
   }
-  // @ts-expect-error: decorator
-  @inline export function sqrt<T>(a: v128): v128 { return pack(v64.sqrt<T>(lo(a)), v64.sqrt<T>(hi(a))); }
-  // @ts-expect-error: decorator
-  @inline export function ceil<T>(a: v128): v128 { return pack(v64.ceil<T>(lo(a)), v64.ceil<T>(hi(a))); }
-  // @ts-expect-error: decorator
-  @inline export function floor<T>(a: v128): v128 { return pack(v64.floor<T>(lo(a)), v64.floor<T>(hi(a))); }
-  // @ts-expect-error: decorator
-  @inline export function trunc<T>(a: v128): v128 { return pack(v64.trunc<T>(lo(a)), v64.trunc<T>(hi(a))); }
-  // @ts-expect-error: decorator
-  @inline export function nearest<T>(a: v128): v128 { return pack(v64.nearest<T>(lo(a)), v64.nearest<T>(hi(a))); }
-  // @ts-expect-error: decorator
-  @inline export function eq<T>(a: v128, b: v128): v128 {
-    if (sizeof<T>() == 1) return i8x16_swar.eq(a, b);
-    if (sizeof<T>() == 2) return i16x8_swar.eq(a, b);
-    if (sizeof<T>() == 4 && !isFloat<T>()) return i32x4_swar.eq(a, b);
-    if (sizeof<T>() == 8 && !isFloat<T>()) return i64x2_swar.eq(a, b);
-    return pack(v64.eq<T>(lo(a), lo(b)), v64.eq<T>(hi(a), hi(b)));
-  }
-  // @ts-expect-error: decorator
-  @inline export function ne<T>(a: v128, b: v128): v128 { return not(eq<T>(a, b)); }
-  // @ts-expect-error: decorator
-  @inline export function lt<T>(a: v128, b: v128): v128 {
-    if (sizeof<T>() == 1) return isSigned<T>() ? i8x16_swar.lt_s(a, b) : i8x16_swar.lt_u(a, b);
-    if (sizeof<T>() == 2) return isSigned<T>() ? i16x8_swar.lt_s(a, b) : i16x8_swar.lt_u(a, b);
-    if (sizeof<T>() == 4 && !isFloat<T>()) return isSigned<T>() ? i32x4_swar.lt_s(a, b) : i32x4_swar.lt_u(a, b);
-    if (sizeof<T>() == 8 && !isFloat<T>()) return i64x2_swar.lt_s(a, b);
-    return pack(v64.lt<T>(lo(a), lo(b)), v64.lt<T>(hi(a), hi(b)));
-  }
-  // @ts-expect-error: decorator
-  @inline export function le<T>(a: v128, b: v128): v128 {
-    if (sizeof<T>() == 1) return isSigned<T>() ? i8x16_swar.le_s(a, b) : i8x16_swar.le_u(a, b);
-    if (sizeof<T>() == 2) return isSigned<T>() ? i16x8_swar.le_s(a, b) : i16x8_swar.le_u(a, b);
-    if (sizeof<T>() == 4 && !isFloat<T>()) return isSigned<T>() ? i32x4_swar.le_s(a, b) : i32x4_swar.le_u(a, b);
-    if (sizeof<T>() == 8 && !isFloat<T>()) return i64x2_swar.le_s(a, b);
-    return not(lt<T>(b, a));
-  }
-  // @ts-expect-error: decorator
-  @inline export function gt<T>(a: v128, b: v128): v128 { return lt<T>(b, a); }
-  // @ts-expect-error: decorator
-  @inline export function ge<T>(a: v128, b: v128): v128 { return le<T>(b, a); }
 
   // @ts-expect-error: decorator
-  @inline export function convert<TFrom>(a: v128): v128 {
-    return pack(v64.convert<TFrom>(lo(a)), v64.convert<TFrom>(hi(a)));
+  @inline export function load_splat<T>(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): u64 { return splat<T>(load<T>(ptr, immOffset, immAlign)); }
+  // @ts-expect-error: decorator
+  @inline export function load8_splat(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): u64 { return splat<i8>(load<i8>(ptr, immOffset, immAlign)); }
+  // @ts-expect-error: decorator
+  @inline export function load16_splat(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): u64 { return splat<i16>(load<i16>(ptr, immOffset, immAlign)); }
+  // @ts-expect-error: decorator
+  @inline export function load32_splat(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): u64 { return splat<i32>(load<i32>(ptr, immOffset, immAlign)); }
+  // @ts-expect-error: decorator
+  @inline export function load64_splat(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): u64 { return splat<i64>(load<i64>(ptr, immOffset, immAlign)); }
+  // @ts-expect-error: decorator
+  @inline export function load32_zero(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): u64 { return load_zero<u32>(ptr, immOffset, immAlign); }
+  // @ts-expect-error: decorator
+  @inline export function load64_zero(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): u64 { return load_zero<u64>(ptr, immOffset, immAlign); }
+  // @ts-expect-error: decorator
+  @inline export function load8_lane(ptr: usize, vecLo: u64, vecHi: u64, idx: u8, immOffset: usize = 0, immAlign: usize = 1): u64 { return load_lane<i8>(ptr, vecLo, vecHi, idx, immOffset, immAlign); }
+  // @ts-expect-error: decorator
+  @inline export function load16_lane(ptr: usize, vecLo: u64, vecHi: u64, idx: u8, immOffset: usize = 0, immAlign: usize = 1): u64 { return load_lane<i16>(ptr, vecLo, vecHi, idx, immOffset, immAlign); }
+  // @ts-expect-error: decorator
+  @inline export function load32_lane(ptr: usize, vecLo: u64, vecHi: u64, idx: u8, immOffset: usize = 0, immAlign: usize = 1): u64 { return load_lane<i32>(ptr, vecLo, vecHi, idx, immOffset, immAlign); }
+  // @ts-expect-error: decorator
+  @inline export function load64_lane(ptr: usize, vecLo: u64, vecHi: u64, idx: u8, immOffset: usize = 0, immAlign: usize = 1): u64 { return load_lane<i64>(ptr, vecLo, vecHi, idx, immOffset, immAlign); }
+  // @ts-expect-error: decorator
+  @inline export function store8_lane(ptr: usize, vecLo: u64, vecHi: u64, idx: u8, immOffset: usize = 0, immAlign: usize = 1): void { store_lane<i8>(ptr, vecLo, vecHi, idx, immOffset, immAlign); }
+  // @ts-expect-error: decorator
+  @inline export function store16_lane(ptr: usize, vecLo: u64, vecHi: u64, idx: u8, immOffset: usize = 0, immAlign: usize = 1): void { store_lane<i16>(ptr, vecLo, vecHi, idx, immOffset, immAlign); }
+  // @ts-expect-error: decorator
+  @inline export function store32_lane(ptr: usize, vecLo: u64, vecHi: u64, idx: u8, immOffset: usize = 0, immAlign: usize = 1): void { store_lane<i32>(ptr, vecLo, vecHi, idx, immOffset, immAlign); }
+  // @ts-expect-error: decorator
+  @inline export function store64_lane(ptr: usize, vecLo: u64, vecHi: u64, idx: u8, immOffset: usize = 0, immAlign: usize = 1): void { store_lane<i64>(ptr, vecLo, vecHi, idx, immOffset, immAlign); }
+
+  // @ts-expect-error: decorator
+  @inline export function add<T>(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
+    if (sizeof<T>() == 1) return set_pair(i8x16_swar.add(aLo, aHi, bLo, bHi), i8x16_swar.take_hi());
+    if (sizeof<T>() == 2) return set_pair(i16x8_swar.add(aLo, aHi, bLo, bHi), i16x8_swar.take_hi());
+    if (sizeof<T>() == 4 && !isFloat<T>()) return set_pair(i32x4_swar.add(aLo, aHi, bLo, bHi), i32x4_swar.take_hi());
+    if (sizeof<T>() == 8 && !isFloat<T>()) return set_pair(i64x2_swar.add(aLo, aHi, bLo, bHi), i64x2_swar.take_hi());
+    return set_pair(v64.add<T>(aLo as v64, bLo as v64) as u64, v64.add<T>(aHi as v64, bHi as v64) as u64);
   }
   // @ts-expect-error: decorator
-  @inline export function convert_low<TFrom>(a: v128): v128 {
+  @inline export function sub<T>(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
+    if (sizeof<T>() == 1) return set_pair(i8x16_swar.sub(aLo, aHi, bLo, bHi), i8x16_swar.take_hi());
+    if (sizeof<T>() == 2) return set_pair(i16x8_swar.sub(aLo, aHi, bLo, bHi), i16x8_swar.take_hi());
+    if (sizeof<T>() == 4 && !isFloat<T>()) return set_pair(i32x4_swar.sub(aLo, aHi, bLo, bHi), i32x4_swar.take_hi());
+    if (sizeof<T>() == 8 && !isFloat<T>()) return set_pair(i64x2_swar.sub(aLo, aHi, bLo, bHi), i64x2_swar.take_hi());
+    return set_pair(v64.sub<T>(aLo as v64, bLo as v64) as u64, v64.sub<T>(aHi as v64, bHi as v64) as u64);
+  }
+  // @ts-expect-error: decorator
+  @inline export function mul<T>(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
+    if (sizeof<T>() == 1) return set_pair(i8x16_swar.mul(aLo, aHi, bLo, bHi), i8x16_swar.take_hi());
+    if (sizeof<T>() == 2) return set_pair(i16x8_swar.mul(aLo, aHi, bLo, bHi), i16x8_swar.take_hi());
+    if (sizeof<T>() == 4 && !isFloat<T>()) return set_pair(i32x4_swar.mul(aLo, aHi, bLo, bHi), i32x4_swar.take_hi());
+    if (sizeof<T>() == 8 && !isFloat<T>()) return set_pair(i64x2_swar.mul(aLo, aHi, bLo, bHi), i64x2_swar.take_hi());
+    return set_pair(v64.mul<T>(aLo as v64, bLo as v64) as u64, v64.mul<T>(aHi as v64, bHi as v64) as u64);
+  }
+  // @ts-expect-error: decorator
+  @inline export function div<T>(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(v64.div<T>(aLo as v64, bLo as v64) as u64, v64.div<T>(aHi as v64, bHi as v64) as u64); }
+  // @ts-expect-error: decorator
+  @inline export function neg<T>(aLo: u64, aHi: u64): u64 {
+    if (sizeof<T>() == 1) return set_pair(i8x16_swar.neg(aLo, aHi), i8x16_swar.take_hi());
+    if (sizeof<T>() == 2) return set_pair(i16x8_swar.neg(aLo, aHi), i16x8_swar.take_hi());
+    if (sizeof<T>() == 4 && !isFloat<T>()) return set_pair(i32x4_swar.neg(aLo, aHi), i32x4_swar.take_hi());
+    if (sizeof<T>() == 8 && !isFloat<T>()) return set_pair(i64x2_swar.neg(aLo, aHi), i64x2_swar.take_hi());
+    return set_pair(v64.neg<T>(aLo as v64) as u64, v64.neg<T>(aHi as v64) as u64);
+  }
+  // @ts-expect-error: decorator
+  @inline export function add_sat<T>(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
+    if (sizeof<T>() == 1) return isSigned<T>() ? set_pair(i8x16_swar.add_sat_s(aLo, aHi, bLo, bHi), i8x16_swar.take_hi()) : set_pair(i8x16_swar.add_sat_u(aLo, aHi, bLo, bHi), i8x16_swar.take_hi());
+    if (sizeof<T>() == 2) return isSigned<T>() ? set_pair(i16x8_swar.add_sat_s(aLo, aHi, bLo, bHi), i16x8_swar.take_hi()) : set_pair(i16x8_swar.add_sat_u(aLo, aHi, bLo, bHi), i16x8_swar.take_hi());
+    return add<T>(aLo, aHi, bLo, bHi);
+  }
+  // @ts-expect-error: decorator
+  @inline export function sub_sat<T>(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
+    if (sizeof<T>() == 1) return isSigned<T>() ? set_pair(i8x16_swar.sub_sat_s(aLo, aHi, bLo, bHi), i8x16_swar.take_hi()) : set_pair(i8x16_swar.sub_sat_u(aLo, aHi, bLo, bHi), i8x16_swar.take_hi());
+    if (sizeof<T>() == 2) return isSigned<T>() ? set_pair(i16x8_swar.sub_sat_s(aLo, aHi, bLo, bHi), i16x8_swar.take_hi()) : set_pair(i16x8_swar.sub_sat_u(aLo, aHi, bLo, bHi), i16x8_swar.take_hi());
+    return sub<T>(aLo, aHi, bLo, bHi);
+  }
+  // @ts-expect-error: decorator
+  @inline export function shl<T>(aLo: u64, aHi: u64, b: i32): u64 {
+    if (sizeof<T>() == 1) return set_pair(i8x16_swar.shl(aLo, aHi, b), i8x16_swar.take_hi());
+    if (sizeof<T>() == 2) return set_pair(i16x8_swar.shl(aLo, aHi, b), i16x8_swar.take_hi());
+    if (sizeof<T>() == 4) return set_pair(i32x4_swar.shl(aLo, aHi, b), i32x4_swar.take_hi());
+    return set_pair(i64x2_swar.shl(aLo, aHi, b), i64x2_swar.take_hi());
+  }
+  // @ts-expect-error: decorator
+  @inline export function shr<T>(aLo: u64, aHi: u64, b: i32): u64 {
+    if (sizeof<T>() == 1) return isSigned<T>() ? set_pair(i8x16_swar.shr_s(aLo, aHi, b), i8x16_swar.take_hi()) : set_pair(i8x16_swar.shr_u(aLo, aHi, b), i8x16_swar.take_hi());
+    if (sizeof<T>() == 2) return isSigned<T>() ? set_pair(i16x8_swar.shr_s(aLo, aHi, b), i16x8_swar.take_hi()) : set_pair(i16x8_swar.shr_u(aLo, aHi, b), i16x8_swar.take_hi());
+    if (sizeof<T>() == 4) return isSigned<T>() ? set_pair(i32x4_swar.shr_s(aLo, aHi, b), i32x4_swar.take_hi()) : set_pair(i32x4_swar.shr_u(aLo, aHi, b), i32x4_swar.take_hi());
+    return isSigned<T>() ? set_pair(i64x2_swar.shr_s(aLo, aHi, b), i64x2_swar.take_hi()) : set_pair(i64x2_swar.shr_u(aLo, aHi, b), i64x2_swar.take_hi());
+  }
+
+  // @ts-expect-error: decorator
+  @inline export function and(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(aLo & bLo, aHi & bHi); }
+  // @ts-expect-error: decorator
+  @inline export function or(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(aLo | bLo, aHi | bHi); }
+  // @ts-expect-error: decorator
+  @inline export function xor(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(aLo ^ bLo, aHi ^ bHi); }
+  // @ts-expect-error: decorator
+  @inline export function andnot(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(aLo & ~bLo, aHi & ~bHi); }
+  // @ts-expect-error: decorator
+  @inline export function not(aLo: u64, aHi: u64): u64 { return set_pair(~aLo, ~aHi); }
+  // @ts-expect-error: decorator
+  @inline export function bitselect(v1Lo: u64, v1Hi: u64, v2Lo: u64, v2Hi: u64, mLo: u64, mHi: u64): u64 { return set_pair((v1Lo & mLo) | (v2Lo & ~mLo), (v1Hi & mHi) | (v2Hi & ~mHi)); }
+  // @ts-expect-error: decorator
+  @inline export function any_true(aLo: u64, aHi: u64): bool { return aLo != 0 || aHi != 0; }
+  // @ts-expect-error: decorator
+  @inline export function all_true<T>(aLo: u64, aHi: u64): bool { return v64.all_true<T>(aLo as v64) && v64.all_true<T>(aHi as v64); }
+  // @ts-expect-error: decorator
+  @inline export function bitmask<T>(aLo: u64, aHi: u64): i32 {
+    if (sizeof<T>() == 1) return i8x16_swar.bitmask(aLo, aHi);
+    if (sizeof<T>() == 2) return i16x8_swar.bitmask(aLo, aHi);
+    if (sizeof<T>() == 4) return i32x4_swar.bitmask(aLo, aHi);
+    return i64x2_swar.bitmask(aLo, aHi);
+  }
+  // @ts-expect-error: decorator
+  @inline export function popcnt<T>(aLo: u64, aHi: u64): u64 {
+    if (sizeof<T>() == 1) return set_pair(i8x16_swar.popcnt(aLo, aHi), i8x16_swar.take_hi());
+    return set_pair(v64.popcnt<T>(aLo as v64) as u64, v64.popcnt<T>(aHi as v64) as u64);
+  }
+  // @ts-expect-error: decorator
+  @inline export function min<T>(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
+    if (sizeof<T>() == 1) return isSigned<T>() ? set_pair(i8x16_swar.min_s(aLo, aHi, bLo, bHi), i8x16_swar.take_hi()) : set_pair(i8x16_swar.min_u(aLo, aHi, bLo, bHi), i8x16_swar.take_hi());
+    if (sizeof<T>() == 2) return isSigned<T>() ? set_pair(i16x8_swar.min_s(aLo, aHi, bLo, bHi), i16x8_swar.take_hi()) : set_pair(i16x8_swar.min_u(aLo, aHi, bLo, bHi), i16x8_swar.take_hi());
+    if (sizeof<T>() == 4 && !isFloat<T>()) return isSigned<T>() ? set_pair(i32x4_swar.min_s(aLo, aHi, bLo, bHi), i32x4_swar.take_hi()) : set_pair(i32x4_swar.min_u(aLo, aHi, bLo, bHi), i32x4_swar.take_hi());
+    return set_pair(v64.min<T>(aLo as v64, bLo as v64) as u64, v64.min<T>(aHi as v64, bHi as v64) as u64);
+  }
+  // @ts-expect-error: decorator
+  @inline export function max<T>(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
+    if (sizeof<T>() == 1) return isSigned<T>() ? set_pair(i8x16_swar.max_s(aLo, aHi, bLo, bHi), i8x16_swar.take_hi()) : set_pair(i8x16_swar.max_u(aLo, aHi, bLo, bHi), i8x16_swar.take_hi());
+    if (sizeof<T>() == 2) return isSigned<T>() ? set_pair(i16x8_swar.max_s(aLo, aHi, bLo, bHi), i16x8_swar.take_hi()) : set_pair(i16x8_swar.max_u(aLo, aHi, bLo, bHi), i16x8_swar.take_hi());
+    if (sizeof<T>() == 4 && !isFloat<T>()) return isSigned<T>() ? set_pair(i32x4_swar.max_s(aLo, aHi, bLo, bHi), i32x4_swar.take_hi()) : set_pair(i32x4_swar.max_u(aLo, aHi, bLo, bHi), i32x4_swar.take_hi());
+    return set_pair(v64.max<T>(aLo as v64, bLo as v64) as u64, v64.max<T>(aHi as v64, bHi as v64) as u64);
+  }
+  // @ts-expect-error: decorator
+  @inline export function pmin<T>(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return min<T>(aLo, aHi, bLo, bHi); }
+  // @ts-expect-error: decorator
+  @inline export function pmax<T>(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return max<T>(aLo, aHi, bLo, bHi); }
+  // @ts-expect-error: decorator
+  @inline export function dot<T extends i16>(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(i32x4_swar.dot_i16x8_s(aLo, aHi, bLo, bHi), i32x4_swar.take_hi()); }
+  // @ts-expect-error: decorator
+  @inline export function avgr<T>(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return sizeof<T>() == 1 ? set_pair(i8x16_swar.avgr_u(aLo, aHi, bLo, bHi), i8x16_swar.take_hi()) : set_pair(i16x8_swar.avgr_u(aLo, aHi, bLo, bHi), i16x8_swar.take_hi()); }
+  // @ts-expect-error: decorator
+  @inline export function abs<T>(aLo: u64, aHi: u64): u64 {
+    if (sizeof<T>() == 1) return set_pair(i8x16_swar.abs(aLo, aHi), i8x16_swar.take_hi());
+    if (sizeof<T>() == 2) return set_pair(i16x8_swar.abs(aLo, aHi), i16x8_swar.take_hi());
+    if (sizeof<T>() == 4 && !isFloat<T>()) return set_pair(i32x4_swar.abs(aLo, aHi), i32x4_swar.take_hi());
+    if (sizeof<T>() == 8 && !isFloat<T>()) return set_pair(i64x2_swar.abs(aLo, aHi), i64x2_swar.take_hi());
+    return set_pair(v64.abs<T>(aLo as v64) as u64, v64.abs<T>(aHi as v64) as u64);
+  }
+  // @ts-expect-error: decorator
+  @inline export function sqrt<T>(aLo: u64, aHi: u64): u64 { return set_pair(v64.sqrt<T>(aLo as v64) as u64, v64.sqrt<T>(aHi as v64) as u64); }
+  // @ts-expect-error: decorator
+  @inline export function ceil<T>(aLo: u64, aHi: u64): u64 { return set_pair(v64.ceil<T>(aLo as v64) as u64, v64.ceil<T>(aHi as v64) as u64); }
+  // @ts-expect-error: decorator
+  @inline export function floor<T>(aLo: u64, aHi: u64): u64 { return set_pair(v64.floor<T>(aLo as v64) as u64, v64.floor<T>(aHi as v64) as u64); }
+  // @ts-expect-error: decorator
+  @inline export function trunc<T>(aLo: u64, aHi: u64): u64 { return set_pair(v64.trunc<T>(aLo as v64) as u64, v64.trunc<T>(aHi as v64) as u64); }
+  // @ts-expect-error: decorator
+  @inline export function nearest<T>(aLo: u64, aHi: u64): u64 { return set_pair(v64.nearest<T>(aLo as v64) as u64, v64.nearest<T>(aHi as v64) as u64); }
+  // @ts-expect-error: decorator
+  @inline export function eq<T>(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
+    if (sizeof<T>() == 1) return set_pair(i8x16_swar.eq(aLo, aHi, bLo, bHi), i8x16_swar.take_hi());
+    if (sizeof<T>() == 2) return set_pair(i16x8_swar.eq(aLo, aHi, bLo, bHi), i16x8_swar.take_hi());
+    if (sizeof<T>() == 4 && !isFloat<T>()) return set_pair(i32x4_swar.eq(aLo, aHi, bLo, bHi), i32x4_swar.take_hi());
+    if (sizeof<T>() == 8 && !isFloat<T>()) return set_pair(i64x2_swar.eq(aLo, aHi, bLo, bHi), i64x2_swar.take_hi());
+    return set_pair(v64.eq<T>(aLo as v64, bLo as v64) as u64, v64.eq<T>(aHi as v64, bHi as v64) as u64);
+  }
+  // @ts-expect-error: decorator
+  @inline export function ne<T>(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return not(eq<T>(aLo, aHi, bLo, bHi), take_hi()); }
+  // @ts-expect-error: decorator
+  @inline export function lt<T>(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
+    if (sizeof<T>() == 1) return isSigned<T>() ? set_pair(i8x16_swar.lt_s(aLo, aHi, bLo, bHi), i8x16_swar.take_hi()) : set_pair(i8x16_swar.lt_u(aLo, aHi, bLo, bHi), i8x16_swar.take_hi());
+    if (sizeof<T>() == 2) return isSigned<T>() ? set_pair(i16x8_swar.lt_s(aLo, aHi, bLo, bHi), i16x8_swar.take_hi()) : set_pair(i16x8_swar.lt_u(aLo, aHi, bLo, bHi), i16x8_swar.take_hi());
+    if (sizeof<T>() == 4 && !isFloat<T>()) return isSigned<T>() ? set_pair(i32x4_swar.lt_s(aLo, aHi, bLo, bHi), i32x4_swar.take_hi()) : set_pair(i32x4_swar.lt_u(aLo, aHi, bLo, bHi), i32x4_swar.take_hi());
+    if (sizeof<T>() == 8 && !isFloat<T>()) return set_pair(i64x2_swar.lt_s(aLo, aHi, bLo, bHi), i64x2_swar.take_hi());
+    return set_pair(v64.lt<T>(aLo as v64, bLo as v64) as u64, v64.lt<T>(aHi as v64, bHi as v64) as u64);
+  }
+  // @ts-expect-error: decorator
+  @inline export function le<T>(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
+    if (sizeof<T>() == 1) return isSigned<T>() ? set_pair(i8x16_swar.le_s(aLo, aHi, bLo, bHi), i8x16_swar.take_hi()) : set_pair(i8x16_swar.le_u(aLo, aHi, bLo, bHi), i8x16_swar.take_hi());
+    if (sizeof<T>() == 2) return isSigned<T>() ? set_pair(i16x8_swar.le_s(aLo, aHi, bLo, bHi), i16x8_swar.take_hi()) : set_pair(i16x8_swar.le_u(aLo, aHi, bLo, bHi), i16x8_swar.take_hi());
+    if (sizeof<T>() == 4 && !isFloat<T>()) return isSigned<T>() ? set_pair(i32x4_swar.le_s(aLo, aHi, bLo, bHi), i32x4_swar.take_hi()) : set_pair(i32x4_swar.le_u(aLo, aHi, bLo, bHi), i32x4_swar.take_hi());
+    if (sizeof<T>() == 8 && !isFloat<T>()) return set_pair(i64x2_swar.le_s(aLo, aHi, bLo, bHi), i64x2_swar.take_hi());
+    return not(lt<T>(bLo, bHi, aLo, aHi), take_hi());
+  }
+  // @ts-expect-error: decorator
+  @inline export function gt<T>(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return lt<T>(bLo, bHi, aLo, aHi); }
+  // @ts-expect-error: decorator
+  @inline export function ge<T>(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return le<T>(bLo, bHi, aLo, aHi); }
+
+  // @ts-expect-error: decorator
+  @inline export function convert<TFrom>(aLo: u64, aHi: u64): u64 { return set_pair(v64.convert<TFrom>(aLo as v64) as u64, v64.convert<TFrom>(aHi as v64) as u64); }
+  // @ts-expect-error: decorator
+  @inline export function convert_low<TFrom>(aLo: u64, aHi: u64): u64 {
     return f64pack(
-      isSigned<TFrom>() ? i32x4_swar.extract_lane(a, 0) as f64 : i32x4_swar.extract_lane(a, 0) as u32 as f64,
-      isSigned<TFrom>() ? i32x4_swar.extract_lane(a, 1) as f64 : i32x4_swar.extract_lane(a, 1) as u32 as f64
+      isSigned<TFrom>() ? i32x4_swar.extract_lane(aLo, aHi, 0) as f64 : i32x4_swar.extract_lane(aLo, aHi, 0) as u32 as f64,
+      isSigned<TFrom>() ? i32x4_swar.extract_lane(aLo, aHi, 1) as f64 : i32x4_swar.extract_lane(aLo, aHi, 1) as u32 as f64
     );
   }
   // @ts-expect-error: decorator
-  @inline export function trunc_sat<TTo>(a: v128): v128 { return pack(v64.trunc_sat<TTo>(lo(a)), v64.trunc_sat<TTo>(hi(a))); }
+  @inline export function trunc_sat<TTo>(aLo: u64, aHi: u64): u64 { return set_pair(v64.trunc_sat<TTo>(aLo as v64) as u64, v64.trunc_sat<TTo>(aHi as v64) as u64); }
   // @ts-expect-error: decorator
-  @inline export function trunc_sat_zero<TTo>(a: v128): v128 {
+  @inline export function trunc_sat_zero<TTo>(aLo: u64, aHi: u64): u64 {
     let out = i32x4_swar.splat(0);
-    out = i32x4_swar.replace_lane(
-      out,
-      0,
-      isSigned<TTo>() ? i32(extract_lane<f64>(a, 0)) : u32(select<f64>(0, extract_lane<f64>(a, 0), extract_lane<f64>(a, 0) < 0))
-    );
-    out = i32x4_swar.replace_lane(
-      out,
-      1,
-      isSigned<TTo>() ? i32(extract_lane<f64>(a, 1)) : u32(select<f64>(0, extract_lane<f64>(a, 1), extract_lane<f64>(a, 1) < 0))
-    );
-    return out;
+    let outHi = i32x4_swar.take_hi();
+    out = i32x4_swar.replace_lane(out, outHi, 0, isSigned<TTo>() ? i32(extract_lane<f64>(aLo, aHi, 0)) : u32(select<f64>(0, extract_lane<f64>(aLo, aHi, 0), extract_lane<f64>(aLo, aHi, 0) < 0)));
+    outHi = i32x4_swar.take_hi();
+    out = i32x4_swar.replace_lane(out, outHi, 1, isSigned<TTo>() ? i32(extract_lane<f64>(aLo, aHi, 1)) : u32(select<f64>(0, extract_lane<f64>(aLo, aHi, 1), extract_lane<f64>(aLo, aHi, 1) < 0)));
+    return set_pair(out, i32x4_swar.take_hi());
   }
   // @ts-expect-error: decorator
-  @inline export function narrow<TFrom>(a: v128, b: v128): v128 {
-    if (sizeof<TFrom>() == 2) return isSigned<TFrom>() ? i8x16_swar.narrow_i16x8_s(a, b) : i8x16_swar.narrow_i16x8_u(a, b);
-    return isSigned<TFrom>() ? i16x8_swar.narrow_i32x4_s(a, b) : i16x8_swar.narrow_i32x4_u(a, b);
+  @inline export function narrow<TFrom>(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
+    if (sizeof<TFrom>() == 2) return isSigned<TFrom>() ? set_pair(i8x16_swar.narrow_i16x8_s(aLo, aHi, bLo, bHi), i8x16_swar.take_hi()) : set_pair(i8x16_swar.narrow_i16x8_u(aLo, aHi, bLo, bHi), i8x16_swar.take_hi());
+    return isSigned<TFrom>() ? set_pair(i16x8_swar.narrow_i32x4_s(aLo, aHi, bLo, bHi), i16x8_swar.take_hi()) : set_pair(i16x8_swar.narrow_i32x4_u(aLo, aHi, bLo, bHi), i16x8_swar.take_hi());
   }
   // @ts-expect-error: decorator
-  @inline export function extend_low<TFrom>(a: v128): v128 {
-    if (sizeof<TFrom>() == 1) return isSigned<TFrom>() ? i16x8_swar.extend_low_i8x16_s(a) : i16x8_swar.extend_low_i8x16_u(a);
-    if (sizeof<TFrom>() == 2) return isSigned<TFrom>() ? i32x4_swar.extend_low_i16x8_s(a) : i32x4_swar.extend_low_i16x8_u(a);
-    return isSigned<TFrom>() ? i64x2_swar.extend_low_i32x4_s(a) : i64x2_swar.extend_low_i32x4_u(a);
+  @inline export function extend_low<TFrom>(aLo: u64, aHi: u64): u64 {
+    if (sizeof<TFrom>() == 1) return isSigned<TFrom>() ? set_pair(i16x8_swar.extend_low_i8x16_s(aLo, aHi), i16x8_swar.take_hi()) : set_pair(i16x8_swar.extend_low_i8x16_u(aLo, aHi), i16x8_swar.take_hi());
+    if (sizeof<TFrom>() == 2) return isSigned<TFrom>() ? set_pair(i32x4_swar.extend_low_i16x8_s(aLo, aHi), i32x4_swar.take_hi()) : set_pair(i32x4_swar.extend_low_i16x8_u(aLo, aHi), i32x4_swar.take_hi());
+    return isSigned<TFrom>() ? set_pair(i64x2_swar.extend_low_i32x4_s(aLo, aHi), i64x2_swar.take_hi()) : set_pair(i64x2_swar.extend_low_i32x4_u(aLo, aHi), i64x2_swar.take_hi());
   }
   // @ts-expect-error: decorator
-  @inline export function extend_high<TFrom>(a: v128): v128 {
-    if (sizeof<TFrom>() == 1) return isSigned<TFrom>() ? i16x8_swar.extend_high_i8x16_s(a) : i16x8_swar.extend_high_i8x16_u(a);
-    if (sizeof<TFrom>() == 2) return isSigned<TFrom>() ? i32x4_swar.extend_high_i16x8_s(a) : i32x4_swar.extend_high_i16x8_u(a);
-    return isSigned<TFrom>() ? i64x2_swar.extend_high_i32x4_s(a) : i64x2_swar.extend_high_i32x4_u(a);
+  @inline export function extend_high<TFrom>(aLo: u64, aHi: u64): u64 {
+    if (sizeof<TFrom>() == 1) return isSigned<TFrom>() ? set_pair(i16x8_swar.extend_high_i8x16_s(aLo, aHi), i16x8_swar.take_hi()) : set_pair(i16x8_swar.extend_high_i8x16_u(aLo, aHi), i16x8_swar.take_hi());
+    if (sizeof<TFrom>() == 2) return isSigned<TFrom>() ? set_pair(i32x4_swar.extend_high_i16x8_s(aLo, aHi), i32x4_swar.take_hi()) : set_pair(i32x4_swar.extend_high_i16x8_u(aLo, aHi), i32x4_swar.take_hi());
+    return isSigned<TFrom>() ? set_pair(i64x2_swar.extend_high_i32x4_s(aLo, aHi), i64x2_swar.take_hi()) : set_pair(i64x2_swar.extend_high_i32x4_u(aLo, aHi), i64x2_swar.take_hi());
   }
   // @ts-expect-error: decorator
-  @inline export function extadd_pairwise<TFrom>(a: v128): v128 {
-    if (sizeof<TFrom>() == 1) return isSigned<TFrom>() ? i16x8_swar.extadd_pairwise_i8x16_s(a) : i16x8_swar.extadd_pairwise_i8x16_u(a);
-    return isSigned<TFrom>() ? i32x4_swar.extadd_pairwise_i16x8_s(a) : i32x4_swar.extadd_pairwise_i16x8_u(a);
+  @inline export function extadd_pairwise<TFrom>(aLo: u64, aHi: u64): u64 {
+    if (sizeof<TFrom>() == 1) return isSigned<TFrom>() ? set_pair(i16x8_swar.extadd_pairwise_i8x16_s(aLo, aHi), i16x8_swar.take_hi()) : set_pair(i16x8_swar.extadd_pairwise_i8x16_u(aLo, aHi), i16x8_swar.take_hi());
+    return isSigned<TFrom>() ? set_pair(i32x4_swar.extadd_pairwise_i16x8_s(aLo, aHi), i32x4_swar.take_hi()) : set_pair(i32x4_swar.extadd_pairwise_i16x8_u(aLo, aHi), i32x4_swar.take_hi());
   }
   // @ts-expect-error: decorator
-  @inline export function demote_zero<T extends f64 = f64>(a: v128): v128 {
+  @inline export function demote_zero<T extends f64 = f64>(aLo: u64, aHi: u64): u64 {
     let out = i32x4_swar.splat(0);
-    out = i32x4_swar.replace_lane(out, 0, reinterpret<i32>(extract_lane<f64>(a, 0) as f32));
-    out = i32x4_swar.replace_lane(out, 1, reinterpret<i32>(extract_lane<f64>(a, 1) as f32));
-    return out;
+    let outHi = i32x4_swar.take_hi();
+    out = i32x4_swar.replace_lane(out, outHi, 0, reinterpret<i32>(extract_lane<f64>(aLo, aHi, 0) as f32));
+    outHi = i32x4_swar.take_hi();
+    out = i32x4_swar.replace_lane(out, outHi, 1, reinterpret<i32>(extract_lane<f64>(aLo, aHi, 1) as f32));
+    return set_pair(out, i32x4_swar.take_hi());
   }
   // @ts-expect-error: decorator
-  @inline export function promote_low<T extends f32 = f32>(a: v128): v128 {
-    return f64pack(extract_lane<f32>(a, 0) as f64, extract_lane<f32>(a, 1) as f64);
+  @inline export function promote_low<T extends f32 = f32>(aLo: u64, aHi: u64): u64 {
+    return f64pack(extract_lane<f32>(aLo, aHi, 0) as f64, extract_lane<f32>(aLo, aHi, 1) as f64);
   }
   // @ts-expect-error: decorator
-  @inline export function q15mulr_sat<T extends i16>(a: v128, b: v128): v128 { return i16x8_swar.q15mulr_sat_s(a, b); }
+  @inline export function q15mulr_sat<T extends i16>(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(i16x8_swar.q15mulr_sat_s(aLo, aHi, bLo, bHi), i16x8_swar.take_hi()); }
   // @ts-expect-error: decorator
-  @inline export function extmul_low<T>(a: v128, b: v128): v128 {
-    if (sizeof<T>() == 1) return isSigned<T>() ? i16x8_swar.extmul_low_i8x16_s(a, b) : i16x8_swar.extmul_low_i8x16_u(a, b);
-    if (sizeof<T>() == 2) return isSigned<T>() ? i32x4_swar.extmul_low_i16x8_s(a, b) : i32x4_swar.extmul_low_i16x8_u(a, b);
-    return isSigned<T>() ? i64x2_swar.extmul_low_i32x4_s(a, b) : i64x2_swar.extmul_low_i32x4_u(a, b);
+  @inline export function extmul_low<T>(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
+    if (sizeof<T>() == 1) return isSigned<T>() ? set_pair(i16x8_swar.extmul_low_i8x16_s(aLo, aHi, bLo, bHi), i16x8_swar.take_hi()) : set_pair(i16x8_swar.extmul_low_i8x16_u(aLo, aHi, bLo, bHi), i16x8_swar.take_hi());
+    if (sizeof<T>() == 2) return isSigned<T>() ? set_pair(i32x4_swar.extmul_low_i16x8_s(aLo, aHi, bLo, bHi), i32x4_swar.take_hi()) : set_pair(i32x4_swar.extmul_low_i16x8_u(aLo, aHi, bLo, bHi), i32x4_swar.take_hi());
+    return isSigned<T>() ? set_pair(i64x2_swar.extmul_low_i32x4_s(aLo, aHi, bLo, bHi), i64x2_swar.take_hi()) : set_pair(i64x2_swar.extmul_low_i32x4_u(aLo, aHi, bLo, bHi), i64x2_swar.take_hi());
   }
   // @ts-expect-error: decorator
-  @inline export function extmul_high<T>(a: v128, b: v128): v128 {
-    if (sizeof<T>() == 1) return isSigned<T>() ? i16x8_swar.extmul_high_i8x16_s(a, b) : i16x8_swar.extmul_high_i8x16_u(a, b);
-    if (sizeof<T>() == 2) return isSigned<T>() ? i32x4_swar.extmul_high_i16x8_s(a, b) : i32x4_swar.extmul_high_i16x8_u(a, b);
-    return isSigned<T>() ? i64x2_swar.extmul_high_i32x4_s(a, b) : i64x2_swar.extmul_high_i32x4_u(a, b);
+  @inline export function extmul_high<T>(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
+    if (sizeof<T>() == 1) return isSigned<T>() ? set_pair(i16x8_swar.extmul_high_i8x16_s(aLo, aHi, bLo, bHi), i16x8_swar.take_hi()) : set_pair(i16x8_swar.extmul_high_i8x16_u(aLo, aHi, bLo, bHi), i16x8_swar.take_hi());
+    if (sizeof<T>() == 2) return isSigned<T>() ? set_pair(i32x4_swar.extmul_high_i16x8_s(aLo, aHi, bLo, bHi), i32x4_swar.take_hi()) : set_pair(i32x4_swar.extmul_high_i16x8_u(aLo, aHi, bLo, bHi), i32x4_swar.take_hi());
+    return isSigned<T>() ? set_pair(i64x2_swar.extmul_high_i32x4_s(aLo, aHi, bLo, bHi), i64x2_swar.take_hi()) : set_pair(i64x2_swar.extmul_high_i32x4_u(aLo, aHi, bLo, bHi), i64x2_swar.take_hi());
   }
 
   // @ts-expect-error: decorator
-  @inline export function relaxed_swizzle(a: v128, s: v128): v128 { return i8x16_swar.relaxed_swizzle(a, s); }
+  @inline export function relaxed_swizzle(aLo: u64, aHi: u64, sLo: u64, sHi: u64): u64 { return set_pair(i8x16_swar.relaxed_swizzle(aLo, aHi, sLo, sHi), i8x16_swar.take_hi()); }
   // @ts-expect-error: decorator
-  @inline export function relaxed_trunc<T>(a: v128): v128 { return trunc_sat<T>(a); }
+  @inline export function relaxed_trunc<T>(aLo: u64, aHi: u64): u64 { return trunc_sat<T>(aLo, aHi); }
   // @ts-expect-error: decorator
-  @inline export function relaxed_trunc_zero<T>(a: v128): v128 { return trunc_sat_zero<T>(a); }
+  @inline export function relaxed_trunc_zero<T>(aLo: u64, aHi: u64): u64 { return trunc_sat_zero<T>(aLo, aHi); }
   // @ts-expect-error: decorator
-  @inline export function relaxed_madd<T>(a: v128, b: v128, c: v128): v128 { return add<T>(mul<T>(a, b), c); }
-  // @ts-expect-error: decorator
-  @inline export function relaxed_nmadd<T>(a: v128, b: v128, c: v128): v128 { return add<T>(neg<T>(mul<T>(a, b)), c); }
-  // @ts-expect-error: decorator
-  @inline export function relaxed_laneselect<T>(a: v128, b: v128, m: v128): v128 {
-    if (sizeof<T>() == 1) return i8x16_swar.relaxed_laneselect(a, b, m);
-    if (sizeof<T>() == 2) return i16x8_swar.relaxed_laneselect(a, b, m);
-    if (sizeof<T>() == 4) return i32x4_swar.relaxed_laneselect(a, b, m);
-    return i64x2_swar.relaxed_laneselect(a, b, m);
+  @inline export function relaxed_madd<T>(aLo: u64, aHi: u64, bLo: u64, bHi: u64, cLo: u64, cHi: u64): u64 {
+    const m = mul<T>(aLo, aHi, bLo, bHi); const mHi = take_hi();
+    return add<T>(m, mHi, cLo, cHi);
   }
   // @ts-expect-error: decorator
-  @inline export function relaxed_min<T>(a: v128, b: v128): v128 { return min<T>(a, b); }
+  @inline export function relaxed_nmadd<T>(aLo: u64, aHi: u64, bLo: u64, bHi: u64, cLo: u64, cHi: u64): u64 {
+    const m = mul<T>(aLo, aHi, bLo, bHi); const mHi = take_hi();
+    const n = neg<T>(m, mHi); const nHi = take_hi();
+    return add<T>(n, nHi, cLo, cHi);
+  }
   // @ts-expect-error: decorator
-  @inline export function relaxed_max<T>(a: v128, b: v128): v128 { return max<T>(a, b); }
+  @inline export function relaxed_laneselect<T>(aLo: u64, aHi: u64, bLo: u64, bHi: u64, mLo: u64, mHi: u64): u64 {
+    if (sizeof<T>() == 1) return set_pair(i8x16_swar.relaxed_laneselect(aLo, aHi, bLo, bHi, mLo, mHi), i8x16_swar.take_hi());
+    if (sizeof<T>() == 2) return set_pair(i16x8_swar.relaxed_laneselect(aLo, aHi, bLo, bHi, mLo, mHi), i16x8_swar.take_hi());
+    if (sizeof<T>() == 4) return set_pair(i32x4_swar.relaxed_laneselect(aLo, aHi, bLo, bHi, mLo, mHi), i32x4_swar.take_hi());
+    return set_pair(i64x2_swar.relaxed_laneselect(aLo, aHi, bLo, bHi, mLo, mHi), i64x2_swar.take_hi());
+  }
   // @ts-expect-error: decorator
-  @inline export function relaxed_q15mulr<T>(a: v128, b: v128): v128 { return q15mulr_sat<i16>(a, b); }
+  @inline export function relaxed_min<T>(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return min<T>(aLo, aHi, bLo, bHi); }
   // @ts-expect-error: decorator
-  @inline export function relaxed_dot<T>(a: v128, b: v128): v128 { return dot<i16>(a, b); }
+  @inline export function relaxed_max<T>(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return max<T>(aLo, aHi, bLo, bHi); }
   // @ts-expect-error: decorator
-  @inline export function relaxed_dot_add<T>(a: v128, b: v128, c: v128): v128 { return add<i32>(dot<i16>(a, b), c); }
+  @inline export function relaxed_q15mulr<T>(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return q15mulr_sat<i16>(aLo, aHi, bLo, bHi); }
+  // @ts-expect-error: decorator
+  @inline export function relaxed_dot<T>(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return dot<i16>(aLo, aHi, bLo, bHi); }
+  // @ts-expect-error: decorator
+  @inline export function relaxed_dot_add<T>(aLo: u64, aHi: u64, bLo: u64, bHi: u64, cLo: u64, cHi: u64): u64 {
+    const d = dot<i16>(aLo, aHi, bLo, bHi); const dHi = take_hi();
+    return add<i32>(d, dHi, cLo, cHi);
+  }
 }

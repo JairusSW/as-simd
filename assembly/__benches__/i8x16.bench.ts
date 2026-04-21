@@ -1,308 +1,287 @@
-import { i8x16_swar } from "../v128/i8x16_swar";
-import { i8x16 as i8x16w, i64x2 as i64x2w, v128 as v128w } from "../v128";
+import { i8x16_swar } from "../index";
+import { bench_common } from "./common";
 import { bench, blackbox, dumpToFile } from "./lib/bench";
 
-const OPS: u64 = 25_000_000;
+const OPS: u64 = bench_common.DEFAULT_OPS;
+const IO_PTR: usize = memory.data(256);
 
 // @ts-expect-error: decorator
-@inline function make128(lo: u64, hi: u64): v128 {
-  return i64x2(lo as i64, hi as i64);
-}
-
-let s0: v128 = make128(0x0123456789abcdef, 0x8899aabbccddeeff);
-let s1: v128 = make128(0xfedcba9876543210, 0x7766554433221100);
-let s2: v128 = make128(0xaa55aa55aa55aa55, 0x55aa55aa55aa55aa);
-const IO_PTR: usize = memory.data(160);
-
+@inline function next64(): u64 { return bench_common.next64(); }
 // @ts-expect-error: decorator
-@inline function next128(x: v128): v128 {
-  x = v128w.xor(x, i64x2w.shl(x, 13));
-  x = v128w.xor(x, i64x2w.shr_u(x, 7));
-  x = v128w.xor(x, i64x2w.shl(x, 17));
-  return x;
-}
-
+@inline function next128(): u64 { return bench_common.next128(); }
 // @ts-expect-error: decorator
-@inline function nextVecA(): v128 {
-  s0 = next128(s0);
-  s1 = next128(s1);
-  return blackbox(v128w.xor(s0, i64x2w.shr_u(s1, 17)));
-}
-
+@inline function next128Hi(): u64 { return bench_common.next128Hi(); }
 // @ts-expect-error: decorator
-@inline function nextVecB(): v128 {
-  s1 = next128(s1);
-  s2 = next128(s2);
-  return blackbox(v128w.xor(s1, i64x2w.shl(s2, 13)));
-}
-
+@inline function nextA(): u64 { return blackbox(bench_common.nextA()); }
 // @ts-expect-error: decorator
-@inline function nextVecM(): v128 {
-  s2 = next128(s2);
-  return blackbox(v128w.xor(s2, i8x16w.splat(0x55)));
-}
-
+@inline function nextB(): u64 { return blackbox(bench_common.nextB()); }
 // @ts-expect-error: decorator
-@inline function nextA64(): u64 {
-  let v = nextVecA();
-  return <u64>i64x2w.extract_lane(v, 0);
-}
-
+@inline function nextM(): u64 { return blackbox(bench_common.nextM()); }
 // @ts-expect-error: decorator
-@inline function nextI8(): i8 {
-  return <i8>(nextA64() & 0xff);
-}
-
+@inline function nextI8(): i8 { return nextA() as i8; }
 // @ts-expect-error: decorator
-@inline function nextShift(): i32 {
-  return <i32>(nextA64() & 7);
-}
-
+@inline function nextLane16(): u8 { return (nextA() & 15) as u8; }
 // @ts-expect-error: decorator
-@inline function nextPtr16(): usize {
-  return IO_PTR + ((nextA64() as usize) & 0x70);
-}
-
+@inline function nextShift(): i32 { return (nextA() & 7) as i32; }
 // @ts-expect-error: decorator
-@inline function nextLen16(): i32 {
-  return <i32>(nextA64() & 31) - 8;
+@inline function nextVec(): v128 {
+  return i8x16(
+    nextI8(), nextI8(), nextI8(), nextI8(), nextI8(), nextI8(), nextI8(), nextI8(),
+    nextI8(), nextI8(), nextI8(), nextI8(), nextI8(), nextI8(), nextI8(), nextI8(),
+  );
 }
 
 bench("i8x16.splat", () => {
-  blackbox(i8x16w.splat(nextI8()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.splat(nextI8()));
+  else { blackbox(i8x16_swar.splat(nextI8())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "splat");
 
-bench("i8x16.load", () => {
-  blackbox(load<v128>(nextPtr16()));
-}, OPS, 16);
-dumpToFile("i8x16", "load");
-
-bench("i8x16.store", () => {
-  store<v128>(nextPtr16(), nextVecA());
-  blackbox(load<u64>(IO_PTR));
-}, OPS, 16);
-dumpToFile("i8x16", "store");
-
-bench("i8x16.loadPartial", () => {
-  blackbox(i8x16_swar.loadPartial(nextPtr16(), nextLen16(), 0, 1, nextI8()));
-}, OPS, 16);
-dumpToFile("i8x16", "load-partial");
-
-bench("i8x16.storePartial", () => {
-  i8x16_swar.storePartial(nextPtr16(), nextVecA(), nextLen16(), 0, 1);
-  blackbox(load<u64>(IO_PTR));
-}, OPS, 16);
-dumpToFile("i8x16", "store-partial");
-
 bench("i8x16.extract_lane_s", () => {
-  blackbox(i8x16w.extract_lane_s(nextVecA(), 7));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.extract_lane_s(nextVec(), 0));
+  else blackbox(i8x16_swar.extract_lane_s(next128(), next128Hi(), nextLane16()));
 }, OPS, 8);
 dumpToFile("i8x16", "extract-lane-s");
 
 bench("i8x16.extract_lane_u", () => {
-  blackbox(i8x16w.extract_lane_u(nextVecA(), 7));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.extract_lane_u(nextVec(), 0));
+  else blackbox(i8x16_swar.extract_lane_u(next128(), next128Hi(), nextLane16()));
 }, OPS, 8);
 dumpToFile("i8x16", "extract-lane-u");
 
 bench("i8x16.replace_lane", () => {
-  blackbox(i8x16w.replace_lane(nextVecA(), 7, nextI8()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.replace_lane(nextVec(), 0, nextI8()));
+  else { blackbox(i8x16_swar.replace_lane(next128(), next128Hi(), nextLane16(), nextI8())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "replace-lane");
 
 bench("i8x16.add", () => {
-  blackbox(i8x16w.add(nextVecA(), nextVecB()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.add(nextVec(), nextVec()));
+  else { blackbox(i8x16_swar.add(next128(), next128Hi(), next128(), next128Hi())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "add");
 
 bench("i8x16.sub", () => {
-  blackbox(i8x16w.sub(nextVecA(), nextVecB()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.sub(nextVec(), nextVec()));
+  else { blackbox(i8x16_swar.sub(next128(), next128Hi(), next128(), next128Hi())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "sub");
 
 bench("i8x16.mul", () => {
-  blackbox(i8x16_swar.mul(nextVecA(), nextVecB()));
+  blackbox(i8x16_swar.mul(next128(), next128Hi(), next128(), next128Hi()));
+  blackbox(i8x16_swar.take_hi());
 }, OPS, 8);
 dumpToFile("i8x16", "mul");
 
 bench("i8x16.min_s", () => {
-  blackbox(i8x16w.min_s(nextVecA(), nextVecB()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.min_s(nextVec(), nextVec()));
+  else { blackbox(i8x16_swar.min_s(next128(), next128Hi(), next128(), next128Hi())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "min-s");
 
 bench("i8x16.min_u", () => {
-  blackbox(i8x16w.min_u(nextVecA(), nextVecB()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.min_u(nextVec(), nextVec()));
+  else { blackbox(i8x16_swar.min_u(next128(), next128Hi(), next128(), next128Hi())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "min-u");
 
 bench("i8x16.max_s", () => {
-  blackbox(i8x16w.max_s(nextVecA(), nextVecB()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.max_s(nextVec(), nextVec()));
+  else { blackbox(i8x16_swar.max_s(next128(), next128Hi(), next128(), next128Hi())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "max-s");
 
 bench("i8x16.max_u", () => {
-  blackbox(i8x16w.max_u(nextVecA(), nextVecB()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.max_u(nextVec(), nextVec()));
+  else { blackbox(i8x16_swar.max_u(next128(), next128Hi(), next128(), next128Hi())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "max-u");
 
 bench("i8x16.avgr_u", () => {
-  blackbox(i8x16w.avgr_u(nextVecA(), nextVecB()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.avgr_u(nextVec(), nextVec()));
+  else { blackbox(i8x16_swar.avgr_u(next128(), next128Hi(), next128(), next128Hi())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "avgr-u");
 
 bench("i8x16.abs", () => {
-  blackbox(i8x16w.abs(nextVecA()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.abs(nextVec()));
+  else { blackbox(i8x16_swar.abs(next128(), next128Hi())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "abs");
 
 bench("i8x16.neg", () => {
-  blackbox(i8x16w.neg(nextVecA()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.neg(nextVec()));
+  else { blackbox(i8x16_swar.neg(next128(), next128Hi())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "neg");
 
 bench("i8x16.add_sat_s", () => {
-  blackbox(i8x16w.add_sat_s(nextVecA(), nextVecB()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.add_sat_s(nextVec(), nextVec()));
+  else { blackbox(i8x16_swar.add_sat_s(next128(), next128Hi(), next128(), next128Hi())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "add-sat-s");
 
 bench("i8x16.add_sat_u", () => {
-  blackbox(i8x16w.add_sat_u(nextVecA(), nextVecB()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.add_sat_u(nextVec(), nextVec()));
+  else { blackbox(i8x16_swar.add_sat_u(next128(), next128Hi(), next128(), next128Hi())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "add-sat-u");
 
 bench("i8x16.sub_sat_s", () => {
-  blackbox(i8x16w.sub_sat_s(nextVecA(), nextVecB()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.sub_sat_s(nextVec(), nextVec()));
+  else { blackbox(i8x16_swar.sub_sat_s(next128(), next128Hi(), next128(), next128Hi())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "sub-sat-s");
 
 bench("i8x16.sub_sat_u", () => {
-  blackbox(i8x16w.sub_sat_u(nextVecA(), nextVecB()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.sub_sat_u(nextVec(), nextVec()));
+  else { blackbox(i8x16_swar.sub_sat_u(next128(), next128Hi(), next128(), next128Hi())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "sub-sat-u");
 
 bench("i8x16.shl", () => {
-  blackbox(i8x16w.shl(nextVecA(), nextShift()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.shl(nextVec(), nextShift()));
+  else { blackbox(i8x16_swar.shl(next128(), next128Hi(), nextShift())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "shl");
 
 bench("i8x16.shr_s", () => {
-  blackbox(i8x16w.shr_s(nextVecA(), nextShift()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.shr_s(nextVec(), nextShift()));
+  else { blackbox(i8x16_swar.shr_s(next128(), next128Hi(), nextShift())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "shr-s");
 
 bench("i8x16.shr_u", () => {
-  blackbox(i8x16w.shr_u(nextVecA(), nextShift()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.shr_u(nextVec(), nextShift()));
+  else { blackbox(i8x16_swar.shr_u(next128(), next128Hi(), nextShift())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "shr-u");
 
 bench("i8x16.all_true", () => {
-  blackbox(i8x16w.all_true(nextVecA()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.all_true(nextVec()));
+  else blackbox(i8x16_swar.all_true(next128(), next128Hi()));
 }, OPS, 8);
 dumpToFile("i8x16", "all-true");
 
 bench("i8x16.bitmask", () => {
-  blackbox(i8x16w.bitmask(nextVecA()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.bitmask(nextVec()));
+  else blackbox(i8x16_swar.bitmask(next128(), next128Hi()));
 }, OPS, 8);
 dumpToFile("i8x16", "bitmask");
 
 bench("i8x16.eq", () => {
-  blackbox(i8x16w.eq(nextVecA(), nextVecB()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.eq(nextVec(), nextVec()));
+  else { blackbox(i8x16_swar.eq(next128(), next128Hi(), next128(), next128Hi())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "eq");
 
 bench("i8x16.ne", () => {
-  blackbox(i8x16w.ne(nextVecA(), nextVecB()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.ne(nextVec(), nextVec()));
+  else { blackbox(i8x16_swar.ne(next128(), next128Hi(), next128(), next128Hi())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "ne");
 
 bench("i8x16.lt_s", () => {
-  blackbox(i8x16w.lt_s(nextVecA(), nextVecB()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.lt_s(nextVec(), nextVec()));
+  else { blackbox(i8x16_swar.lt_s(next128(), next128Hi(), next128(), next128Hi())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "lt-s");
 
 bench("i8x16.lt_u", () => {
-  blackbox(i8x16w.lt_u(nextVecA(), nextVecB()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.lt_u(nextVec(), nextVec()));
+  else { blackbox(i8x16_swar.lt_u(next128(), next128Hi(), next128(), next128Hi())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "lt-u");
 
 bench("i8x16.le_s", () => {
-  blackbox(i8x16w.le_s(nextVecA(), nextVecB()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.le_s(nextVec(), nextVec()));
+  else { blackbox(i8x16_swar.le_s(next128(), next128Hi(), next128(), next128Hi())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "le-s");
 
 bench("i8x16.le_u", () => {
-  blackbox(i8x16w.le_u(nextVecA(), nextVecB()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.le_u(nextVec(), nextVec()));
+  else { blackbox(i8x16_swar.le_u(next128(), next128Hi(), next128(), next128Hi())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "le-u");
 
 bench("i8x16.gt_s", () => {
-  blackbox(i8x16w.gt_s(nextVecA(), nextVecB()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.gt_s(nextVec(), nextVec()));
+  else { blackbox(i8x16_swar.gt_s(next128(), next128Hi(), next128(), next128Hi())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "gt-s");
 
 bench("i8x16.gt_u", () => {
-  blackbox(i8x16w.gt_u(nextVecA(), nextVecB()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.gt_u(nextVec(), nextVec()));
+  else { blackbox(i8x16_swar.gt_u(next128(), next128Hi(), next128(), next128Hi())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "gt-u");
 
 bench("i8x16.ge_s", () => {
-  blackbox(i8x16w.ge_s(nextVecA(), nextVecB()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.ge_s(nextVec(), nextVec()));
+  else { blackbox(i8x16_swar.ge_s(next128(), next128Hi(), next128(), next128Hi())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "ge-s");
 
 bench("i8x16.ge_u", () => {
-  blackbox(i8x16w.ge_u(nextVecA(), nextVecB()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.ge_u(nextVec(), nextVec()));
+  else { blackbox(i8x16_swar.ge_u(next128(), next128Hi(), next128(), next128Hi())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "ge-u");
 
 bench("i8x16.narrow_i16x8_s", () => {
-  blackbox(i8x16w.narrow_i16x8_s(nextVecA(), nextVecB()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.narrow_i16x8_s(i16x8.splat(nextI8() as i16), i16x8.splat(nextI8() as i16)));
+  else { blackbox(i8x16_swar.narrow_i16x8_s(next128(), next128Hi(), next128(), next128Hi())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "narrow-i16x8-s");
 
 bench("i8x16.narrow_i16x8_u", () => {
-  blackbox(i8x16w.narrow_i16x8_u(nextVecA(), nextVecB()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.narrow_i16x8_u(i16x8.splat(nextI8() as i16), i16x8.splat(nextI8() as i16)));
+  else { blackbox(i8x16_swar.narrow_i16x8_u(next128(), next128Hi(), next128(), next128Hi())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "narrow-i16x8-u");
 
 bench("i8x16.shuffle", () => {
-  blackbox(i8x16w.shuffle(
-    nextVecA(), nextVecB(),
-    0, 17, 2, 19, 4, 21, 6, 23,
-    8, 25, 10, 27, 12, 29, 14, 31
-  ));
-}, OPS, 8);
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.shuffle(nextVec(), nextVec(), 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0));
+  else {
+    blackbox(i8x16_swar.shuffle(next128(), next128Hi(), next128(), next128Hi(), 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0));
+    blackbox(i8x16_swar.take_hi());
+  }
+}, OPS, 16);
 dumpToFile("i8x16", "shuffle");
 
 bench("i8x16.swizzle", () => {
-  blackbox(i8x16w.swizzle(nextVecA(), nextVecB()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.swizzle(nextVec(), nextVec()));
+  else { blackbox(i8x16_swar.swizzle(next128(), next128Hi(), next128(), next128Hi())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "swizzle");
 
 if (ASC_FEATURE_RELAXED_SIMD) {
   bench("i8x16.relaxed_swizzle", () => {
-    blackbox(i8x16_swar.relaxed_swizzle(nextVecA(), nextVecB()));
+    blackbox(i8x16.relaxed_swizzle(nextVec(), nextVec()));
   }, OPS, 8);
   dumpToFile("i8x16", "relaxed-swizzle");
 
   bench("i8x16.relaxed_laneselect", () => {
-    blackbox(i8x16_swar.relaxed_laneselect(nextVecA(), nextVecB(), nextVecM()));
-  }, OPS, 48);
+    blackbox(i8x16.relaxed_laneselect(nextVec(), nextVec(), nextVec()));
+  }, OPS, 24);
   dumpToFile("i8x16", "relaxed-laneselect");
 } else {
-  // Fallback keeps output shape stable for runtimes without relaxed SIMD.
   bench("i8x16.relaxed_swizzle", () => {
-    blackbox(i8x16w.swizzle(nextVecA(), nextVecB()));
+    blackbox(i8x16_swar.relaxed_swizzle(next128(), next128Hi(), next128(), next128Hi()));
+    blackbox(i8x16_swar.take_hi());
   }, OPS, 8);
   dumpToFile("i8x16", "relaxed-swizzle");
 
   bench("i8x16.relaxed_laneselect", () => {
-    blackbox(v128w.bitselect(nextVecA(), nextVecB(), nextVecM()));
-  }, OPS, 48);
+    blackbox(i8x16_swar.relaxed_laneselect(next128(), next128Hi(), next128(), next128Hi(), nextM(), nextB()));
+    blackbox(i8x16_swar.take_hi());
+  }, OPS, 24);
   dumpToFile("i8x16", "relaxed-laneselect");
 }
 
 bench("i8x16.popcnt", () => {
-  blackbox(i8x16w.popcnt(nextVecA()));
+  if (ASC_FEATURE_SIMD) blackbox(i8x16.popcnt(nextVec()));
+  else { blackbox(i8x16_swar.popcnt(next128(), next128Hi())); blackbox(i8x16_swar.take_hi()); }
 }, OPS, 8);
 dumpToFile("i8x16", "popcnt");
