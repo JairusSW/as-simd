@@ -1,10 +1,10 @@
 // @ts-ignore: decorator allowed
 @external("env", "writeFile")
-export declare function writeFile(fileName: string, data: string): void;
+declare function hostWriteFile(fileName: string, data: string): void;
 
 // @ts-ignore: decorator allowed
 @external("env", "readFile")
-export declare function readFileBuffer(filePath: string): ArrayBuffer;
+declare function hostReadFileBuffer(filePath: string): ArrayBuffer;
 
 const SIMD_ENABLED = ASC_FEATURE_SIMD ? "simd" : "swar";
 
@@ -40,6 +40,8 @@ const PREALLOC_BYTES: usize = isDefined(BENCH_PREALLOC_BYTES) ? BENCH_PREALLOC_B
 let preallocated = false;
 // @ts-expect-error: BENCH_SAMPLES may be undefined.
 const BENCH_SAMPLE_COUNT: i32 = isDefined(BENCH_SAMPLES) ? BENCH_SAMPLES : 7;
+// @ts-expect-error: AS_BENCH_RUNTIME_LLVM may be undefined.
+const BENCH_RUNTIME_LLVM: bool = isDefined(AS_BENCH_RUNTIME_LLVM);
 
 // @ts-expect-error: @inline is a valid decorator
 @inline function preallocateMemory(): void {
@@ -176,11 +178,18 @@ export function dumpToFile(suite: string, type: string): void {
     + "\"ops_median\":" + r.ops_median.toString() + ","
     + "\"ops_stddev\":" + r.ops_stddev.toString()
     + "}";
-  writeFile("./build/logs/as/" + SIMD_ENABLED + "/" + suite + "." + type + ".as.json", json);
+  const fileName = "./build/logs/as/" + SIMD_ENABLED + "/" + suite + "." + type + ".as.json";
+  if (BENCH_RUNTIME_LLVM) {
+    // LLVM/WASI path: emit structured payload to stdout for scripts/run-bench.sh.
+    console.log("__AS_BENCH_JSON__" + fileName + "\t" + json);
+    return;
+  }
+  hostWriteFile(fileName, json);
 }
 
 export function readFile(path: string): string {
-  return String.UTF8.decode(readFileBuffer(path));
+  if (BENCH_RUNTIME_LLVM) return "";
+  return String.UTF8.decode(hostReadFileBuffer(path));
 }
 
 function formatNumber(n: u64): string {

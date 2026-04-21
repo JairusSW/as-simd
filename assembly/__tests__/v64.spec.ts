@@ -33,39 +33,42 @@ describe("v64 generic api", () => {
       const a = nextU64();
       const b = nextU64();
       const s = <i32>(nextU32() & 31);
-
-      expect<u64>(v64.add<i8>(a, b)).toBe(i8x8.add(a, b));
-      expect<u64>(v64.sub<i8>(a, b)).toBe(i8x8.sub(a, b));
-      expect<u64>(v64.mul<i8>(a, b)).toBe(i8x8.mul(a, b));
-      expect<u64>(v64.min<i8>(a, b)).toBe(i8x8.min_s(a, b));
-      expect<u64>(v64.max<u8>(a, b)).toBe(i8x8.max_u(a, b));
-      expect<u64>(v64.add_sat<i8>(a, b)).toBe(i8x8.add_sat_s(a, b));
-      expect<u64>(v64.sub_sat<u8>(a, b)).toBe(i8x8.sub_sat_u(a, b));
-      expect<u64>(v64.shl<i8>(a, s)).toBe(i8x8.shl(a, s));
-      expect<u64>(v64.shr<i8>(a, s)).toBe(i8x8.shr_s(a, s));
-      expect<u64>(v64.popcnt<i8>(a)).toBe(i8x8.popcnt(a));
-      expect<u64>(v64.eq<i8>(a, b)).toBe(i8x8.eq(a, b));
-      expect<u64>(v64.lt<u8>(a, b)).toBe(i8x8.lt_u(a, b));
       const m = nextU64();
-      expect<u64>(v64.relaxed_laneselect<i8>(a, b, m)).toBe(i8x8.relaxed_laneselect(a, b, m));
+      let mismatches = 0;
 
-      expect<u64>(v64.add<i16>(a, b)).toBe(i16x4.add(a, b));
-      expect<u64>(v64.mul<i16>(a, b)).toBe(i16x4.mul(a, b));
-      expect<u64>(v64.min<i16>(a, b)).toBe(i16x4.min_s(a, b));
-      expect<u64>(v64.max<u16>(a, b)).toBe(i16x4.max_u(a, b));
-      expect<u64>(v64.shl<i16>(a, s)).toBe(i16x4.shl(a, s));
-      expect<u64>(v64.shr<u16>(a, s)).toBe(i16x4.shr_u(a, s));
-      expect<u64>(v64.eq<i16>(a, b)).toBe(i16x4.eq(a, b));
-      expect<u64>(v64.lt<i16>(a, b)).toBe(i16x4.lt_s(a, b));
+      mismatches += v64.add<i8>(a, b) != i8x8.add(a, b) ? 1 : 0;
+      mismatches += v64.sub<i8>(a, b) != i8x8.sub(a, b) ? 1 : 0;
+      mismatches += v64.mul<i8>(a, b) != i8x8.mul(a, b) ? 1 : 0;
+      mismatches += v64.min<i8>(a, b) != i8x8.min_s(a, b) ? 1 : 0;
+      mismatches += v64.max<u8>(a, b) != i8x8.max_u(a, b) ? 1 : 0;
+      mismatches += v64.add_sat<i8>(a, b) != i8x8.add_sat_s(a, b) ? 1 : 0;
+      mismatches += v64.sub_sat<u8>(a, b) != i8x8.sub_sat_u(a, b) ? 1 : 0;
+      mismatches += v64.shl<i8>(a, s) != i8x8.shl(a, s) ? 1 : 0;
+      mismatches += v64.shr<i8>(a, s) != i8x8.shr_s(a, s) ? 1 : 0;
+      mismatches += v64.popcnt<i8>(a) != i8x8.popcnt(a) ? 1 : 0;
+      mismatches += v64.eq<i8>(a, b) != i8x8.eq(a, b) ? 1 : 0;
+      mismatches += v64.lt<u8>(a, b) != i8x8.lt_u(a, b) ? 1 : 0;
+      mismatches += v64.relaxed_laneselect<i8>(a, b, m) != i8x8.relaxed_laneselect(a, b, m) ? 1 : 0;
 
-      expect<u64>(v64.add<i32>(a, b)).toBe(i32x2.add(a, b));
-      expect<u64>(v64.mul<i32>(a, b)).toBe(i32x2.mul(a, b));
-      expect<u64>(v64.min<i32>(a, b)).toBe(i32x2.min_s(a, b));
-      expect<u64>(v64.max<u32>(a, b)).toBe(i32x2.max_u(a, b));
-      expect<u64>(v64.shl<i32>(a, s)).toBe(i32x2.shl(a, s));
-      expect<u64>(v64.shr<u32>(a, s)).toBe(i32x2.shr_u(a, s));
-      expect<u64>(v64.eq<i32>(a, b)).toBe(i32x2.eq(a, b));
-      expect<u64>(v64.lt<i32>(a, b)).toBe(i32x2.lt_s(a, b));
+      mismatches += v64.add<i16>(a, b) != i16x4.add(a, b) ? 1 : 0;
+      mismatches += v64.mul<i16>(a, b) != i16x4.mul(a, b) ? 1 : 0;
+      mismatches += v64.min<i16>(a, b) != i16x4.min_s(a, b) ? 1 : 0;
+      mismatches += v64.max<u16>(a, b) != i16x4.max_u(a, b) ? 1 : 0;
+      mismatches += v64.shl<i16>(a, s) != i16x4.shl(a, s) ? 1 : 0;
+      mismatches += v64.shr<u16>(a, s) != i16x4.shr_u(a, s) ? 1 : 0;
+      mismatches += v64.eq<i16>(a, b) != i16x4.eq(a, b) ? 1 : 0;
+      mismatches += v64.lt<i16>(a, b) != i16x4.lt_s(a, b) ? 1 : 0;
+
+      mismatches += v64.add<i32>(a, b) != i32x2.add(a, b) ? 1 : 0;
+      mismatches += v64.mul<i32>(a, b) != i32x2.mul(a, b) ? 1 : 0;
+      mismatches += v64.min<i32>(a, b) != i32x2.min_s(a, b) ? 1 : 0;
+      mismatches += v64.max<u32>(a, b) != i32x2.max_u(a, b) ? 1 : 0;
+      mismatches += v64.shl<i32>(a, s) != i32x2.shl(a, s) ? 1 : 0;
+      mismatches += v64.shr<u32>(a, s) != i32x2.shr_u(a, s) ? 1 : 0;
+      mismatches += v64.eq<i32>(a, b) != i32x2.eq(a, b) ? 1 : 0;
+      mismatches += v64.lt<i32>(a, b) != i32x2.lt_s(a, b) ? 1 : 0;
+
+      expect<i32>(mismatches).toBe(0);
     }
   });
 
