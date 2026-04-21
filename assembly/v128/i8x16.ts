@@ -263,4 +263,102 @@ export namespace i8x16_swar {
   @inline export function ge_s(a: v128, b: v128): v128 { if (ASC_FEATURE_SIMD) return i8x16.ge_s(a, b); return pack(i8x8.ge_s(lo(a), lo(b)), i8x8.ge_s(hi(a), hi(b))); }
   // @ts-expect-error: decorator
   @inline export function ge_u(a: v128, b: v128): v128 { if (ASC_FEATURE_SIMD) return i8x16.ge_u(a, b); return pack(i8x8.ge_u(lo(a), lo(b)), i8x8.ge_u(hi(a), hi(b))); }
+
+  // @ts-expect-error: decorator
+  @inline export function narrow_i16x8_s(a: v128, b: v128): v128 {
+    if (ASC_FEATURE_SIMD) return i8x16.narrow_i16x8_s(a, b);
+    return pack(i8x8.narrow_i16x4_s(lo(a), hi(a)), i8x8.narrow_i16x4_s(lo(b), hi(b)));
+  }
+  // @ts-expect-error: decorator
+  @inline export function narrow_i16x8_u(a: v128, b: v128): v128 {
+    if (ASC_FEATURE_SIMD) return i8x16.narrow_i16x8_u(a, b);
+    return pack(i8x8.narrow_i16x4_u(lo(a), hi(a)), i8x8.narrow_i16x4_u(lo(b), hi(b)));
+  }
+  // @ts-expect-error: decorator
+  @inline export function shuffle(a: v128, b: v128, l0: u8, l1: u8, l2: u8, l3: u8, l4: u8, l5: u8, l6: u8, l7: u8, l8: u8, l9: u8, l10: u8, l11: u8, l12: u8, l13: u8, l14: u8, l15: u8): v128 {
+    let r = splat(0);
+    r = replace_lane(r, 0, ((l0 & 31) < 16 ? extract_lane_s(a, l0) : extract_lane_s(b, (l0 - 16) & 15)));
+    r = replace_lane(r, 1, ((l1 & 31) < 16 ? extract_lane_s(a, l1) : extract_lane_s(b, (l1 - 16) & 15)));
+    r = replace_lane(r, 2, ((l2 & 31) < 16 ? extract_lane_s(a, l2) : extract_lane_s(b, (l2 - 16) & 15)));
+    r = replace_lane(r, 3, ((l3 & 31) < 16 ? extract_lane_s(a, l3) : extract_lane_s(b, (l3 - 16) & 15)));
+    r = replace_lane(r, 4, ((l4 & 31) < 16 ? extract_lane_s(a, l4) : extract_lane_s(b, (l4 - 16) & 15)));
+    r = replace_lane(r, 5, ((l5 & 31) < 16 ? extract_lane_s(a, l5) : extract_lane_s(b, (l5 - 16) & 15)));
+    r = replace_lane(r, 6, ((l6 & 31) < 16 ? extract_lane_s(a, l6) : extract_lane_s(b, (l6 - 16) & 15)));
+    r = replace_lane(r, 7, ((l7 & 31) < 16 ? extract_lane_s(a, l7) : extract_lane_s(b, (l7 - 16) & 15)));
+    r = replace_lane(r, 8, ((l8 & 31) < 16 ? extract_lane_s(a, l8) : extract_lane_s(b, (l8 - 16) & 15)));
+    r = replace_lane(r, 9, ((l9 & 31) < 16 ? extract_lane_s(a, l9) : extract_lane_s(b, (l9 - 16) & 15)));
+    r = replace_lane(r, 10, ((l10 & 31) < 16 ? extract_lane_s(a, l10) : extract_lane_s(b, (l10 - 16) & 15)));
+    r = replace_lane(r, 11, ((l11 & 31) < 16 ? extract_lane_s(a, l11) : extract_lane_s(b, (l11 - 16) & 15)));
+    r = replace_lane(r, 12, ((l12 & 31) < 16 ? extract_lane_s(a, l12) : extract_lane_s(b, (l12 - 16) & 15)));
+    r = replace_lane(r, 13, ((l13 & 31) < 16 ? extract_lane_s(a, l13) : extract_lane_s(b, (l13 - 16) & 15)));
+    r = replace_lane(r, 14, ((l14 & 31) < 16 ? extract_lane_s(a, l14) : extract_lane_s(b, (l14 - 16) & 15)));
+    r = replace_lane(r, 15, ((l15 & 31) < 16 ? extract_lane_s(a, l15) : extract_lane_s(b, (l15 - 16) & 15)));
+    return r;
+  }
+  // @ts-expect-error: decorator
+  @inline export function swizzle(a: v128, s: v128): v128 {
+    if (ASC_FEATURE_SIMD) return i8x16.swizzle(a, s);
+    let r = splat(0);
+    const i0 = extract_lane_u(s, 0); r = replace_lane(r, 0, i0 < 16 ? extract_lane_s(a, i0) : 0);
+    const i1 = extract_lane_u(s, 1); r = replace_lane(r, 1, i1 < 16 ? extract_lane_s(a, i1) : 0);
+    const i2 = extract_lane_u(s, 2); r = replace_lane(r, 2, i2 < 16 ? extract_lane_s(a, i2) : 0);
+    const i3 = extract_lane_u(s, 3); r = replace_lane(r, 3, i3 < 16 ? extract_lane_s(a, i3) : 0);
+    const i4 = extract_lane_u(s, 4); r = replace_lane(r, 4, i4 < 16 ? extract_lane_s(a, i4) : 0);
+    const i5 = extract_lane_u(s, 5); r = replace_lane(r, 5, i5 < 16 ? extract_lane_s(a, i5) : 0);
+    const i6 = extract_lane_u(s, 6); r = replace_lane(r, 6, i6 < 16 ? extract_lane_s(a, i6) : 0);
+    const i7 = extract_lane_u(s, 7); r = replace_lane(r, 7, i7 < 16 ? extract_lane_s(a, i7) : 0);
+    const i8 = extract_lane_u(s, 8); r = replace_lane(r, 8, i8 < 16 ? extract_lane_s(a, i8) : 0);
+    const i9 = extract_lane_u(s, 9); r = replace_lane(r, 9, i9 < 16 ? extract_lane_s(a, i9) : 0);
+    const i10 = extract_lane_u(s, 10); r = replace_lane(r, 10, i10 < 16 ? extract_lane_s(a, i10) : 0);
+    const i11 = extract_lane_u(s, 11); r = replace_lane(r, 11, i11 < 16 ? extract_lane_s(a, i11) : 0);
+    const i12 = extract_lane_u(s, 12); r = replace_lane(r, 12, i12 < 16 ? extract_lane_s(a, i12) : 0);
+    const i13 = extract_lane_u(s, 13); r = replace_lane(r, 13, i13 < 16 ? extract_lane_s(a, i13) : 0);
+    const i14 = extract_lane_u(s, 14); r = replace_lane(r, 14, i14 < 16 ? extract_lane_s(a, i14) : 0);
+    const i15 = extract_lane_u(s, 15); r = replace_lane(r, 15, i15 < 16 ? extract_lane_s(a, i15) : 0);
+    return r;
+  }
+  // @ts-expect-error: decorator
+  @inline export function relaxed_swizzle(a: v128, s: v128): v128 {
+    if (ASC_FEATURE_SIMD) return i8x16.relaxed_swizzle(a, s);
+    let r = splat(0);
+    r = replace_lane(r, 0, extract_lane_s(a, extract_lane_u(s, 0) & 15));
+    r = replace_lane(r, 1, extract_lane_s(a, extract_lane_u(s, 1) & 15));
+    r = replace_lane(r, 2, extract_lane_s(a, extract_lane_u(s, 2) & 15));
+    r = replace_lane(r, 3, extract_lane_s(a, extract_lane_u(s, 3) & 15));
+    r = replace_lane(r, 4, extract_lane_s(a, extract_lane_u(s, 4) & 15));
+    r = replace_lane(r, 5, extract_lane_s(a, extract_lane_u(s, 5) & 15));
+    r = replace_lane(r, 6, extract_lane_s(a, extract_lane_u(s, 6) & 15));
+    r = replace_lane(r, 7, extract_lane_s(a, extract_lane_u(s, 7) & 15));
+    r = replace_lane(r, 8, extract_lane_s(a, extract_lane_u(s, 8) & 15));
+    r = replace_lane(r, 9, extract_lane_s(a, extract_lane_u(s, 9) & 15));
+    r = replace_lane(r, 10, extract_lane_s(a, extract_lane_u(s, 10) & 15));
+    r = replace_lane(r, 11, extract_lane_s(a, extract_lane_u(s, 11) & 15));
+    r = replace_lane(r, 12, extract_lane_s(a, extract_lane_u(s, 12) & 15));
+    r = replace_lane(r, 13, extract_lane_s(a, extract_lane_u(s, 13) & 15));
+    r = replace_lane(r, 14, extract_lane_s(a, extract_lane_u(s, 14) & 15));
+    r = replace_lane(r, 15, extract_lane_s(a, extract_lane_u(s, 15) & 15));
+    return r;
+  }
+  // @ts-expect-error: decorator
+  @inline export function relaxed_laneselect(a: v128, b: v128, m: v128): v128 {
+    if (ASC_FEATURE_SIMD) return i8x16.relaxed_laneselect(a, b, m);
+    let r = splat(0);
+    r = replace_lane(r, 0, extract_lane_s(m, 0) < 0 ? extract_lane_s(a, 0) : extract_lane_s(b, 0));
+    r = replace_lane(r, 1, extract_lane_s(m, 1) < 0 ? extract_lane_s(a, 1) : extract_lane_s(b, 1));
+    r = replace_lane(r, 2, extract_lane_s(m, 2) < 0 ? extract_lane_s(a, 2) : extract_lane_s(b, 2));
+    r = replace_lane(r, 3, extract_lane_s(m, 3) < 0 ? extract_lane_s(a, 3) : extract_lane_s(b, 3));
+    r = replace_lane(r, 4, extract_lane_s(m, 4) < 0 ? extract_lane_s(a, 4) : extract_lane_s(b, 4));
+    r = replace_lane(r, 5, extract_lane_s(m, 5) < 0 ? extract_lane_s(a, 5) : extract_lane_s(b, 5));
+    r = replace_lane(r, 6, extract_lane_s(m, 6) < 0 ? extract_lane_s(a, 6) : extract_lane_s(b, 6));
+    r = replace_lane(r, 7, extract_lane_s(m, 7) < 0 ? extract_lane_s(a, 7) : extract_lane_s(b, 7));
+    r = replace_lane(r, 8, extract_lane_s(m, 8) < 0 ? extract_lane_s(a, 8) : extract_lane_s(b, 8));
+    r = replace_lane(r, 9, extract_lane_s(m, 9) < 0 ? extract_lane_s(a, 9) : extract_lane_s(b, 9));
+    r = replace_lane(r, 10, extract_lane_s(m, 10) < 0 ? extract_lane_s(a, 10) : extract_lane_s(b, 10));
+    r = replace_lane(r, 11, extract_lane_s(m, 11) < 0 ? extract_lane_s(a, 11) : extract_lane_s(b, 11));
+    r = replace_lane(r, 12, extract_lane_s(m, 12) < 0 ? extract_lane_s(a, 12) : extract_lane_s(b, 12));
+    r = replace_lane(r, 13, extract_lane_s(m, 13) < 0 ? extract_lane_s(a, 13) : extract_lane_s(b, 13));
+    r = replace_lane(r, 14, extract_lane_s(m, 14) < 0 ? extract_lane_s(a, 14) : extract_lane_s(b, 14));
+    r = replace_lane(r, 15, extract_lane_s(m, 15) < 0 ? extract_lane_s(a, 15) : extract_lane_s(b, 15));
+    return r;
+  }
 }

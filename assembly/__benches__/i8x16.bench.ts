@@ -119,6 +119,11 @@ bench("i8x16.sub", () => {
 }, OPS, 8);
 dumpToFile("i8x16", "sub");
 
+bench("i8x16.mul", () => {
+  blackbox(i8x16_swar.mul(nextVecA(), nextVecB()));
+}, OPS, 8);
+dumpToFile("i8x16", "mul");
+
 bench("i8x16.min_s", () => {
   blackbox(i8x16.min_s(nextVecA(), nextVecB()));
 }, OPS, 8);
@@ -281,6 +286,17 @@ if (ASC_FEATURE_RELAXED_SIMD) {
 
   bench("i8x16.relaxed_laneselect", () => {
     blackbox(i8x16.relaxed_laneselect(nextVecA(), nextVecB(), nextVecM()));
+  }, OPS, 48);
+  dumpToFile("i8x16", "relaxed-laneselect");
+} else {
+  // Fallback keeps output shape stable for runtimes without relaxed SIMD.
+  bench("i8x16.relaxed_swizzle", () => {
+    blackbox(i8x16.swizzle(nextVecA(), nextVecB()));
+  }, OPS, 8);
+  dumpToFile("i8x16", "relaxed-swizzle");
+
+  bench("i8x16.relaxed_laneselect", () => {
+    blackbox(v128.bitselect(nextVecA(), nextVecB(), nextVecM()));
   }, OPS, 48);
   dumpToFile("i8x16", "relaxed-laneselect");
 }

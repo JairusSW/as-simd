@@ -1,7 +1,7 @@
 export type v32 = u32;
 export type v16 = u16;
 export type v8 = u8;
-export type { v64 } from "./v64";
+export { v64 } from "./v64";
 export { i8x8 } from "./v64/i8x8";
 export { i16x4 } from "./v64/i16x4";
 export { i32x2 } from "./v64/i32x2";
@@ -13,3 +13,5 @@ export { i8x16_swar as i8x16 } from "./v128/i8x16";
 export { i16x8_swar as i16x8 } from "./v128/i16x8";
 export { i32x4_swar as i32x4 } from "./v128/i32x4";
 export { i64x2_swar as i64x2 } from "./v128/i64x2";
+export { v128_swar } from "./v128/v128";
+export { v128_swar as v128 } from "./v128/v128";

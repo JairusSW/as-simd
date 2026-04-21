@@ -59,6 +59,18 @@ export namespace i64x2_swar {
     return p(l(a) - l(b), h(a) - h(b));
   }
   // @ts-expect-error: decorator
+  @inline export function mul(a: v128, b: v128): v128 {
+    if (ASC_FEATURE_SIMD) return i64x2.mul(a, b);
+    return p(l(a) * l(b), h(a) * h(b));
+  }
+  // @ts-expect-error: decorator
+  @inline export function abs(a: v128): v128 {
+    if (ASC_FEATURE_SIMD) return i64x2.abs(a);
+    const al = l(a), ah = h(a);
+    const ml = al >> 63, mh = ah >> 63;
+    return p((al ^ ml) - ml, (ah ^ mh) - mh);
+  }
+  // @ts-expect-error: decorator
   @inline export function neg(a: v128): v128 {
     if (ASC_FEATURE_SIMD) return i64x2.neg(a);
     return p(-l(a), -h(a));
@@ -120,5 +132,81 @@ export namespace i64x2_swar {
   @inline export function ge_s(a: v128, b: v128): v128 {
     if (ASC_FEATURE_SIMD) return i64x2.ge_s(a, b);
     return p(m(l(a) >= l(b)), m(h(a) >= h(b)));
+  }
+  // @ts-expect-error: decorator
+  @inline export function extend_low_i32x4_s(a: v128): v128 {
+    if (ASC_FEATURE_SIMD) return i64x2.extend_low_i32x4_s(a);
+    const x = l(a);
+    return p((x & 0xffffffff) as i32 as i64, ((x >> 32) & 0xffffffff) as i32 as i64);
+  }
+  // @ts-expect-error: decorator
+  @inline export function extend_low_i32x4_u(a: v128): v128 {
+    if (ASC_FEATURE_SIMD) return i64x2.extend_low_i32x4_u(a);
+    const x = l(a);
+    return p((x & 0xffffffff) as u32 as u64 as i64, ((x >> 32) & 0xffffffff) as u32 as u64 as i64);
+  }
+  // @ts-expect-error: decorator
+  @inline export function extend_high_i32x4_s(a: v128): v128 {
+    if (ASC_FEATURE_SIMD) return i64x2.extend_high_i32x4_s(a);
+    const x = h(a);
+    return p((x & 0xffffffff) as i32 as i64, ((x >> 32) & 0xffffffff) as i32 as i64);
+  }
+  // @ts-expect-error: decorator
+  @inline export function extend_high_i32x4_u(a: v128): v128 {
+    if (ASC_FEATURE_SIMD) return i64x2.extend_high_i32x4_u(a);
+    const x = h(a);
+    return p((x & 0xffffffff) as u32 as u64 as i64, ((x >> 32) & 0xffffffff) as u32 as u64 as i64);
+  }
+  // @ts-expect-error: decorator
+  @inline export function extmul_low_i32x4_s(a: v128, b: v128): v128 {
+    if (ASC_FEATURE_SIMD) return i64x2.extmul_low_i32x4_s(a, b);
+    const ax = l(a), bx = l(b);
+    const a0 = (ax & 0xffffffff) as i32 as i64;
+    const a1 = ((ax >> 32) & 0xffffffff) as i32 as i64;
+    const b0 = (bx & 0xffffffff) as i32 as i64;
+    const b1 = ((bx >> 32) & 0xffffffff) as i32 as i64;
+    return p(a0 * b0, a1 * b1);
+  }
+  // @ts-expect-error: decorator
+  @inline export function extmul_low_i32x4_u(a: v128, b: v128): v128 {
+    if (ASC_FEATURE_SIMD) return i64x2.extmul_low_i32x4_u(a, b);
+    const ax = l(a), bx = l(b);
+    const a0 = (ax & 0xffffffff) as u32 as u64;
+    const a1 = ((ax >> 32) & 0xffffffff) as u32 as u64;
+    const b0 = (bx & 0xffffffff) as u32 as u64;
+    const b1 = ((bx >> 32) & 0xffffffff) as u32 as u64;
+    return p((a0 * b0) as i64, (a1 * b1) as i64);
+  }
+  // @ts-expect-error: decorator
+  @inline export function extmul_high_i32x4_s(a: v128, b: v128): v128 {
+    if (ASC_FEATURE_SIMD) return i64x2.extmul_high_i32x4_s(a, b);
+    const ax = h(a), bx = h(b);
+    const a0 = (ax & 0xffffffff) as i32 as i64;
+    const a1 = ((ax >> 32) & 0xffffffff) as i32 as i64;
+    const b0 = (bx & 0xffffffff) as i32 as i64;
+    const b1 = ((bx >> 32) & 0xffffffff) as i32 as i64;
+    return p(a0 * b0, a1 * b1);
+  }
+  // @ts-expect-error: decorator
+  @inline export function extmul_high_i32x4_u(a: v128, b: v128): v128 {
+    if (ASC_FEATURE_SIMD) return i64x2.extmul_high_i32x4_u(a, b);
+    const ax = h(a), bx = h(b);
+    const a0 = (ax & 0xffffffff) as u32 as u64;
+    const a1 = ((ax >> 32) & 0xffffffff) as u32 as u64;
+    const b0 = (bx & 0xffffffff) as u32 as u64;
+    const b1 = ((bx >> 32) & 0xffffffff) as u32 as u64;
+    return p((a0 * b0) as i64, (a1 * b1) as i64);
+  }
+  // @ts-expect-error: decorator
+  @inline export function shuffle(a: v128, b: v128, l0: u8, l1: u8): v128 {
+    const i0 = l0 & 3, i1 = l1 & 3;
+    const x0 = i0 < 2 ? extract_lane(a, i0) : extract_lane(b, i0 - 2);
+    const x1 = i1 < 2 ? extract_lane(a, i1) : extract_lane(b, i1 - 2);
+    return p(x0, x1);
+  }
+  // @ts-expect-error: decorator
+  @inline export function relaxed_laneselect(a: v128, b: v128, m: v128): v128 {
+    if (ASC_FEATURE_SIMD) return i64x2.relaxed_laneselect(a, b, m);
+    return p(extract_lane(m, 0) < 0 ? extract_lane(a, 0) : extract_lane(b, 0), extract_lane(m, 1) < 0 ? extract_lane(a, 1) : extract_lane(b, 1));
   }
 }

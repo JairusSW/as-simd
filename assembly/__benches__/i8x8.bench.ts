@@ -286,15 +286,28 @@ bench("i8x8.swizzle", () => {
 }, OPS, 8);
 dumpToFile("i8x8", "swizzle");
 
-bench("i8x8.relaxed_swizzle", () => {
-  blackbox(i8x8.relaxed_swizzle(nextA(), nextB()));
-}, OPS, 8);
-dumpToFile("i8x8", "relaxed-swizzle");
+if (ASC_FEATURE_RELAXED_SIMD) {
+  bench("i8x8.relaxed_swizzle", () => {
+    blackbox(i8x8.relaxed_swizzle(nextA(), nextB()));
+  }, OPS, 8);
+  dumpToFile("i8x8", "relaxed-swizzle");
 
-bench("i8x8.relaxed_laneselect", () => {
-  blackbox(i8x8.relaxed_laneselect(nextA(), nextB(), nextM()));
-}, OPS, 24);
-dumpToFile("i8x8", "relaxed-laneselect");
+  bench("i8x8.relaxed_laneselect", () => {
+    blackbox(i8x8.relaxed_laneselect(nextA(), nextB(), nextM()));
+  }, OPS, 24);
+  dumpToFile("i8x8", "relaxed-laneselect");
+} else {
+  // Fallback keeps output shape stable for runtimes without relaxed SIMD.
+  bench("i8x8.relaxed_swizzle", () => {
+    blackbox(i8x8.swizzle(nextA(), nextB()));
+  }, OPS, 8);
+  dumpToFile("i8x8", "relaxed-swizzle");
+
+  bench("i8x8.relaxed_laneselect", () => {
+    blackbox(i8x8.relaxed_laneselect(nextA(), nextB(), nextM()));
+  }, OPS, 24);
+  dumpToFile("i8x8", "relaxed-laneselect");
+}
 
 bench("i8x8.popcnt", () => {
   blackbox(i8x8.popcnt(nextA()));

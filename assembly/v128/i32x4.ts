@@ -112,4 +112,78 @@ export namespace i32x4_swar {
   @inline export function ge_s(a: v128, b: v128): v128 { if (ASC_FEATURE_SIMD) return i32x4.ge_s(a, b); return pack(i32x2.ge_s(lo(a), lo(b)), i32x2.ge_s(hi(a), hi(b))); }
   // @ts-expect-error: decorator
   @inline export function ge_u(a: v128, b: v128): v128 { if (ASC_FEATURE_SIMD) return i32x4.ge_u(a, b); return pack(i32x2.ge_u(lo(a), lo(b)), i32x2.ge_u(hi(a), hi(b))); }
+
+  // @ts-expect-error: decorator
+  @inline export function extend_low_i16x8_s(a: v128): v128 {
+    if (ASC_FEATURE_SIMD) return i32x4.extend_low_i16x8_s(a);
+    const al = lo(a);
+    return pack(i32x2.extend_low_i16x4_s(al), i32x2.extend_high_i16x4_s(al));
+  }
+  // @ts-expect-error: decorator
+  @inline export function extend_low_i16x8_u(a: v128): v128 {
+    if (ASC_FEATURE_SIMD) return i32x4.extend_low_i16x8_u(a);
+    const al = lo(a);
+    return pack(i32x2.extend_low_i16x4_u(al), i32x2.extend_high_i16x4_u(al));
+  }
+  // @ts-expect-error: decorator
+  @inline export function extend_high_i16x8_s(a: v128): v128 {
+    if (ASC_FEATURE_SIMD) return i32x4.extend_high_i16x8_s(a);
+    const ah = hi(a);
+    return pack(i32x2.extend_low_i16x4_s(ah), i32x2.extend_high_i16x4_s(ah));
+  }
+  // @ts-expect-error: decorator
+  @inline export function extend_high_i16x8_u(a: v128): v128 {
+    if (ASC_FEATURE_SIMD) return i32x4.extend_high_i16x8_u(a);
+    const ah = hi(a);
+    return pack(i32x2.extend_low_i16x4_u(ah), i32x2.extend_high_i16x4_u(ah));
+  }
+  // @ts-expect-error: decorator
+  @inline export function extadd_pairwise_i16x8_s(a: v128): v128 {
+    if (ASC_FEATURE_SIMD) return i32x4.extadd_pairwise_i16x8_s(a);
+    return pack(i32x2.extadd_pairwise_i16x4_s(lo(a)), i32x2.extadd_pairwise_i16x4_s(hi(a)));
+  }
+  // @ts-expect-error: decorator
+  @inline export function extadd_pairwise_i16x8_u(a: v128): v128 {
+    if (ASC_FEATURE_SIMD) return i32x4.extadd_pairwise_i16x8_u(a);
+    return pack(i32x2.extadd_pairwise_i16x4_u(lo(a)), i32x2.extadd_pairwise_i16x4_u(hi(a)));
+  }
+  // @ts-expect-error: decorator
+  @inline export function extmul_low_i16x8_s(a: v128, b: v128): v128 {
+    if (ASC_FEATURE_SIMD) return i32x4.extmul_low_i16x8_s(a, b);
+    return pack(i32x2.extmul_low_i16x4_s(lo(a), lo(b)), i32x2.extmul_high_i16x4_s(lo(a), lo(b)));
+  }
+  // @ts-expect-error: decorator
+  @inline export function extmul_low_i16x8_u(a: v128, b: v128): v128 {
+    if (ASC_FEATURE_SIMD) return i32x4.extmul_low_i16x8_u(a, b);
+    return pack(i32x2.extmul_low_i16x4_u(lo(a), lo(b)), i32x2.extmul_high_i16x4_u(lo(a), lo(b)));
+  }
+  // @ts-expect-error: decorator
+  @inline export function extmul_high_i16x8_s(a: v128, b: v128): v128 {
+    if (ASC_FEATURE_SIMD) return i32x4.extmul_high_i16x8_s(a, b);
+    return pack(i32x2.extmul_low_i16x4_s(hi(a), hi(b)), i32x2.extmul_high_i16x4_s(hi(a), hi(b)));
+  }
+  // @ts-expect-error: decorator
+  @inline export function extmul_high_i16x8_u(a: v128, b: v128): v128 {
+    if (ASC_FEATURE_SIMD) return i32x4.extmul_high_i16x8_u(a, b);
+    return pack(i32x2.extmul_low_i16x4_u(hi(a), hi(b)), i32x2.extmul_high_i16x4_u(hi(a), hi(b)));
+  }
+  // @ts-expect-error: decorator
+  @inline export function shuffle(a: v128, b: v128, l0: u8, l1: u8, l2: u8, l3: u8): v128 {
+    let r = splat(0);
+    r = replace_lane(r, 0, ((l0 & 7) < 4 ? extract_lane(a, l0) : extract_lane(b, (l0 - 4) & 3)));
+    r = replace_lane(r, 1, ((l1 & 7) < 4 ? extract_lane(a, l1) : extract_lane(b, (l1 - 4) & 3)));
+    r = replace_lane(r, 2, ((l2 & 7) < 4 ? extract_lane(a, l2) : extract_lane(b, (l2 - 4) & 3)));
+    r = replace_lane(r, 3, ((l3 & 7) < 4 ? extract_lane(a, l3) : extract_lane(b, (l3 - 4) & 3)));
+    return r;
+  }
+  // @ts-expect-error: decorator
+  @inline export function relaxed_laneselect(a: v128, b: v128, m: v128): v128 {
+    if (ASC_FEATURE_SIMD) return i32x4.relaxed_laneselect(a, b, m);
+    let r = splat(0);
+    r = replace_lane(r, 0, extract_lane(m, 0) < 0 ? extract_lane(a, 0) : extract_lane(b, 0));
+    r = replace_lane(r, 1, extract_lane(m, 1) < 0 ? extract_lane(a, 1) : extract_lane(b, 1));
+    r = replace_lane(r, 2, extract_lane(m, 2) < 0 ? extract_lane(a, 2) : extract_lane(b, 2));
+    r = replace_lane(r, 3, extract_lane(m, 3) < 0 ? extract_lane(a, 3) : extract_lane(b, 3));
+    return r;
+  }
 }
