@@ -42,6 +42,8 @@ export namespace i32x4_swar {
   // @ts-expect-error: decorator
   @inline function mask(pred: bool): i32 { return pred ? -1 : 0; }
   // @ts-expect-error: decorator
+  @inline function abs32(x: i32): i32 { return x < 0 ? -x : x; }
+  // @ts-expect-error: decorator
   @inline function i16_lane_s(xLo: u64, xHi: u64, idx: i32): i16 {
     const v = idx < 4 ? xLo : xHi;
     const s = ((idx & 3) << 4) as u64;
@@ -131,8 +133,8 @@ export namespace i32x4_swar {
   }
   // @ts-expect-error: decorator
   @inline export function abs(aLo: u64, aHi: u64): u64 {
-    const l0 = abs<i32>(unpack_lo(aLo)), l1 = abs<i32>(unpack_hi(aLo));
-    const h0 = abs<i32>(unpack_lo(aHi)), h1 = abs<i32>(unpack_hi(aHi));
+    const l0 = abs32(unpack_lo(aLo)), l1 = abs32(unpack_hi(aLo));
+    const h0 = abs32(unpack_lo(aHi)), h1 = abs32(unpack_hi(aHi));
     return set_pair(pack2(l0, l1), pack2(h0, h1));
   }
   // @ts-expect-error: decorator

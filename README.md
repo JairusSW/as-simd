@@ -106,6 +106,15 @@ const b = i8x8(1, 2, 3, 4, 5, 6, 7, 8);
 const sub = i8x8.sub(a, b);
 const mul = i8x8.mul(a, b);
 const lt = i8x8.lt_s(a, b); // lane masks: 0x00 or 0xFF per lane
+const laneMask = i8x8.bitmask_lane(lt); // 0x80 in each truthy lane
+
+// Existing bitmask() returns packed lane bits. ctz(mask) << 3 gives
+// the byte shift for the first truthy lane.
+const firstByteShift = ctz(i8x8.bitmask(lt)) << 3;
+
+// bitmask_lane() returns a vector-shaped mask. ctz(mask) >> 3 gives
+// the first truthy lane index.
+const firstLane = ctz(laneMask) >> 3;
 ```
 
 ### Saturating and narrowing operations

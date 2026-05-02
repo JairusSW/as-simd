@@ -17,46 +17,7 @@ export function i8x8(a: i8, b: i8, c: i8, d: i8, e: i8, f: i8, g: i8, h: i8): v6
 export type i8x8 = v64;
 
 export namespace i8x8 {
-  let sat_coverage_warmed: bool = false;
   const simd_shuffle_tmp = memory.data(16);
-
-  // @ts-expect-error: decorator
-  @inline function zero_mask(x: v64): v64 {
-    return ((~(((x & 0x7f7f7f7f7f7f7f7f) + 0x7f7f7f7f7f7f7f7f) & 0x8080808080808080) & ~x & 0x8080808080808080) >> 7) * 0xff;
-  }
-
-  // @ts-expect-error: decorator
-  @inline function add_swar(a: v64, b: v64): v64 {
-    return ((a & ~0x8080808080808080) + (b & ~0x8080808080808080)) ^ ((a ^ b) & 0x8080808080808080);
-  }
-
-  // @ts-expect-error: decorator
-  @inline function sub_swar(a: v64, b: v64): v64 {
-    return ((a | 0x8080808080808080) - (b & ~0x8080808080808080)) ^ ((a ^ ~b) & 0x8080808080808080);
-  }
-
-  // @ts-expect-error: decorator
-  @inline function add_swar16(a: v64, b: v64): v64 {
-    return ((a & ~0x8000800080008000) + (b & ~0x8000800080008000)) ^ ((a ^ b) & 0x8000800080008000);
-  }
-
-  // @ts-expect-error: decorator
-  @inline function lt_mask_u(a: v64, b: v64): v64 {
-    const d = sub_swar(a, b);
-    return ((((~a & b) | (~(a ^ b) & d)) & 0x8080808080808080) >> 7) * 0xff;
-  }
-
-  // @ts-expect-error: decorator
-  @inline function lt_mask_s(a: v64, b: v64): v64 {
-    return lt_mask_u(a ^ 0x8080808080808080, b ^ 0x8080808080808080);
-  }
-
-  // @ts-expect-error: decorator
-  @inline function pack_low_bytes(x: v64): v64 {
-    x &= 0x00ff00ff00ff00ff;
-    x = (x | (x >> 8)) & 0x0000ffff0000ffff;
-    return (x | (x >> 16)) & 0x00000000ffffffff;
-  }
 
   // @ts-expect-error: decorator
   @inline function narrow_i16x4_u_swar(x: v64): v64 {
@@ -85,17 +46,17 @@ export namespace i8x8 {
   /** Extracts one 8-bit integer lane as a signed scalar. idx argument does not need to be a compile time constant. */
   // @ts-expect-error: decorator
   @inline export function extract_lane_s(x: v64, idx: u8): i8 {
-    return ((x >> (idx * 8)) & 0xff) as i8;
+    return ((x >> (idx << 3)) & 0xff) as i8;
   }
   /** Extracts one 8-but integer lane. idx argument does not need to be a compile time constant. */
   // @ts-expect-error: decorator
   @inline export function extract_lane_u(x: v64, idx: u8): u8 {
-    return ((x >> (idx * 8)) & 0xff) as u8;
+    return ((x >> (idx << 3)) & 0xff) as u8;
   }
   /** Replaces one 8-bit integer lane. idx argument does not need to be a compile time constant. */
   // @ts-expect-error: decorator
   @inline export function replace_lane(x: v64, idx: u8, value: i8): v64 {
-    const shift = idx * 8;
+    const shift = idx << 3;
     const mask = (0xff as v64) << shift;
     return (x & ~mask) | (((value as v64) & 0xff) << shift);
   }
@@ -109,11 +70,11 @@ export namespace i8x8 {
     switch (len) {
       case 1: return (fv & 0xffffffffffffff00) | (load<u8>(p) as v64);
       case 2: return (fv & 0xffffffffffff0000) | (load<u16>(p) as v64);
-      case 3: return (fv & 0xffffffffff000000) | (load<u16>(p) as v64) | ((load<u8>(p + 2) as v64) << 16);
+      case 3: return (fv & 0xffffffffff000000) | (load<u16>(p) as v64) | ((load<u8>(p, 2) as v64) << 16);
       case 4: return (fv & 0xffffffff00000000) | (load<u32>(p) as v64);
-      case 5: return (fv & 0xffffff0000000000) | (load<u32>(p) as v64) | ((load<u8>(p + 4) as v64) << 32);
-      case 6: return (fv & 0xffff000000000000) | (load<u32>(p) as v64) | ((load<u16>(p + 4) as v64) << 32);
-      default: return (fv & 0xff00000000000000) | (load<u32>(p) as v64) | ((load<u16>(p + 4) as v64) << 32) | ((load<u8>(p + 6) as v64) << 48);
+      case 5: return (fv & 0xffffff0000000000) | (load<u32>(p) as v64) | ((load<u8>(p, 4) as v64) << 32);
+      case 6: return (fv & 0xffff000000000000) | (load<u32>(p) as v64) | ((load<u16>(p, 4) as v64) << 32);
+      default: return (fv & 0xff00000000000000) | (load<u32>(p) as v64) | ((load<u16>(p, 4) as v64) << 32) | ((load<u8>(p, 6) as v64) << 48);
     }
   }
   /** Stores the first `len` lanes to memory. */
@@ -133,7 +94,7 @@ export namespace i8x8 {
       }
       case 3: {
         store<u16>(p, (value & 0xffff) as u16);
-        store<u8>(p + 2, ((value >> 16) & 0xff) as u8);
+        store<u8>(p, ((value >> 16) & 0xff) as u8, 2);
         return;
       }
       case 4: {
@@ -142,18 +103,18 @@ export namespace i8x8 {
       }
       case 5: {
         store<u32>(p, (value & 0xffffffff) as u32);
-        store<u8>(p + 4, ((value >> 32) & 0xff) as u8);
+        store<u8>(p, ((value >> 32) & 0xff) as u8, 4);
         return;
       }
       case 6: {
         store<u32>(p, (value & 0xffffffff) as u32);
-        store<u16>(p + 4, ((value >> 32) & 0xffff) as u16);
+        store<u16>(p, ((value >> 32) & 0xffff) as u16, 4);
         return;
       }
       default: {
         store<u32>(p, (value & 0xffffffff) as u32);
-        store<u16>(p + 4, ((value >> 32) & 0xffff) as u16);
-        store<u8>(p + 6, ((value >> 48) & 0xff) as u8);
+        store<u16>(p, ((value >> 32) & 0xffff) as u16, 4);
+        store<u8>(p, ((value >> 48) & 0xff) as u8, 6);
         return;
       }
     }
@@ -161,12 +122,20 @@ export namespace i8x8 {
   /** Adds each 8-bit integer lane. */
   // @ts-expect-error: decorator
   @inline export function add(a: v64, b: v64): v64 {
-    return ((a & ~0x8080808080808080) + (b & ~0x8080808080808080)) ^ ((a ^ b) & 0x8080808080808080);
+    if (ASC_FEATURE_SIMD) {
+      return i64x2.extract_lane(i8x16.add(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
+    }
+    const lo = (a & 0x0f0f0f0f0f0f0f0f) + (b & 0x0f0f0f0f0f0f0f0f);
+    const hi = (a & 0xf0f0f0f0f0f0f0f0) + (b & 0xf0f0f0f0f0f0f0f0) + (lo & 0x1010101010101010);
+    return (lo & 0x0f0f0f0f0f0f0f0f) | (hi & 0xf0f0f0f0f0f0f0f0);
   }
   /** Subtracts each 8-bit integer lane. */
   // @ts-expect-error: decorator
   @inline export function sub(a: v64, b: v64): v64 {
-    return ((a | 0x8080808080808080) - (b & ~0x8080808080808080)) ^ ((a ^ ~b) & 0x8080808080808080);
+    if (ASC_FEATURE_SIMD) {
+      return i64x2.extract_lane(i8x16.sub(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
+    }
+    return add(a, add(~b, 0x0101010101010101));
   }
   /** Multiplies each 8-bit integer lane. */
   // @ts-expect-error: decorator
@@ -182,20 +151,30 @@ export namespace i8x8 {
       return lo | (hi << 32);
     }
 
-    return (
-      ((((a >> 0) & 0xff) * ((b >> 0) & 0xff)) & 0xff) |
-      (((((a >> 8) & 0xff) * ((b >> 8) & 0xff)) & 0xff) << 8) |
-      (((((a >> 16) & 0xff) * ((b >> 16) & 0xff)) & 0xff) << 16) |
-      (((((a >> 24) & 0xff) * ((b >> 24) & 0xff)) & 0xff) << 24) |
-      (((((a >> 32) & 0xff) * ((b >> 32) & 0xff)) & 0xff) << 32) |
-      (((((a >> 40) & 0xff) * ((b >> 40) & 0xff)) & 0xff) << 40) |
-      (((((a >> 48) & 0xff) * ((b >> 48) & 0xff)) & 0xff) << 48) |
-      (((((a >> 56) & 0xff) * ((b >> 56) & 0xff)) & 0xff) << 56)
+    const alo = a as u32;
+    const blo = b as u32;
+    const ahi = (a >> 32) as u32;
+    const bhi = (b >> 32) as u32;
+    const lo = (
+      (((alo & 0xff) * (blo & 0xff)) & 0xff) |
+      (((((alo >> 8) & 0xff) * ((blo >> 8) & 0xff)) & 0xff) << 8) |
+      (((((alo >> 16) & 0xff) * ((blo >> 16) & 0xff)) & 0xff) << 16) |
+      (((((alo >> 24) & 0xff) * ((blo >> 24) & 0xff)) & 0xff) << 24)
     );
+    const hi = (
+      (((ahi & 0xff) * (bhi & 0xff)) & 0xff) |
+      (((((ahi >> 8) & 0xff) * ((bhi >> 8) & 0xff)) & 0xff) << 8) |
+      (((((ahi >> 16) & 0xff) * ((bhi >> 16) & 0xff)) & 0xff) << 16) |
+      (((((ahi >> 24) & 0xff) * ((bhi >> 24) & 0xff)) & 0xff) << 24)
+    );
+    return (lo as v64) | ((hi as v64) << 32);
   }
   /** Computes the signed minimum of each 8-bit integer lane. */
   // @ts-expect-error: decorator
   @inline export function min_s(a: v64, b: v64): v64 {
+    if (ASC_FEATURE_SIMD) {
+      return i64x2.extract_lane(i8x16.min_s(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
+    }
     const ax = a ^ 0x8080808080808080;
     const bx = b ^ 0x8080808080808080;
     const d = ((ax | 0x8080808080808080) - (bx & ~0x8080808080808080)) ^ ((ax ^ ~bx) & 0x8080808080808080);
@@ -205,13 +184,22 @@ export namespace i8x8 {
   /** Computes the unsigned minimum of each 8-bit integer lane. */
   // @ts-expect-error: decorator
   @inline export function min_u(a: v64, b: v64): v64 {
-    const d = ((a | 0x8080808080808080) - (b & ~0x8080808080808080)) ^ ((a ^ ~b) & 0x8080808080808080);
-    const mask = ((((~a & b) | (~(a ^ b) & d)) & 0x8080808080808080) >> 7) * 0xff;
+    if (ASC_FEATURE_SIMD) {
+      return i64x2.extract_lane(i8x16.min_u(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
+    }
+    const dlo = ((a | 0x0080008000800080) - (b & 0x007f007f007f007f)) ^ ((a ^ ~b) & 0x0080008000800080);
+    const dhi = ((a | 0x8000800080008000) - (b & 0x7f007f007f007f00)) ^ ((a ^ ~b) & 0x8000800080008000);
+    const ml = (((~a & b) | (~(a ^ b) & dlo)) & 0x0080008000800080) >> 7;
+    const mh = (((~a & b) | (~(a ^ b) & dhi)) & 0x8000800080008000) >> 7;
+    const mask = ((ml * 0xff) & 0x00ff00ff00ff00ff) | ((mh * 0xff) & 0xff00ff00ff00ff00);
     return b ^ ((a ^ b) & mask);
   }
   /** Computes the signed maximum of each 8-bit integer lane. */
   // @ts-expect-error: decorator
   @inline export function max_s(a: v64, b: v64): v64 {
+    if (ASC_FEATURE_SIMD) {
+      return i64x2.extract_lane(i8x16.max_s(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
+    }
     const ax = a ^ 0x8080808080808080;
     const bx = b ^ 0x8080808080808080;
     const d = ((ax | 0x8080808080808080) - (bx & ~0x8080808080808080)) ^ ((ax ^ ~bx) & 0x8080808080808080);
@@ -221,31 +209,54 @@ export namespace i8x8 {
   /** Computes the unsigned maxmum of each 8-bit integer lane. */
   // @ts-expect-error: decorator
   @inline export function max_u(a: v64, b: v64): v64 {
-    const d = ((a | 0x8080808080808080) - (b & ~0x8080808080808080)) ^ ((a ^ ~b) & 0x8080808080808080);
-    const mask = ((((~a & b) | (~(a ^ b) & d)) & 0x8080808080808080) >> 7) * 0xff;
-    return a ^ ((a ^ b) & mask);
+    if (ASC_FEATURE_SIMD) {
+      return i64x2.extract_lane(i8x16.max_u(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
+    }
+    const dlo = ((b | 0x0080008000800080) - (a & 0x007f007f007f007f)) ^ ((b ^ ~a) & 0x0080008000800080);
+    const dhi = ((b | 0x8000800080008000) - (a & 0x7f007f007f007f00)) ^ ((b ^ ~a) & 0x8000800080008000);
+    const ml = (((~b & a) | (~(b ^ a) & dlo)) & 0x0080008000800080) >> 7;
+    const mh = (((~b & a) | (~(b ^ a) & dhi)) & 0x8000800080008000) >> 7;
+    const mask = ((ml * 0xff) & 0x00ff00ff00ff00ff) | ((mh * 0xff) & 0xff00ff00ff00ff00);
+    return b ^ ((a ^ b) & mask);
   }
   /** Computes the unsigned average of each 8-bit integer lane. */
   // @ts-expect-error: decorator
   @inline export function avgr_u(a: v64, b: v64): v64 {
-    return (a | b) - (((a ^ b) & ~0x0101010101010101) >> 1);
+    if (ASC_FEATURE_SIMD) {
+      return i64x2.extract_lane(i8x16.avgr_u(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
+    }
+    const alo = a as u32;
+    const blo = b as u32;
+    const ahi = (a >> 32) as u32;
+    const bhi = (b >> 32) as u32;
+    const lo = (alo | blo) - (((alo ^ blo) & 0xfefefefe) >> 1);
+    const hi = (ahi | bhi) - (((ahi ^ bhi) & 0xfefefefe) >> 1);
+    return (lo as v64) | ((hi as v64) << 32);
   }
   /** Computes the absolute value of each 8-bit integer lane. */
   // @ts-expect-error: decorator
   @inline export function abs(a: v64): v64 {
+    if (ASC_FEATURE_SIMD) {
+      return i64x2.extract_lane(i8x16.abs(i64x2(a as i64, 0)), 0) as v64;
+    }
     const mask = ((a & 0x8080808080808080) >> 7) * 0xff;
-    const x = a ^ mask;
-    return ((x | 0x8080808080808080) - (mask & ~0x8080808080808080)) ^ ((x ^ ~mask) & 0x8080808080808080);
+    return add(a ^ mask, mask & 0x0101010101010101);
   }
 
   /** Negates each 8-bit integer lane. */
   // @ts-expect-error: decorator
   @inline export function neg(a: v64): v64 {
+    if (ASC_FEATURE_SIMD) {
+      return i64x2.extract_lane(i8x16.neg(i64x2(a as i64, 0)), 0) as v64;
+    }
     return (0x8080808080808080 - (a & ~0x8080808080808080)) ^ ((~a) & 0x8080808080808080);
   }
   /** Adds each 8-bit integer lane using signed saturation. */
   // @ts-expect-error: decorator
   @inline export function add_sat_s(a: v64, b: v64): v64 {
+    if (ASC_FEATURE_SIMD) {
+      return i64x2.extract_lane(i8x16.add_sat_s(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
+    }
     const sum = ((a & ~0x8080808080808080) + (b & ~0x8080808080808080)) ^ ((a ^ b) & 0x8080808080808080);
     const overflow = (~(a ^ b) & (a ^ sum) & 0x8080808080808080) >> 7;
     const mask = overflow * 0xff;
@@ -255,6 +266,9 @@ export namespace i8x8 {
   /** Adds each 8-bit integer lane using unsigned saturation. */
   // @ts-expect-error: decorator
   @inline export function add_sat_u(a: v64, b: v64): v64 {
+    if (ASC_FEATURE_SIMD) {
+      return i64x2.extract_lane(i8x16.add_sat_u(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
+    }
     const sum = ((a & ~0x8080808080808080) + (b & ~0x8080808080808080)) ^ ((a ^ b) & 0x8080808080808080);
     const d = ((sum | 0x8080808080808080) - (a & ~0x8080808080808080)) ^ ((sum ^ ~a) & 0x8080808080808080);
     const mask = ((((~sum & a) | (~(sum ^ a) & d)) & 0x8080808080808080) >> 7) * 0xff;
@@ -263,6 +277,9 @@ export namespace i8x8 {
   /** Subtracts each 8-bit integer lane using signed saturation. */
   // @ts-expect-error: decorator
   @inline export function sub_sat_s(a: v64, b: v64): v64 {
+    if (ASC_FEATURE_SIMD) {
+      return i64x2.extract_lane(i8x16.sub_sat_s(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
+    }
     const diff = ((a | 0x8080808080808080) - (b & ~0x8080808080808080)) ^ ((a ^ ~b) & 0x8080808080808080);
     const overflow = ((a ^ b) & (a ^ diff) & 0x8080808080808080) >> 7;
     const mask = overflow * 0xff;
@@ -272,6 +289,9 @@ export namespace i8x8 {
   /** Subtracts each 8-bit integer lane using unsigned saturation. */
   // @ts-expect-error: decorator
   @inline export function sub_sat_u(a: v64, b: v64): v64 {
+    if (ASC_FEATURE_SIMD) {
+      return i64x2.extract_lane(i8x16.sub_sat_u(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
+    }
     const diff = ((a | 0x8080808080808080) - (b & ~0x8080808080808080)) ^ ((a ^ ~b) & 0x8080808080808080);
     const mask = ((((~a & b) | (~(a ^ b) & diff)) & 0x8080808080808080) >> 7) * 0xff;
     return diff & ~mask;
@@ -279,8 +299,11 @@ export namespace i8x8 {
   /** Performs a bitwise left shift on each 8-bit integer lane by a scalar. */
   // @ts-expect-error: decorator
   @inline export function shl(a: v64, b: i32): v64 {
+    if (ASC_FEATURE_SIMD) {
+      return i64x2.extract_lane(i8x16.shl(i64x2(a as i64, 0), b), 0) as v64;
+    }
     const shift = b & 7;
-    return ((a & (((0xff >> shift) as v64) * 0x0101010101010101)) << shift) & 0xffffffffffffffff;
+    return (a & (((0xff >> shift) as v64) * 0x0101010101010101)) << shift;
   }
   /** Performs a bitwise arithmetic right shift on each 8-bit integer lane by a scalar. */
   // @ts-expect-error: decorator
@@ -297,19 +320,36 @@ export namespace i8x8 {
   /** Performs a bitwise logical right shift on each 8-bit integer lane by a scalar. */
   // @ts-expect-error: decorator
   @inline export function shr_u(a: v64, b: i32): v64 {
-    const shift = b & 7;
-    return (a & ((((0xff << shift) & 0xff) as v64) * 0x0101010101010101)) >> shift;
+    if (ASC_FEATURE_SIMD) {
+      return i64x2.extract_lane(i8x16.shr_u(i64x2(a as i64, 0), b), 0) as v64;
+    }
+    switch (b & 7) {
+      case 0: return a;
+      case 1: return (a >> 1) & 0x7f7f7f7f7f7f7f7f;
+      case 2: return (a >> 2) & 0x3f3f3f3f3f3f3f3f;
+      case 3: return (a >> 3) & 0x1f1f1f1f1f1f1f1f;
+      case 4: return (a >> 4) & 0x0f0f0f0f0f0f0f0f;
+      case 5: return (a >> 5) & 0x0707070707070707;
+      case 6: return (a >> 6) & 0x0303030303030303;
+      default: return (a >> 7) & 0x0101010101010101;
+    }
   }
   /** Reduces a vector to a scalar indicating whether all 8-bit integer lanes are considered `true`. */
   // @ts-expect-error: decorator
   @inline export function all_true(a: v64): bool {
-    const z = ((~(((a & 0x7f7f7f7f7f7f7f7f) + 0x7f7f7f7f7f7f7f7f) & 0x8080808080808080) & ~a & 0x8080808080808080) >> 7) * 0xff;
-    return z == 0;
+    return ((a - 0x0101010101010101) & ~a & 0x8080808080808080) == 0;
   }
   /** Extracts the high bit of each 8-bit integer lane and produces a scalar mask with all bits concatenated. */
   // @ts-expect-error: decorator
   @inline export function bitmask(a: v64): i32 {
-    return (((a & 0x8080808080808080) * 0x02040810204081) >> 56) as i32;
+    const lo = (((((a >> 7) & 0x0000000001010101) * 0x01020408) >> 24) & 0x0f) as i32;
+    const hi = (((((a >> 39) & 0x0000000001010101) * 0x01020408) >> 20) & 0xf0) as i32;
+    return lo | hi;
+  }
+  /** Returns 0x80 in each nonzero 8-bit lane and 0 otherwise. Use ctz(bitmask(x)) << 3 for the first true lane byte offset, or ctz(bitmask_lane(x)) >> 3 for the lane index. */
+  // @ts-expect-error: decorator
+  @inline export function bitmask_lane(a: v64): v64 {
+    return (((a & 0x7f7f7f7f7f7f7f7f) + 0x7f7f7f7f7f7f7f7f) | a) & 0x8080808080808080;
   }
   /** Counts the number of bits set to one within each 8-bit integer lane. */
   // @ts-expect-error: decorator
@@ -321,6 +361,9 @@ export namespace i8x8 {
   /** Computes which 8-bit integer lanes are equal. */
   // @ts-expect-error: decorator
   @inline export function eq(a: v64, b: v64): v64 {
+    if (ASC_FEATURE_SIMD) {
+      return i64x2.extract_lane(i8x16.eq(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
+    }
     const x = a ^ b;
     return ((~(((x & 0x7f7f7f7f7f7f7f7f) + 0x7f7f7f7f7f7f7f7f) & 0x8080808080808080) & ~x & 0x8080808080808080) >> 7) * 0xff;
   }
@@ -328,63 +371,106 @@ export namespace i8x8 {
   // @ts-expect-error: decorator
   @inline export function ne(a: v64, b: v64): v64 {
     const x = a ^ b;
-    return ~(((~(((x & 0x7f7f7f7f7f7f7f7f) + 0x7f7f7f7f7f7f7f7f) & 0x8080808080808080) & ~x & 0x8080808080808080) >> 7) * 0xff);
+    const mask = (((x & 0x7f7f7f7f7f7f7f7f) + 0x7f7f7f7f7f7f7f7f) | x) & 0x8080808080808080;
+    return (mask >> 7) * 0xff;
   }
   /** Computes which 8-bit signed integer lanes of the first vector are less than those of the second. */
   // @ts-expect-error: decorator
   @inline export function lt_s(a: v64, b: v64): v64 {
+    if (ASC_FEATURE_SIMD) {
+      return i64x2.extract_lane(i8x16.lt_s(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
+    }
     const ax = a ^ 0x8080808080808080;
     const bx = b ^ 0x8080808080808080;
-    const d = ((ax | 0x8080808080808080) - (bx & ~0x8080808080808080)) ^ ((ax ^ ~bx) & 0x8080808080808080);
-    return ((((~ax & bx) | (~(ax ^ bx) & d)) & 0x8080808080808080) >> 7) * 0xff;
+    const dlo = ((ax | 0x0080008000800080) - (bx & 0x007f007f007f007f)) ^ ((ax ^ ~bx) & 0x0080008000800080);
+    const dhi = ((ax | 0x8000800080008000) - (bx & 0x7f007f007f007f00)) ^ ((ax ^ ~bx) & 0x8000800080008000);
+    const ml = (((~ax & bx) | (~(ax ^ bx) & dlo)) & 0x0080008000800080) >> 7;
+    const mh = (((~ax & bx) | (~(ax ^ bx) & dhi)) & 0x8000800080008000) >> 7;
+    return ((ml * 0xff) & 0x00ff00ff00ff00ff) | ((mh * 0xff) & 0xff00ff00ff00ff00);
   }
   /** Computes which 8-bit unsigned integer lanes of the first vector are less than those of the second. */
   // @ts-expect-error: decorator
   @inline export function lt_u(a: v64, b: v64): v64 {
-    const d = ((a | 0x8080808080808080) - (b & ~0x8080808080808080)) ^ ((a ^ ~b) & 0x8080808080808080);
-    return ((((~a & b) | (~(a ^ b) & d)) & 0x8080808080808080) >> 7) * 0xff;
+    if (ASC_FEATURE_SIMD) {
+      return i64x2.extract_lane(i8x16.lt_u(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
+    }
+    const dlo = ((a | 0x0080008000800080) - (b & 0x007f007f007f007f)) ^ ((a ^ ~b) & 0x0080008000800080);
+    const dhi = ((a | 0x8000800080008000) - (b & 0x7f007f007f007f00)) ^ ((a ^ ~b) & 0x8000800080008000);
+    const ml = (((~a & b) | (~(a ^ b) & dlo)) & 0x0080008000800080) >> 7;
+    const mh = (((~a & b) | (~(a ^ b) & dhi)) & 0x8000800080008000) >> 7;
+    return ((ml * 0xff) & 0x00ff00ff00ff00ff) | ((mh * 0xff) & 0xff00ff00ff00ff00);
   }
   /** Computes which 8-bit signed integer lanes of the first vector are less than or equal those of the second. */
   // @ts-expect-error: decorator
   @inline export function le_s(a: v64, b: v64): v64 {
+    if (ASC_FEATURE_SIMD) {
+      return i64x2.extract_lane(i8x16.le_s(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
+    }
     const bx = b ^ 0x8080808080808080;
     const ax = a ^ 0x8080808080808080;
-    const d = ((bx | 0x8080808080808080) - (ax & ~0x8080808080808080)) ^ ((bx ^ ~ax) & 0x8080808080808080);
+    const d = ((bx | 0x8080808080808080) - (ax & 0x7f7f7f7f7f7f7f7f)) ^ ((bx ^ ~ax) & 0x8080808080808080);
     return ~(((((~bx & ax) | (~(bx ^ ax) & d)) & 0x8080808080808080) >> 7) * 0xff);
   }
   /** Computes which 8-bit unsigned integer lanes of the first vector are less than or equal those of the second. */
   // @ts-expect-error: decorator
   @inline export function le_u(a: v64, b: v64): v64 {
-    const d = ((b | 0x8080808080808080) - (a & ~0x8080808080808080)) ^ ((b ^ ~a) & 0x8080808080808080);
-    return ~(((((~b & a) | (~(b ^ a) & d)) & 0x8080808080808080) >> 7) * 0xff);
+    if (ASC_FEATURE_SIMD) {
+      return i64x2.extract_lane(i8x16.le_u(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
+    }
+    const dlo = ((b | 0x0080008000800080) - (a & 0x007f007f007f007f)) ^ ((b ^ ~a) & 0x0080008000800080);
+    const dhi = ((b | 0x8000800080008000) - (a & 0x7f007f007f007f00)) ^ ((b ^ ~a) & 0x8000800080008000);
+    const ml = (((~b & a) | (~(b ^ a) & dlo)) & 0x0080008000800080) >> 7;
+    const mh = (((~b & a) | (~(b ^ a) & dhi)) & 0x8000800080008000) >> 7;
+    return ~(((ml * 0xff) & 0x00ff00ff00ff00ff) | ((mh * 0xff) & 0xff00ff00ff00ff00));
   }
   /** Computes which 8-bit signed integer lanes of the first vector are greater than those of the second. */
   // @ts-expect-error: decorator
   @inline export function gt_s(a: v64, b: v64): v64 {
+    if (ASC_FEATURE_SIMD) {
+      return i64x2.extract_lane(i8x16.gt_s(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
+    }
     const bx = b ^ 0x8080808080808080;
     const ax = a ^ 0x8080808080808080;
-    const d = ((bx | 0x8080808080808080) - (ax & ~0x8080808080808080)) ^ ((bx ^ ~ax) & 0x8080808080808080);
+    const d = ((bx | 0x8080808080808080) - (ax & 0x7f7f7f7f7f7f7f7f)) ^ ((bx ^ ~ax) & 0x8080808080808080);
     return ((((~bx & ax) | (~(bx ^ ax) & d)) & 0x8080808080808080) >> 7) * 0xff;
   }
   /** Computes which 8-bit unsigned integer lanes of the first vector are greater than those of the second. */
   // @ts-expect-error: decorator
   @inline export function gt_u(a: v64, b: v64): v64 {
-    const d = ((b | 0x8080808080808080) - (a & ~0x8080808080808080)) ^ ((b ^ ~a) & 0x8080808080808080);
-    return ((((~b & a) | (~(b ^ a) & d)) & 0x8080808080808080) >> 7) * 0xff;
+    if (ASC_FEATURE_SIMD) {
+      return i64x2.extract_lane(i8x16.gt_u(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
+    }
+    const dlo = ((b | 0x0080008000800080) - (a & 0x007f007f007f007f)) ^ ((b ^ ~a) & 0x0080008000800080);
+    const dhi = ((b | 0x8000800080008000) - (a & 0x7f007f007f007f00)) ^ ((b ^ ~a) & 0x8000800080008000);
+    const ml = (((~b & a) | (~(b ^ a) & dlo)) & 0x0080008000800080) >> 7;
+    const mh = (((~b & a) | (~(b ^ a) & dhi)) & 0x8000800080008000) >> 7;
+    return ((ml * 0xff) & 0x00ff00ff00ff00ff) | ((mh * 0xff) & 0xff00ff00ff00ff00);
   }
   /** Computes which 8-bit signed integer lanes of the first vector are greater than or equal those of the second. */
   // @ts-expect-error: decorator
   @inline export function ge_s(a: v64, b: v64): v64 {
+    if (ASC_FEATURE_SIMD) {
+      return i64x2.extract_lane(i8x16.ge_s(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
+    }
     const ax = a ^ 0x8080808080808080;
     const bx = b ^ 0x8080808080808080;
-    const d = ((ax | 0x8080808080808080) - (bx & ~0x8080808080808080)) ^ ((ax ^ ~bx) & 0x8080808080808080);
-    return ~(((((~ax & bx) | (~(ax ^ bx) & d)) & 0x8080808080808080) >> 7) * 0xff);
+    const dlo = ((ax | 0x0080008000800080) - (bx & 0x007f007f007f007f)) ^ ((ax ^ ~bx) & 0x0080008000800080);
+    const dhi = ((ax | 0x8000800080008000) - (bx & 0x7f007f007f007f00)) ^ ((ax ^ ~bx) & 0x8000800080008000);
+    const ml = (((~ax & bx) | (~(ax ^ bx) & dlo)) & 0x0080008000800080) >> 7;
+    const mh = (((~ax & bx) | (~(ax ^ bx) & dhi)) & 0x8000800080008000) >> 7;
+    return ~(((ml * 0xff) & 0x00ff00ff00ff00ff) | ((mh * 0xff) & 0xff00ff00ff00ff00));
   }
   /** Computes which 8-bit unsigned integer lanes of the first vector are greater than or equal those of the second. */
   // @ts-expect-error: decorator
   @inline export function ge_u(a: v64, b: v64): v64 {
-    const d = ((a | 0x8080808080808080) - (b & ~0x8080808080808080)) ^ ((a ^ ~b) & 0x8080808080808080);
-    return ~(((((~a & b) | (~(a ^ b) & d)) & 0x8080808080808080) >> 7) * 0xff);
+    if (ASC_FEATURE_SIMD) {
+      return i64x2.extract_lane(i8x16.ge_u(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
+    }
+    const dlo = ((a | 0x0080008000800080) - (b & 0x007f007f007f007f)) ^ ((a ^ ~b) & 0x0080008000800080);
+    const dhi = ((a | 0x8000800080008000) - (b & 0x7f007f007f007f00)) ^ ((a ^ ~b) & 0x8000800080008000);
+    const ml = (((~a & b) | (~(a ^ b) & dlo)) & 0x0080008000800080) >> 7;
+    const mh = (((~a & b) | (~(a ^ b) & dhi)) & 0x8000800080008000) >> 7;
+    return ~(((ml * 0xff) & 0x00ff00ff00ff00ff) | ((mh * 0xff) & 0xff00ff00ff00ff00));
   }
 
   /** Narrows each 16-bit signed integer lane to 8-bit signed integer lanes with saturation. */
@@ -428,7 +514,7 @@ export namespace i8x8 {
       store<u8>(simd_shuffle_tmp, l6,6);
       store<u8>(simd_shuffle_tmp, l7,7);
       store<u64>(simd_shuffle_tmp, 0x8080808080808080,8);
-      return i64x2.extract_lane(i8x16.swizzle(i64x2(a as i64, b as i64), load<v128>(simd_shuffle_tmp)), 0) as v64;
+      return i64x2.extract_lane(i8x16.swizzle(i64x2(a as i64, b as i64), load<v128>(simd_shuffle_tmp, 0, 1)), 0) as v64;
     }
 
     const i0 = (l0 & 7) as v64, i1 = (l1 & 7) as v64, i2 = (l2 & 7) as v64, i3 = (l3 & 7) as v64;

@@ -21,7 +21,7 @@ function assertApiSync(): void {
   const extractSFns: FnExtractS[] = [i8x8.extract_lane_s, i8x8_scalar.extract_lane_s];
   const extractUFns: FnExtractU[] = [i8x8.extract_lane_u, i8x8_scalar.extract_lane_u];
   const replaceFns: FnReplace[] = [i8x8.replace_lane, i8x8_scalar.replace_lane];
-  const unaryVecFns: FnUnaryVec[] = [i8x8.abs, i8x8_scalar.abs, i8x8.neg, i8x8_scalar.neg, i8x8.popcnt, i8x8_scalar.popcnt];
+  const unaryVecFns: FnUnaryVec[] = [i8x8.abs, i8x8_scalar.abs, i8x8.neg, i8x8_scalar.neg, i8x8.popcnt, i8x8_scalar.popcnt, i8x8.bitmask_lane, i8x8_scalar.bitmask_lane];
   const unaryBoolFns: FnUnaryBool[] = [i8x8.all_true, i8x8_scalar.all_true];
   const unaryI32Fns: FnUnaryI32[] = [i8x8.bitmask, i8x8_scalar.bitmask];
   const binaryVecFns: FnBinaryVec[] = [
@@ -40,7 +40,7 @@ function assertApiSync(): void {
   const laneSelectFns: FnLaneSelect[] = [i8x8.relaxed_laneselect, i8x8_scalar.relaxed_laneselect];
 
   expect<i32>(splatFns.length + extractSFns.length + extractUFns.length + replaceFns.length).toBe(8);
-  expect<i32>(unaryVecFns.length + unaryBoolFns.length + unaryI32Fns.length).toBe(10);
+  expect<i32>(unaryVecFns.length + unaryBoolFns.length + unaryI32Fns.length).toBe(12);
   expect<i32>(binaryVecFns.length + shiftFns.length + shuffleFns.length + swizzleFns.length + laneSelectFns.length).toBe(62);
 }
 
@@ -139,6 +139,14 @@ describe("i8x8", () => {
     expect<i32>(dst[7]).toBe(0xaa);
   });
 
+  test("bitmask_lane", () => {
+    const lanes = i8x8(0, 1, -1, 0, 0x7f, -128, 42, 0);
+    const mask = i8x8.bitmask_lane(lanes);
+    expect<u64>(mask).toBe(0x0080808000808000);
+    expect<i32>((ctz(mask) >> 3) as i32).toBe(1);
+    expect<i32>(ctz(i8x8.bitmask(mask)) << 3).toBe(8);
+  });
+
   test("full scalar parity", () => {
     state = 0x243f6a8885a308d3;
     let completedRuns = 0;
@@ -187,6 +195,7 @@ describe("i8x8", () => {
       if (!check64(i8x8.shr_u(a, shift), i8x8_scalar.shr_u(a, shift))) return;
       if (!checkBool(i8x8.all_true(a), i8x8_scalar.all_true(a))) return;
       if (!check32(i8x8.bitmask(a), i8x8_scalar.bitmask(a))) return;
+      if (!check64(i8x8.bitmask_lane(a), i8x8_scalar.bitmask_lane(a))) return;
       if (!check64(i8x8.popcnt(a), i8x8_scalar.popcnt(a))) return;
       if (!check64(i8x8.eq(a, b), i8x8_scalar.eq(a, b))) return;
       if (!check64(i8x8.ne(a, b), i8x8_scalar.ne(a, b))) return;

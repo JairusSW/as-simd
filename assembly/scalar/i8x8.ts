@@ -210,6 +210,12 @@ export namespace i8x8_scalar {
     return m;
   }
 
+  export function bitmask_lane(a: u64): u64 {
+    let out: u64 = 0;
+    for (let i = 0; i < 8; i++) out = set8(out, i, get8(a, i) != 0 ? 0x80 : 0);
+    return out;
+  }
+
   export function popcnt(a: u64): u64 {
     let out: u64 = 0;
     for (let i = 0; i < 8; i++) out = set8(out, i, pop8(get8(a, i)));
