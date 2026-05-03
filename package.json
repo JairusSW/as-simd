@@ -19,6 +19,7 @@
     "build:transform": "node --check ./transform/index.mjs",
     "test:wasmtime": "wasmtime ./build/test.wasm",
     "bench": "./scripts/run-bench.sh",
+    "v8:score": "node ./scripts/v8-score.mjs",
     "format": "prettier -w .",
     "charts": "npm run charts:build && npm run charts:serve",
     "charts:build": "./scripts/build-charts.sh",

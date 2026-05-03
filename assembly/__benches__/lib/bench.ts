@@ -54,6 +54,8 @@ const BENCH_RUNTIME_V8: bool = isDefined(AS_BENCH_RUNTIME_V8);
 const BENCH_RUNTIME_LLVM: bool = isDefined(AS_BENCH_RUNTIME_LLVM);
 // @ts-expect-error: AS_BENCH_RUNTIME_WAVM may be undefined.
 const BENCH_RUNTIME_WAVM: bool = isDefined(AS_BENCH_RUNTIME_WAVM);
+// @ts-expect-error: AS_BENCH_RUNTIME_WASMTIME may be undefined.
+const BENCH_RUNTIME_WASMTIME: bool = isDefined(AS_BENCH_RUNTIME_WASMTIME);
 // @ts-expect-error: AS_BENCH_RUNTIME_WASMER may be undefined.
 const BENCH_RUNTIME_WASMER: bool = isDefined(AS_BENCH_RUNTIME_WASMER);
 const BENCH_RUNTIME_STDOUT: bool = !BENCH_RUNTIME_V8;
@@ -61,11 +63,13 @@ const BENCH_RUNTIME_NAME: string = BENCH_RUNTIME_V8
   ? "v8"
   : BENCH_RUNTIME_WAVM
     ? "wavm"
-    : BENCH_RUNTIME_WASMER
-      ? "wasmer"
-      : BENCH_RUNTIME_LLVM
-        ? "llvm"
-        : "runtime";
+    : BENCH_RUNTIME_WASMTIME
+      ? "wasmtime"
+      : BENCH_RUNTIME_WASMER
+        ? "wasmer"
+        : BENCH_RUNTIME_LLVM
+          ? "llvm"
+          : "runtime";
 
 let ASC_FEATURES: string = "";
 if (ASC_FEATURE_SIMD) ASC_FEATURES += "simd ";

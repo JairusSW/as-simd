@@ -11,8 +11,10 @@ TURBOFAN_FLAGS=${TURBOFAN_FLAGS:-"--no-liftoff"}
 BENCH_SAMPLES=${BENCH_SAMPLES:-1}
 D8_BIN=${D8_BIN:-""}
 WAVM_BIN=${WAVM_BIN:-"wavm"}
+WASMTIME_BIN=${WASMTIME_BIN:-"wasmtime"}
 WASMER_BIN=${WASMER_BIN:-"wasmer"}
 WAVM_RUN_FLAGS=${WAVM_RUN_FLAGS:-"--abi=wasi --enable simd --enable bulk-memory --enable sign-extension"}
+WASMTIME_RUN_FLAGS=${WASMTIME_RUN_FLAGS:-"-W simd=y -W relaxed-simd=y -W bulk-memory=y"}
 WASMER_RUN_FLAGS=${WASMER_RUN_FLAGS:-"--llvm --enable-simd --enable-relaxed-simd --enable-bulk-memory --enable-reference-types --enable-multi-value"}
 # Deserialize-biased alternative to try manually:
 # TURBOFAN_FLAGS="--no-liftoff --no-wasm-stack-checks --no-wasm-bounds-checks --no-wasm-tier-up --experimental-wasm-revectorize --minor-ms --minor-ms-concurrent-marking-trigger=30 --turboshaft-wasm-load-elimination"
@@ -20,9 +22,11 @@ BENCH_NAME=""
 ARGS=()
 RUN_V8=0
 RUN_WAVM=0
+RUN_WASMTIME=0
 RUN_WASMER=0
 
 read -r -a WAVM_RUN_FLAGS_ARR <<< "$WAVM_RUN_FLAGS"
+read -r -a WASMTIME_RUN_FLAGS_ARR <<< "$WASMTIME_RUN_FLAGS"
 read -r -a WASMER_RUN_FLAGS_ARR <<< "$WASMER_RUN_FLAGS"
 
 while [[ $# -gt 0 ]]; do
@@ -40,8 +44,18 @@ while [[ $# -gt 0 ]]; do
       RUN_WAVM=1
       shift
       ;;
+    --wasmtime)
+      RUN_WASMTIME=1
+      shift
+      ;;
     --wasmer)
       RUN_WASMER=1
+      shift
+      ;;
+    --compare-runtimes|--compare-engines|--compare)
+      RUN_V8=1
+      RUN_WASMTIME=1
+      RUN_WAVM=1
       shift
       ;;
     --compile)
@@ -59,8 +73,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ $RUN_V8 -eq 0 && $RUN_WAVM -eq 0 && $RUN_WASMER -eq 0 ]]; then
-  RUN_V8=1
+if [[ $RUN_V8 -eq 0 && $RUN_WAVM -eq 0 && $RUN_WASMTIME -eq 0 && $RUN_WASMER -eq 0 ]]; then
   RUN_WAVM=1
 fi
 
@@ -80,6 +93,13 @@ fi
 if [[ $RUN_WAVM -eq 1 ]]; then
   if ! command -v "$WAVM_BIN" >/dev/null 2>&1; then
     echo "❌ wavm not found in PATH (or WAVM_BIN is invalid)"
+    exit 1
+  fi
+fi
+
+if [[ $RUN_WASMTIME -eq 1 ]]; then
+  if ! command -v "$WASMTIME_BIN" >/dev/null 2>&1; then
+    echo "❌ wasmtime not found in PATH (or WASMTIME_BIN is invalid)"
     exit 1
   fi
 fi
@@ -133,7 +153,13 @@ if [[ -n "$BENCH_NAME" ]]; then
   fi
 
   for f in "${CANDIDATES[@]}"; do
-    [[ -f "$f" ]] && FILES+=("$f")
+    if [[ -f "$f" ]]; then
+      already_added=0
+      for existing in "${FILES[@]}"; do
+        [[ "$existing" == "$f" ]] && already_added=1 && break
+      done
+      [[ $already_added -eq 0 ]] && FILES+=("$f")
+    fi
   done
 
   if [[ ${#FILES[@]} -eq 0 ]]; then
@@ -193,6 +219,21 @@ run_wavm_module() {
   local tmp
   tmp="$(mktemp)"
   if ! "$WAVM_BIN" run "${WAVM_RUN_FLAGS_ARR[@]}" "./build/$wasm_arg" >"$tmp" 2>&1; then
+    cat "$tmp"
+    rm -f "$tmp"
+    return 1
+  fi
+
+  consume_bench_output "$tmp"
+
+  rm -f "$tmp"
+}
+
+run_wasmtime_module() {
+  local wasm_arg="$1"
+  local tmp
+  tmp="$(mktemp)"
+  if ! "$WASMTIME_BIN" run "${WASMTIME_RUN_FLAGS_ARR[@]}" "./build/$wasm_arg" >"$tmp" 2>&1; then
     cat "$tmp"
     rm -f "$tmp"
     return 1
@@ -319,6 +360,34 @@ for file in "${FILES[@]}"; do
             optimize_or_fallback "${output}.wavm.tmp" "${output}.wavm.swar.wasm"
             echo -e "$filename (asc/$runtime/wavm/swar/wavm)\n"
             run_wavm_module "${filename%.ts}.${runtime}.wavm.swar.wasm"
+          fi
+        fi
+
+        if [[ $RUN_WASMTIME -eq 1 ]]; then
+          if [[ (-z "$MODE_FILTER" || "$MODE_FILTER" == "SIMD") && (-z "$file_mode" || "$file_mode" == "SIMD") ]]; then
+            npx asc "$file" -o "${output}.wasmtime.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime "$runtime" --use BENCH_SAMPLES="$BENCH_SAMPLES" --use AS_BENCH_WASI=1 --use AS_BENCH_RUNTIME_WASMTIME=1 --use AS_BENCH_FORCE_SIMD=1 --config ./node_modules/@assemblyscript/wasi-shim/asconfig.json --enable bulk-memory --enable simd --enable relaxed-simd --enable sign-extension --exportRuntime || {
+              echo "Wasmtime WASI SIMD build failed"
+              exit 1
+            }
+            optimize_or_fallback "${output}.wasmtime.tmp" "${output}.wasmtime.simd.wasm"
+            echo -e "$filename (asc/$runtime/wasmtime/simd/wasmtime)\n"
+            run_wasmtime_module "${filename%.ts}.${runtime}.wasmtime.simd.wasm"
+          fi
+          if [[ (-z "$MODE_FILTER" || "$MODE_FILTER" == "SWAR") && (-z "$file_mode" || "$file_mode" == "SWAR") ]]; then
+            if [[ $swar_alias_simd -eq 1 ]]; then
+              AS_SIMD_FORCE_SWAR_V128=1 npx asc "$file" -o "${output}.wasmtime.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime "$runtime" --use BENCH_SAMPLES="$BENCH_SAMPLES" --use AS_BENCH_WASI=1 --use AS_BENCH_RUNTIME_WASMTIME=1 --use AS_BENCH_FORCE_SWAR=1 --config ./node_modules/@assemblyscript/wasi-shim/asconfig.json --transform ./transform/index.mjs --enable bulk-memory --enable simd --enable relaxed-simd --enable sign-extension --exportRuntime || {
+                echo "Wasmtime WASI SWAR build failed"
+                exit 1
+              }
+            else
+              npx asc "$file" -o "${output}.wasmtime.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime "$runtime" --use BENCH_SAMPLES="$BENCH_SAMPLES" --use AS_BENCH_WASI=1 --use AS_BENCH_RUNTIME_WASMTIME=1 --use AS_BENCH_FORCE_SWAR=1 --config ./node_modules/@assemblyscript/wasi-shim/asconfig.json --enable bulk-memory --enable sign-extension --exportRuntime || {
+                echo "Wasmtime WASI SWAR build failed"
+                exit 1
+              }
+            fi
+            optimize_or_fallback "${output}.wasmtime.tmp" "${output}.wasmtime.swar.wasm"
+            echo -e "$filename (asc/$runtime/wasmtime/swar/wasmtime)\n"
+            run_wasmtime_module "${filename%.ts}.${runtime}.wasmtime.swar.wasm"
           fi
         fi
 
