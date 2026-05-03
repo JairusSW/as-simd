@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1320" height="1746" viewBox="0 0 1320 1746">
 <rect x="0" y="0" width="1320" height="1746" fill="transparent"/>
 <text x="660" y="44" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="600" fill="#666666">i32x2 SWAR vs i32x4 SIMD</text>
-<text x="660" y="66" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="500" fill="#666666">Sun May 03 2026 - v0.0.0 - 5b293a4 - main</text>
+<text x="660" y="66" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="500" fill="#666666">Sun May 03 2026 - v0.0.0 - 8c5810a - main</text>
 <text y="89" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="600"><tspan x="828" fill="#666666">v8 swar</tspan><tspan x="912" fill="#666666">wavm swar</tspan><tspan x="996" fill="#666666">v8 simd</tspan><tspan x="1080" fill="#666666">wavm simd</tspan></text>
 <text x="172" y="107" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="600" fill="#666666">splat</text>
 <rect x="220" y="88" width="393" height="6" fill="rgb(99,102,241)" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>
