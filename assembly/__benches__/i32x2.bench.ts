@@ -39,6 +39,7 @@ bench("i32x2.shl", () => { blackbox(i32x2.shl(blackbox(BENCH_A), blackbox(BENCH_
 bench("i32x2.shr_s", () => { blackbox(i32x2.shr_s(blackbox(BENCH_A), blackbox(BENCH_SHIFT))); }, OPS, 8); dumpToFile("i32x2", "shr-s");
 bench("i32x2.shr_u", () => { blackbox(i32x2.shr_u(blackbox(BENCH_A), blackbox(BENCH_SHIFT))); }, OPS, 8); dumpToFile("i32x2", "shr-u");
 bench("i32x2.all_true", () => { blackbox(i32x2.all_true(blackbox(BENCH_A))); }, OPS, 8); dumpToFile("i32x2", "all-true");
+bench("i32x2.any_true", () => { blackbox(i32x2.any_true(blackbox(BENCH_A))); }, OPS, 8); dumpToFile("i32x2", "any-true");
 bench("i32x2.bitmask", () => { blackbox(i32x2.bitmask(blackbox(BENCH_A))); }, OPS, 8); dumpToFile("i32x2", "bitmask");
 bench("i32x2.eq", () => { blackbox(i32x2.eq(blackbox(BENCH_A), blackbox(BENCH_B))); }, OPS, 8); dumpToFile("i32x2", "eq");
 bench("i32x2.ne", () => { blackbox(i32x2.ne(blackbox(BENCH_A), blackbox(BENCH_B))); }, OPS, 8); dumpToFile("i32x2", "ne");

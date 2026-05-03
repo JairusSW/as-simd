@@ -76,20 +76,27 @@ fuzz("i32x4 scalar-vs-simd parity", (seedValue: i32): bool => {
   if (!checkV128(i32x4.sub(a, b), i32x2_scalar.sub(aLo, bLo), i32x2_scalar.sub(aHi, bHi))) return false;
   if (!checkV128(i32x4.mul(a, b), i32x2_scalar.mul(aLo, bLo), i32x2_scalar.mul(aHi, bHi))) return false;
   if (!checkV128(i32x4.min_s(a, b), i32x2_scalar.min_s(aLo, bLo), i32x2_scalar.min_s(aHi, bHi))) return false;
+  if (!checkV128(i32x4.min_u(a, b), i32x2_scalar.min_u(aLo, bLo), i32x2_scalar.min_u(aHi, bHi))) return false;
   if (!checkV128(i32x4.max_s(a, b), i32x2_scalar.max_s(aLo, bLo), i32x2_scalar.max_s(aHi, bHi))) return false;
+  if (!checkV128(i32x4.max_u(a, b), i32x2_scalar.max_u(aLo, bLo), i32x2_scalar.max_u(aHi, bHi))) return false;
   if (!checkV128(i32x4.dot_i16x8_s(a, b), i32x2_scalar.dot_i16x4_s(aLo, bLo), i32x2_scalar.dot_i16x4_s(aHi, bHi))) return false;
   if (!checkV128(i32x4.abs(a), i32x2_scalar.abs(aLo), i32x2_scalar.abs(aHi))) return false;
   if (!checkV128(i32x4.neg(a), i32x2_scalar.neg(aLo), i32x2_scalar.neg(aHi))) return false;
   if (!checkV128(i32x4.shl(a, shift), i32x2_scalar.shl(aLo, shift), i32x2_scalar.shl(aHi, shift))) return false;
   if (!checkV128(i32x4.shr_s(a, shift), i32x2_scalar.shr_s(aLo, shift), i32x2_scalar.shr_s(aHi, shift))) return false;
+  if (!checkV128(i32x4.shr_u(a, shift), i32x2_scalar.shr_u(aLo, shift), i32x2_scalar.shr_u(aHi, shift))) return false;
   if (!checkBool(i32x4.all_true(a), i32x2_scalar.all_true(aLo) && i32x2_scalar.all_true(aHi))) return false;
   if (!check32(i32x4.bitmask(a), i32x2_scalar.bitmask(aLo) | (i32x2_scalar.bitmask(aHi) << 2))) return false;
   if (!checkV128(i32x4.eq(a, b), i32x2_scalar.eq(aLo, bLo), i32x2_scalar.eq(aHi, bHi))) return false;
   if (!checkV128(i32x4.ne(a, b), i32x2_scalar.ne(aLo, bLo), i32x2_scalar.ne(aHi, bHi))) return false;
   if (!checkV128(i32x4.lt_s(a, b), i32x2_scalar.lt_s(aLo, bLo), i32x2_scalar.lt_s(aHi, bHi))) return false;
+  if (!checkV128(i32x4.lt_u(a, b), i32x2_scalar.lt_u(aLo, bLo), i32x2_scalar.lt_u(aHi, bHi))) return false;
   if (!checkV128(i32x4.le_s(a, b), i32x2_scalar.le_s(aLo, bLo), i32x2_scalar.le_s(aHi, bHi))) return false;
+  if (!checkV128(i32x4.le_u(a, b), i32x2_scalar.le_u(aLo, bLo), i32x2_scalar.le_u(aHi, bHi))) return false;
   if (!checkV128(i32x4.gt_s(a, b), i32x2_scalar.gt_s(aLo, bLo), i32x2_scalar.gt_s(aHi, bHi))) return false;
+  if (!checkV128(i32x4.gt_u(a, b), i32x2_scalar.gt_u(aLo, bLo), i32x2_scalar.gt_u(aHi, bHi))) return false;
   if (!checkV128(i32x4.ge_s(a, b), i32x2_scalar.ge_s(aLo, bLo), i32x2_scalar.ge_s(aHi, bHi))) return false;
+  if (!checkV128(i32x4.ge_u(a, b), i32x2_scalar.ge_u(aLo, bLo), i32x2_scalar.ge_u(aHi, bHi))) return false;
 
   return true;
 }).generate((seed: FuzzSeed, run: (seedValue: i32) => bool): void => {

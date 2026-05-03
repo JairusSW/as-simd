@@ -78,6 +78,7 @@ fuzz("i32x2 scalar reference parity", (seedValue: i32): bool => {
   if (!check64(i32x2.shr_s(a, shift), i32x2_scalar.shr_s(a, shift))) return false;
   if (!check64(i32x2.shr_u(a, shift), i32x2_scalar.shr_u(a, shift))) return false;
   if (!checkBool(i32x2.all_true(a), i32x2_scalar.all_true(a))) return false;
+  if (!checkBool(i32x2.any_true(a), i32x2_scalar.any_true(a))) return false;
   if (!check32(i32x2.bitmask(a), i32x2_scalar.bitmask(a))) return false;
   if (!check64(i32x2.eq(a, b), i32x2_scalar.eq(a, b))) return false;
   if (!check64(i32x2.ne(a, b), i32x2_scalar.ne(a, b))) return false;
