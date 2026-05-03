@@ -154,10 +154,25 @@ bench("i16x4.all_true", () => {
 }, OPS, 8);
 dumpToFile("i16x4", "all-true");
 
+bench("i16x4.any_true", () => {
+  blackbox(i16x4.any_true(blackbox(BENCH_A)));
+}, OPS, 8);
+dumpToFile("i16x4", "any-true");
+
 bench("i16x4.bitmask", () => {
   blackbox(i16x4.bitmask(blackbox(BENCH_A)));
 }, OPS, 8);
 dumpToFile("i16x4", "bitmask");
+
+bench("i16x4.bitmask_lane", () => {
+  blackbox(i16x4.bitmask_lane(blackbox(BENCH_A)));
+}, OPS, 8);
+dumpToFile("i16x4", "bitmask-lane");
+
+bench("i16x4.popcnt", () => {
+  blackbox(i16x4.popcnt(blackbox(BENCH_A)));
+}, OPS, 8);
+dumpToFile("i16x4", "popcnt");
 
 bench("i16x4.eq", () => {
   blackbox(i16x4.eq(blackbox(BENCH_A), blackbox(BENCH_B)));

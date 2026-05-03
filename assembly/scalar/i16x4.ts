@@ -201,8 +201,30 @@ export namespace i16x4_scalar {
     return get16u(a, 0) != 0 && get16u(a, 1) != 0 && get16u(a, 2) != 0 && get16u(a, 3) != 0;
   }
 
+  export function any_true(a: u64): bool {
+    return a != 0;
+  }
+
   export function bitmask(a: u64): i32 {
     return ((((a >> 15) & 1) as i32) | ((((a >> 31) & 1) as i32) << 1) | ((((a >> 47) & 1) as i32) << 2) | ((((a >> 63) & 1) as i32) << 3));
+  }
+
+  export function bitmask_lane(a: u64): u64 {
+    return pack4(get16u(a, 0) != 0 ? 0x8000 : 0, get16u(a, 1) != 0 ? 0x8000 : 0, get16u(a, 2) != 0 ? 0x8000 : 0, get16u(a, 3) != 0 ? 0x8000 : 0);
+  }
+
+  // @ts-expect-error: decorator
+  @inline function pop16(x: u16): u16 {
+    let v: u32 = x;
+    v = v - ((v >> 1) & 0x5555);
+    v = (v & 0x3333) + ((v >> 2) & 0x3333);
+    v = (v + (v >> 4)) & 0x0f0f;
+    v = (v + (v >> 8)) & 0x001f;
+    return v as u16;
+  }
+
+  export function popcnt(a: u64): u64 {
+    return pack4(pop16(get16u(a, 0)), pop16(get16u(a, 1)), pop16(get16u(a, 2)), pop16(get16u(a, 3)));
   }
 
   export function eq(a: u64, b: u64): u64 {

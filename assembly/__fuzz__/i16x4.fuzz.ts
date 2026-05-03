@@ -88,7 +88,10 @@ fuzz("i16x4 scalar reference parity", (seedValue: i32): bool => {
   if (!check64(i16x4.shr_s(a, shift), i16x4_scalar.shr_s(a, shift))) return false;
   if (!check64(i16x4.shr_u(a, shift), i16x4_scalar.shr_u(a, shift))) return false;
   if (!checkBool(i16x4.all_true(a), i16x4_scalar.all_true(a))) return false;
+  if (!checkBool(i16x4.any_true(a), i16x4_scalar.any_true(a))) return false;
   if (!check32(i16x4.bitmask(a), i16x4_scalar.bitmask(a))) return false;
+  if (!check64(i16x4.bitmask_lane(a), i16x4_scalar.bitmask_lane(a))) return false;
+  if (!check64(i16x4.popcnt(a), i16x4_scalar.popcnt(a))) return false;
   if (!check64(i16x4.eq(a, b), i16x4_scalar.eq(a, b))) return false;
   if (!check64(i16x4.ne(a, b), i16x4_scalar.ne(a, b))) return false;
   if (!check64(i16x4.lt_s(a, b), i16x4_scalar.lt_s(a, b))) return false;

@@ -24,8 +24,9 @@ function assertApiSync(): void {
     i16x4.extend_low_i8x8_s, i16x4_scalar.extend_low_i8x8_s, i16x4.extend_low_i8x8_u, i16x4_scalar.extend_low_i8x8_u,
     i16x4.extend_high_i8x8_s, i16x4_scalar.extend_high_i8x8_s, i16x4.extend_high_i8x8_u, i16x4_scalar.extend_high_i8x8_u,
     i16x4.extadd_pairwise_i8x8_s, i16x4_scalar.extadd_pairwise_i8x8_s, i16x4.extadd_pairwise_i8x8_u, i16x4_scalar.extadd_pairwise_i8x8_u,
+    i16x4.bitmask_lane, i16x4_scalar.bitmask_lane, i16x4.popcnt, i16x4_scalar.popcnt,
   ];
-  const unaryBoolFns: FnUnaryBool[] = [i16x4.all_true, i16x4_scalar.all_true];
+  const unaryBoolFns: FnUnaryBool[] = [i16x4.all_true, i16x4_scalar.all_true, i16x4.any_true, i16x4_scalar.any_true];
   const unaryI32Fns: FnUnaryI32[] = [i16x4.bitmask, i16x4_scalar.bitmask];
   const binaryVecFns: FnBinaryVec[] = [
     i16x4.add, i16x4_scalar.add, i16x4.sub, i16x4_scalar.sub, i16x4.mul, i16x4_scalar.mul,
@@ -46,7 +47,7 @@ function assertApiSync(): void {
   const laneSelectFns: FnLaneSelect[] = [i16x4.relaxed_laneselect, i16x4_scalar.relaxed_laneselect];
 
   expect<i32>(splatFns.length + extractSFns.length + extractUFns.length + replaceFns.length).toBe(8);
-  expect<i32>(unaryVecFns.length + unaryBoolFns.length + unaryI32Fns.length).toBe(20);
+  expect<i32>(unaryVecFns.length + unaryBoolFns.length + unaryI32Fns.length).toBe(26);
   expect<i32>(binaryVecFns.length + shiftFns.length + shuffleFns.length + laneSelectFns.length).toBe(72);
 }
 
@@ -167,7 +168,10 @@ describe("i16x4", () => {
       if (!check64(i16x4.shr_s(a, shift), i16x4_scalar.shr_s(a, shift))) return;
       if (!check64(i16x4.shr_u(a, shift), i16x4_scalar.shr_u(a, shift))) return;
       if (!checkBool(i16x4.all_true(a), i16x4_scalar.all_true(a))) return;
+      if (!checkBool(i16x4.any_true(a), i16x4_scalar.any_true(a))) return;
       if (!check32(i16x4.bitmask(a), i16x4_scalar.bitmask(a))) return;
+      if (!check64(i16x4.bitmask_lane(a), i16x4_scalar.bitmask_lane(a))) return;
+      if (!check64(i16x4.popcnt(a), i16x4_scalar.popcnt(a))) return;
       if (!check64(i16x4.eq(a, b), i16x4_scalar.eq(a, b))) return;
       if (!check64(i16x4.ne(a, b), i16x4_scalar.ne(a, b))) return;
       if (!check64(i16x4.lt_s(a, b), i16x4_scalar.lt_s(a, b))) return;
