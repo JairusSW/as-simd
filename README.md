@@ -157,9 +157,13 @@ Correctness is validated by:
 - deterministic unit parity tests against scalar
 - mode-specific fuzz parity in SWAR and SIMD builds
 
+All charts and benchmark results are located [Here](https://github.com/JairusSW/as-simd/tree/main/charts)
+
 ### Comparison to SIMD
 
-![ahh](https://raw.githubusercontent.com/JairusSW/as-simd/refs/heads/main/charts/chart-i8x8-v-i8x16.svg)
+Here's some results comparing `i16x4 (SWAR)` versus the native `i16x8 (SIMD)` implementation.
+
+![i16x4-swar-vs-i16x8-simd](https://raw.githubusercontent.com/JairusSW/as-simd/refs/heads/main/charts/chart-i16x4-swar-v-i16x8-simd.svg)
 
 ### Running Benchmarks Locally
 
