@@ -176,20 +176,20 @@ export function createComparisonChart(config: ComparisonChartConfig): void {
   const svg: string[] = [];
   svg.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`);
   svg.push(`<rect x="0" y="0" width="${width}" height="${height}" fill="transparent"/>`);
-  svg.push(`<text x="${Math.round(width / 2)}" y="44" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="600" fill="#111827">${esc(config.title)}</text>`);
-  svg.push(`<text x="${Math.round(width / 2)}" y="64" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="500" fill="#666666">${esc(config.subtitle)}</text>`);
+  svg.push(`<text x="${Math.round(width / 2)}" y="44" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="600" fill="#666666">${esc(config.title)}</text>`);
+  svg.push(`<text x="${Math.round(width / 2)}" y="66" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="500" fill="#666666">${esc(config.subtitle)}</text>`);
 
   const summaryX = layout.leftW + layout.barW + layout.barMargin;
   const summaryHeaderY = layout.headerH + 3;
   const summaryHeader = config.variants
-    .map((v, j) => `<tspan x="${summaryX + j * layout.colGap}" fill="#374151">${esc(variantLabel(v))}</tspan>`)
+    .map((v, j) => `<tspan x="${summaryX + j * layout.colGap}" fill="#666666">${esc(variantLabel(v))}</tspan>`)
     .join("");
-  svg.push(`<text y="${summaryHeaderY}" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600">${summaryHeader}</text>`);
+  svg.push(`<text y="${summaryHeaderY}" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="600">${summaryHeader}</text>`);
 
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i];
     const y = layout.headerH + i * layout.rowH;
-    svg.push(`<text x="${layout.leftW - layout.barMargin}" y="${y + 21}" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#111827">${esc(r.op)}</text>`);
+    svg.push(`<text x="${layout.leftW - layout.barMargin}" y="${y + 21}" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="600" fill="#666666">${esc(r.op)}</text>`);
 
     for (let j = 0; j < config.variants.length; j++) {
       if (!r.values[j].ok) continue;
@@ -200,10 +200,10 @@ export function createComparisonChart(config: ComparisonChartConfig): void {
     const summary = config.variants
       .map((v, j) => {
         const x = summaryX + j * layout.colGap;
-        return `<tspan x="${x}" fill="${v.color}">■</tspan><tspan x="${x + 14}" fill="#374151">${fmtMops(r.values[j].ops)}</tspan>`;
+        return `<tspan x="${x}" fill="${v.color}">■</tspan><tspan x="${x + 14}" fill="#666666">${fmtMops(r.values[j].ops)}</tspan>`;
       })
       .join("");
-    svg.push(`<text y="${y + 21}" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600">${summary}</text>`);
+    svg.push(`<text y="${y + 21}" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="600">${summary}</text>`);
   }
 
   svg.push("</svg>");
