@@ -11,6 +11,7 @@ let benchName = "";
 let mode = "swar";
 let filter = "";
 let keepLogs = false;
+let jsonOutput = false;
 
 for (let i = 0; i < args.length; i++) {
   const arg = args[i];
@@ -20,6 +21,8 @@ for (let i = 0; i < args.length; i++) {
     filter = args[++i] || "";
   } else if (arg === "--keep-logs") {
     keepLogs = true;
+  } else if (arg === "--json") {
+    jsonOutput = true;
   } else if (!benchName) {
     benchName = arg;
   } else {
@@ -122,26 +125,39 @@ for (const row of rows) {
 
 rows.sort((a, b) => a.score - b.score);
 const bestScore = rows[0]?.score || 0;
+for (let i = 0; i < rows.length; i++) {
+  rows[i].rank = i + 1;
+  rows[i].delta = rows[i].score - bestScore;
+}
 
-console.log(`V8 score for ${path.relative(root, benchPath)} (${mode})`);
-console.log(`d8/v8: ${v8Bin}`);
-console.log("");
-printTable(rows, [
-  ["rank", (_, i) => String(i + 1)],
-  ["label", (r) => r.label],
-  ["delta", (r) => fmt(r.score - bestScore)],
-  ["score", (r) => fmt(r.score)],
-  ["instrB", (r) => fmt(r.instructionBytes)],
-  ["codeB", (r) => fmt(r.codeBytes)],
-  ["compileUs", (r) => fmt(r.compileMicros)],
-  ["stackL", (r) => fmt(r.stackLoads)],
-  ["stackS", (r) => fmt(r.stackStores)],
-  ["wasmL", (r) => fmt(r.staticLoads)],
-  ["wasmS", (r) => fmt(r.staticStores)],
-  ["ops/s", (r) => r.opsPerSecond ? fmt(r.opsPerSecond) : "-"],
-]);
+if (jsonOutput) {
+  process.stdout.write(JSON.stringify({
+    bench: path.relative(root, benchPath),
+    mode,
+    v8Bin,
+    rows,
+  }));
+} else {
+  console.log(`V8 score for ${path.relative(root, benchPath)} (${mode})`);
+  console.log(`d8/v8: ${v8Bin}`);
+  console.log("");
+  printTable(rows, [
+    ["rank", (r) => String(r.rank)],
+    ["label", (r) => r.label],
+    ["delta", (r) => fmt(r.delta)],
+    ["score", (r) => fmt(r.score)],
+    ["instrB", (r) => fmt(r.instructionBytes)],
+    ["codeB", (r) => fmt(r.codeBytes)],
+    ["compileUs", (r) => fmt(r.compileMicros)],
+    ["stackL", (r) => fmt(r.stackLoads)],
+    ["stackS", (r) => fmt(r.stackStores)],
+    ["wasmL", (r) => fmt(r.staticLoads)],
+    ["wasmS", (r) => fmt(r.staticStores)],
+    ["ops/s", (r) => r.opsPerSecond ? fmt(r.opsPerSecond) : "-"],
+  ]);
+}
 
-if (keepLogs) {
+if (keepLogs && !jsonOutput) {
   console.log("");
   console.log(`Logs kept under ${path.relative(root, outDir)}`);
 } else {
@@ -158,6 +174,7 @@ if (keepLogs) {
 }
 
 function resolveBench(name) {
+  if (existsSync(name)) return path.resolve(root, name);
   const normalized = name.endsWith(".bench.ts") ? name : `${name}.bench.ts`;
   const candidates = [
     path.join(root, normalized),
@@ -170,15 +187,17 @@ function resolveBench(name) {
 
 function filterSourceToBench(src, wanted) {
   const lines = src.split(/\r?\n/);
-  let skippingDump = false;
+  let skippingBench = false;
   return lines.map((line) => {
     const match = line.match(/bench\("([^"]+)"/);
     if (match) {
       const keep = match[1] === wanted;
-      skippingDump = !keep;
+      skippingBench = !keep;
       if (!keep) return `// skipped by scripts/v8-score.mjs: ${line}`;
-    } else if (skippingDump && line.includes("dumpToFile(")) {
-      skippingDump = false;
+    } else if (skippingBench) {
+      if (line.includes("dumpToFile(")) {
+        skippingBench = false;
+      }
       return `// skipped by scripts/v8-score.mjs: ${line}`;
     }
     return line;
@@ -272,7 +291,7 @@ function fmt(value) {
 
 function usage(message) {
   if (message) console.error(message);
-  console.error("Usage: node scripts/v8-score.mjs <bench|custom/bench> [--mode swar|simd] [--filter regex] [--keep-logs]");
+  console.error("Usage: node scripts/v8-score.mjs <bench|custom/bench> [--mode swar|simd] [--filter regex] [--keep-logs] [--json]");
   process.exit(2);
 }
 

@@ -92,6 +92,7 @@ fuzz("i8x8 scalar reference parity", (seedValue: i32): bool => {
   if (!check64(i8x8.shl(a, shift), i8x8_scalar.shl(a, shift))) return false;
   if (!check64(i8x8.shr_s(a, shift), i8x8_scalar.shr_s(a, shift))) return false;
   if (!check64(i8x8.shr_u(a, shift), i8x8_scalar.shr_u(a, shift))) return false;
+  if (!checkBool(i8x8.any_true(a), i8x8_scalar.any_true(a))) return false;
   if (!checkBool(i8x8.all_true(a), i8x8_scalar.all_true(a))) return false;
   if (!check32(i8x8.bitmask(a), i8x8_scalar.bitmask(a))) return false;
   if (!check64(i8x8.popcnt(a), i8x8_scalar.popcnt(a))) return false;

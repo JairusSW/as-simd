@@ -1,4 +1,5 @@
 import { i8x8 } from "../../v64/i8x8";
+import { v64 } from "../../v64/v64";
 import { bench_common } from "../common";
 import { bench, blackbox, dumpToFile } from "../lib/bench";
 
@@ -10,12 +11,31 @@ const OPS: u64 = bench_common.DEFAULT_OPS;
 }
 
 // @ts-expect-error: decorator
-@inline function add_current(a: u64, b: u64): u64 {
+@inline function add_new(a: u64, b: u64): u64 {
   return ((a & ~0x8080808080808080) + (b & ~0x8080808080808080)) ^ ((a ^ b) & 0x8080808080808080);
 }
 
 // @ts-expect-error: decorator
-@inline function add_current_const(a: u64, b: u64): u64 {
+@inline function add_new_v64(a: v64, b: v64): v64 {
+  return ((a & ~0x8080808080808080) + (b & ~0x8080808080808080)) ^ ((a ^ b) & 0x8080808080808080);
+}
+
+// @ts-expect-error: decorator
+@inline function add_new_locals(a: u64, b: u64): u64 {
+  const ax = a & ~0x8080808080808080;
+  const bx = b & ~0x8080808080808080;
+  return (ax + bx) ^ ((a ^ b) & 0x8080808080808080);
+}
+
+// @ts-expect-error: decorator
+@inline function add_new_v64_locals(a: v64, b: v64): v64 {
+  const ax = a & ~0x8080808080808080;
+  const bx = b & ~0x8080808080808080;
+  return (ax + bx) ^ ((a ^ b) & 0x8080808080808080);
+}
+
+// @ts-expect-error: decorator
+@inline function add_new_const(a: u64, b: u64): u64 {
   return ((a & 0x7f7f7f7f7f7f7f7f) + (b & 0x7f7f7f7f7f7f7f7f)) ^ ((a ^ b) & 0x8080808080808080);
 }
 
@@ -45,6 +65,11 @@ const OPS: u64 = bench_common.DEFAULT_OPS;
 }
 
 // @ts-expect-error: decorator
+@inline function add_old(a: u64, b: u64): u64 {
+  return add_nibble(a, b);
+}
+
+// @ts-expect-error: decorator
 @inline function add_nibble_xor(a: u64, b: u64): u64 {
   const lo = (a & 0x0f0f0f0f0f0f0f0f) + (b & 0x0f0f0f0f0f0f0f0f);
   const hi = (a & 0xf0f0f0f0f0f0f0f0) + (b & 0xf0f0f0f0f0f0f0f0) + (lo & 0x1010101010101010);
@@ -52,16 +77,22 @@ const OPS: u64 = bench_common.DEFAULT_OPS;
 }
 
 if (
-  add_current(0xfedcba9876543210, 0x7766554433221100) != add_current_const(0xfedcba9876543210, 0x7766554433221100)
-  || add_current(0xfedcba9876543210, 0x7766554433221100) != add_split32(0xfedcba9876543210, 0x7766554433221100)
-  || add_current(0xfedcba9876543210, 0x7766554433221100) != add_split16(0xfedcba9876543210, 0x7766554433221100)
-  || add_current(0xfedcba9876543210, 0x7766554433221100) != add_nibble(0xfedcba9876543210, 0x7766554433221100)
-  || add_current(0xfedcba9876543210, 0x7766554433221100) != add_nibble_xor(0xfedcba9876543210, 0x7766554433221100)
-  || add_current(0xffffffffffffffff, 0x0101010101010101) != add_current_const(0xffffffffffffffff, 0x0101010101010101)
-  || add_current(0xffffffffffffffff, 0x0101010101010101) != add_split32(0xffffffffffffffff, 0x0101010101010101)
-  || add_current(0xffffffffffffffff, 0x0101010101010101) != add_split16(0xffffffffffffffff, 0x0101010101010101)
-  || add_current(0xffffffffffffffff, 0x0101010101010101) != add_nibble(0xffffffffffffffff, 0x0101010101010101)
-  || add_current(0xffffffffffffffff, 0x0101010101010101) != add_nibble_xor(0xffffffffffffffff, 0x0101010101010101)
+  add_new(0xfedcba9876543210, 0x7766554433221100) != add_new_const(0xfedcba9876543210, 0x7766554433221100)
+  || add_new(0xfedcba9876543210, 0x7766554433221100) != add_new_v64(0xfedcba9876543210, 0x7766554433221100)
+  || add_new(0xfedcba9876543210, 0x7766554433221100) != add_new_locals(0xfedcba9876543210, 0x7766554433221100)
+  || add_new(0xfedcba9876543210, 0x7766554433221100) != add_new_v64_locals(0xfedcba9876543210, 0x7766554433221100)
+  || add_new(0xfedcba9876543210, 0x7766554433221100) != add_split32(0xfedcba9876543210, 0x7766554433221100)
+  || add_new(0xfedcba9876543210, 0x7766554433221100) != add_split16(0xfedcba9876543210, 0x7766554433221100)
+  || add_new(0xfedcba9876543210, 0x7766554433221100) != add_nibble(0xfedcba9876543210, 0x7766554433221100)
+  || add_new(0xfedcba9876543210, 0x7766554433221100) != add_nibble_xor(0xfedcba9876543210, 0x7766554433221100)
+  || add_new(0xffffffffffffffff, 0x0101010101010101) != add_new_const(0xffffffffffffffff, 0x0101010101010101)
+  || add_new(0xffffffffffffffff, 0x0101010101010101) != add_new_v64(0xffffffffffffffff, 0x0101010101010101)
+  || add_new(0xffffffffffffffff, 0x0101010101010101) != add_new_locals(0xffffffffffffffff, 0x0101010101010101)
+  || add_new(0xffffffffffffffff, 0x0101010101010101) != add_new_v64_locals(0xffffffffffffffff, 0x0101010101010101)
+  || add_new(0xffffffffffffffff, 0x0101010101010101) != add_split32(0xffffffffffffffff, 0x0101010101010101)
+  || add_new(0xffffffffffffffff, 0x0101010101010101) != add_split16(0xffffffffffffffff, 0x0101010101010101)
+  || add_new(0xffffffffffffffff, 0x0101010101010101) != add_nibble(0xffffffffffffffff, 0x0101010101010101)
+  || add_new(0xffffffffffffffff, 0x0101010101010101) != add_nibble_xor(0xffffffffffffffff, 0x0101010101010101)
 ) {
   unreachable();
 }
@@ -74,13 +105,38 @@ bench("add.lib", () => {
 }, OPS, 8);
 dumpToFile("add-comp", "lib");
 
+bench("add.old", () => {
+  blackbox(add_old(blackbox(add_a), blackbox(add_b)));
+}, OPS, 8);
+dumpToFile("add-comp", "old");
+
+bench("add.new", () => {
+  blackbox(add_new(blackbox(add_a), blackbox(add_b)));
+}, OPS, 8);
+dumpToFile("add-comp", "new");
+
 bench("add.current", () => {
-  blackbox(add_current(blackbox(add_a), blackbox(add_b)));
+  blackbox(add_new(blackbox(add_a), blackbox(add_b)));
 }, OPS, 8);
 dumpToFile("add-comp", "current");
 
+bench("add.current-v64", () => {
+  blackbox(add_new_v64(blackbox(add_a), blackbox(add_b)));
+}, OPS, 8);
+dumpToFile("add-comp", "current-v64");
+
+bench("add.current-locals", () => {
+  blackbox(add_new_locals(blackbox(add_a), blackbox(add_b)));
+}, OPS, 8);
+dumpToFile("add-comp", "current-locals");
+
+bench("add.current-v64-locals", () => {
+  blackbox(add_new_v64_locals(blackbox(add_a), blackbox(add_b)));
+}, OPS, 8);
+dumpToFile("add-comp", "current-v64-locals");
+
 bench("add.current-const", () => {
-  blackbox(add_current_const(blackbox(add_a), blackbox(add_b)));
+  blackbox(add_new_const(blackbox(add_a), blackbox(add_b)));
 }, OPS, 8);
 dumpToFile("add-comp", "current-const");
 

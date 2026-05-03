@@ -24,6 +24,7 @@ RUN_V8=0
 RUN_WAVM=0
 RUN_WASMTIME=0
 RUN_WASMER=0
+RUN_SCORE=0
 
 read -r -a WAVM_RUN_FLAGS_ARR <<< "$WAVM_RUN_FLAGS"
 read -r -a WASMTIME_RUN_FLAGS_ARR <<< "$WASMTIME_RUN_FLAGS"
@@ -52,6 +53,10 @@ while [[ $# -gt 0 ]]; do
       RUN_WASMER=1
       shift
       ;;
+    --score)
+      RUN_SCORE=1
+      shift
+      ;;
     --compare-runtimes|--compare-engines|--compare)
       RUN_V8=1
       RUN_WASMTIME=1
@@ -74,7 +79,13 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ $RUN_V8 -eq 0 && $RUN_WAVM -eq 0 && $RUN_WASMTIME -eq 0 && $RUN_WASMER -eq 0 ]]; then
-  RUN_WAVM=1
+  if [[ $RUN_SCORE -eq 1 ]]; then
+    RUN_V8=1
+  else
+    RUN_WAVM=1
+  fi
+elif [[ $RUN_SCORE -eq 1 && $RUN_V8 -eq 0 ]]; then
+  RUN_V8=1
 fi
 
 if [[ $RUN_V8 -eq 1 ]]; then
@@ -194,6 +205,60 @@ run_v8_module() {
       return 1
       ;;
   esac
+}
+
+apply_v8_score_metadata() {
+  local bench_file="$1"
+  local mode="$2"
+  local score_json
+  local score_tmp
+
+  score_json="$(node ./scripts/v8-score.mjs "$bench_file" --mode "$mode" --json)" || return 1
+  score_tmp="$(mktemp)"
+  printf "%s" "$score_json" >"$score_tmp"
+
+  SCORE_JSON_PATH="$score_tmp" SCORE_MODE="$mode" node <<'EOF'
+const fs = require("node:fs");
+const path = require("node:path");
+
+const root = process.cwd();
+const scorePath = process.env.SCORE_JSON_PATH;
+const mode = process.env.SCORE_MODE;
+const payload = JSON.parse(fs.readFileSync(scorePath, "utf8"));
+const scoreByLabel = new Map(payload.rows.map((row) => [row.label, row]));
+const dir = path.join(root, "build", "logs", "as", mode);
+
+if (!fs.existsSync(dir)) process.exit(0);
+
+for (const entry of fs.readdirSync(dir)) {
+  if (!entry.endsWith(".v8.json")) continue;
+  const filePath = path.join(dir, entry);
+  const record = JSON.parse(fs.readFileSync(filePath, "utf8"));
+  const score = scoreByLabel.get(record.description);
+  if (!score) continue;
+  record.v8_score = {
+    source: "scripts/v8-score.mjs",
+    engine: "turbofan",
+    rank: score.rank,
+    delta: score.delta,
+    score: score.score,
+    compiledFunctions: score.compiledFunctions,
+    compileMicros: score.compileMicros,
+    wasmBodyBytes: score.wasmBodyBytes,
+    codeBytes: score.codeBytes,
+    instructionBytes: score.instructionBytes,
+    opsPerSecond: score.opsPerSecond,
+    stackLoads: score.stackLoads,
+    stackStores: score.stackStores,
+    staticLoads: score.staticLoads,
+    staticStores: score.staticStores,
+    v8Bin: payload.v8Bin,
+  };
+  fs.writeFileSync(filePath, JSON.stringify(record));
+}
+EOF
+
+  rm -f "$score_tmp"
 }
 
 consume_bench_output() {
@@ -327,10 +392,16 @@ for file in "${FILES[@]}"; do
             if [[ (-z "$MODE_FILTER" || "$MODE_FILTER" == "SWAR") && (-z "$file_mode" || "$file_mode" == "SWAR") ]]; then
               echo -e "$filename (asc/$runtime/$engine/swar/v8)\n"
               run_v8_module "$engine" "$argSwar"
+              if [[ $RUN_SCORE -eq 1 && "$engine" == "turbofan" ]]; then
+                apply_v8_score_metadata "$file" "swar"
+              fi
             fi
             if [[ (-z "$MODE_FILTER" || "$MODE_FILTER" == "SIMD") && (-z "$file_mode" || "$file_mode" == "SIMD") ]]; then
               echo -e "$filename (asc/$runtime/$engine/simd/v8)\n"
               run_v8_module "$engine" "$argSimd"
+              if [[ $RUN_SCORE -eq 1 && "$engine" == "turbofan" ]]; then
+                apply_v8_score_metadata "$file" "simd"
+              fi
             fi
           done
         fi

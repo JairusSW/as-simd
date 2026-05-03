@@ -22,7 +22,7 @@ function assertApiSync(): void {
   const extractUFns: FnExtractU[] = [i8x8.extract_lane_u, i8x8_scalar.extract_lane_u];
   const replaceFns: FnReplace[] = [i8x8.replace_lane, i8x8_scalar.replace_lane];
   const unaryVecFns: FnUnaryVec[] = [i8x8.abs, i8x8_scalar.abs, i8x8.neg, i8x8_scalar.neg, i8x8.popcnt, i8x8_scalar.popcnt, i8x8.bitmask_lane, i8x8_scalar.bitmask_lane];
-  const unaryBoolFns: FnUnaryBool[] = [i8x8.all_true, i8x8_scalar.all_true];
+  const unaryBoolFns: FnUnaryBool[] = [i8x8.any_true, i8x8_scalar.any_true, i8x8.all_true, i8x8_scalar.all_true];
   const unaryI32Fns: FnUnaryI32[] = [i8x8.bitmask, i8x8_scalar.bitmask];
   const binaryVecFns: FnBinaryVec[] = [
     i8x8.add, i8x8_scalar.add, i8x8.sub, i8x8_scalar.sub, i8x8.mul, i8x8_scalar.mul,
@@ -40,7 +40,7 @@ function assertApiSync(): void {
   const laneSelectFns: FnLaneSelect[] = [i8x8.relaxed_laneselect, i8x8_scalar.relaxed_laneselect];
 
   expect<i32>(splatFns.length + extractSFns.length + extractUFns.length + replaceFns.length).toBe(8);
-  expect<i32>(unaryVecFns.length + unaryBoolFns.length + unaryI32Fns.length).toBe(12);
+  expect<i32>(unaryVecFns.length + unaryBoolFns.length + unaryI32Fns.length).toBe(14);
   expect<i32>(binaryVecFns.length + shiftFns.length + shuffleFns.length + swizzleFns.length + laneSelectFns.length).toBe(62);
 }
 
@@ -193,6 +193,7 @@ describe("i8x8", () => {
       if (!check64(i8x8.shl(a, shift), i8x8_scalar.shl(a, shift))) return;
       if (!check64(i8x8.shr_s(a, shift), i8x8_scalar.shr_s(a, shift))) return;
       if (!check64(i8x8.shr_u(a, shift), i8x8_scalar.shr_u(a, shift))) return;
+      if (!checkBool(i8x8.any_true(a), i8x8_scalar.any_true(a))) return;
       if (!checkBool(i8x8.all_true(a), i8x8_scalar.all_true(a))) return;
       if (!check32(i8x8.bitmask(a), i8x8_scalar.bitmask(a))) return;
       if (!check64(i8x8.bitmask_lane(a), i8x8_scalar.bitmask_lane(a))) return;

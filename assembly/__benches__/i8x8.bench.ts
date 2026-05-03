@@ -233,6 +233,11 @@ dumpToFile("i8x8", "shr-u");
 
 const i8x8_all_true_a: u64 = 0xfedcba9876543210;
 
+bench("i8x8.any_true", () => {
+  blackbox(i8x8.any_true(blackbox(i8x8_all_true_a)));
+}, OPS, 8);
+dumpToFile("i8x8", "any-true");
+
 bench("i8x8.all_true", () => {
   blackbox(i8x8.all_true(blackbox(i8x8_all_true_a)));
 }, OPS, 8);

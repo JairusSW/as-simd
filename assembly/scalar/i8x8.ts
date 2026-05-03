@@ -204,6 +204,10 @@ export namespace i8x8_scalar {
     return true;
   }
 
+  export function any_true(a: u64): bool {
+    return a != 0;
+  }
+
   export function bitmask(a: u64): i32 {
     let m: i32 = 0;
     for (let i = 0; i < 8; i++) m |= (<i32>((get8(a, i) >> 7) & 1)) << i;

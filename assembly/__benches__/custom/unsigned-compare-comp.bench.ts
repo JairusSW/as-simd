@@ -35,11 +35,13 @@ const b: u64 = 0x7766554433221100;
 }
 
 bench("lt-u.lib", () => { blackbox(i8x8.lt_u(blackbox(a), blackbox(b))); }, OPS, 8); dumpToFile("unsigned-compare-comp", "lt-u-lib");
+bench("lt-u.via-ge", () => { blackbox(~i8x8.ge_u(blackbox(a), blackbox(b))); }, OPS, 8); dumpToFile("unsigned-compare-comp", "lt-u-via-ge");
 bench("lt-u.current", () => { blackbox(lt_u_current(blackbox(a), blackbox(b))); }, OPS, 8); dumpToFile("unsigned-compare-comp", "lt-u-current");
 bench("lt-u.split32", () => { blackbox(lt_u_split32(blackbox(a), blackbox(b))); }, OPS, 8); dumpToFile("unsigned-compare-comp", "lt-u-split32");
 bench("lt-u.split16", () => { blackbox(lt_u_split16(blackbox(a), blackbox(b))); }, OPS, 8); dumpToFile("unsigned-compare-comp", "lt-u-split16");
 
 bench("gt-u.lib", () => { blackbox(i8x8.gt_u(blackbox(a), blackbox(b))); }, OPS, 8); dumpToFile("unsigned-compare-comp", "gt-u-lib");
+bench("gt-u.via-le", () => { blackbox(~i8x8.le_u(blackbox(a), blackbox(b))); }, OPS, 8); dumpToFile("unsigned-compare-comp", "gt-u-via-le");
 bench("gt-u.current", () => { blackbox(lt_u_current(blackbox(b), blackbox(a))); }, OPS, 8); dumpToFile("unsigned-compare-comp", "gt-u-current");
 bench("gt-u.split32", () => { blackbox(lt_u_split32(blackbox(b), blackbox(a))); }, OPS, 8); dumpToFile("unsigned-compare-comp", "gt-u-split32");
 bench("gt-u.split16", () => { blackbox(lt_u_split16(blackbox(b), blackbox(a))); }, OPS, 8); dumpToFile("unsigned-compare-comp", "gt-u-split16");
