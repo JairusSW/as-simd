@@ -8,7 +8,7 @@
   "contributors": [],
   "license": "MIT",
   "scripts": {
-    "test": "ast test",
+    "test": "ast test --mode simd,swar",
     "prepublishOnly": "npm run build:transform && npm test && npm run test:integration:dropin && npm run test:integration:simd-intent",
     "fuzz": "ast fuzz",
     "fuzz:simd": "ast fuzz --mode simd",
