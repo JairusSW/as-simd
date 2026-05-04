@@ -1,42 +1,29 @@
 import { expect, fuzz, FuzzSeed } from "as-test";
 import { i8x16_swar } from "../v128/i8x16_swar";
 
-let state: u64 = 0;
 let checkId: i32 = 0;
 
 // @ts-expect-error: decorator
-@inline function nextU32(): u32 {
-  state += 0x9e3779b97f4a7c15;
-  let z = state;
+@inline function mix64(seed: u64, stream: u64): u64 {
+  let z = seed + stream * 0x9e3779b97f4a7c15 + 0xbf58476d1ce4e5b9;
   z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9;
   z = (z ^ (z >> 27)) * 0x94d049bb133111eb;
-  return <u32>(z ^ (z >> 31));
+  return z ^ (z >> 31);
 }
 
 // @ts-expect-error: decorator
-@inline function nextU64(): u64 {
-  return (<u64>nextU32() << 32) | <u64>nextU32();
+@inline function mix32(seed: u64, stream: u64): u32 {
+  return mix64(seed, stream) as u32;
 }
 
 // @ts-expect-error: decorator
-@inline function v128From64(lo: u64, hi: u64): v128 {
-  return i64x2(lo as i64, hi as i64);
-}
-
+@inline function v128From64(lo: u64, hi: u64): v128 { return i64x2(lo as i64, hi as i64); }
 // @ts-expect-error: decorator
-@inline function lo64(x: v128): u64 {
-  return i64x2.extract_lane(x, 0) as u64;
-}
-
+@inline function lo64(x: v128): u64 { return i64x2.extract_lane(x, 0) as u64; }
 // @ts-expect-error: decorator
-@inline function hi64(x: v128): u64 {
-  return i64x2.extract_lane(x, 1) as u64;
-}
-
+@inline function hi64(x: v128): u64 { return i64x2.extract_lane(x, 1) as u64; }
 // @ts-expect-error: decorator
-@inline function pair(lo: u64): v128 {
-  return v128From64(lo, i8x16_swar.take_hi());
-}
+@inline function pair(lo: u64): v128 { return v128From64(lo, i8x16_swar.take_hi()); }
 
 // @ts-expect-error: decorator
 @inline function checkV128(a: v128, b: v128): bool {
@@ -70,16 +57,16 @@ let checkId: i32 = 0;
 
 fuzz("i8x16_swar parity vs i8x16", (seedValue: i32): bool => {
   if (!ASC_FEATURE_SIMD) return true;
-  state = <u64>seedValue;
-  const a = v128From64(nextU64(), nextU64());
-  const b = v128From64(nextU64(), nextU64());
-  const aLo = lo64(a);
-  const aHi = hi64(a);
-  const bLo = lo64(b);
-  const bHi = hi64(b);
+  const seed = seedValue as u32 as u64;
+  const aLo = mix64(seed, 0);
+  const aHi = mix64(seed, 1);
+  const bLo = mix64(seed, 2);
+  const bHi = mix64(seed, 3);
+  const lane = <i8>mix32(seed, 4);
+  const shift = <i32>(mix32(seed, 5) & 31);
+  const a = v128From64(aLo, aHi);
+  const b = v128From64(bLo, bHi);
   const idx: u8 = 7;
-  const lane = <i8>nextU32();
-  const shift = <i32>(nextU32() & 31);
   checkId = 1;
 
   if (!checkV128(pair(i8x16_swar.splat(lane)), i8x16.splat(lane))) return false;
@@ -117,5 +104,5 @@ fuzz("i8x16_swar parity vs i8x16", (seedValue: i32): bool => {
   if (!checkV128(pair(i8x16_swar.ge_u(aLo, aHi, bLo, bHi)), i8x16.ge_u(a, b))) return false;
   return true;
 }).generate((seed: FuzzSeed, run: (seedValue: i32) => bool): void => {
-  run(<i32>seed.u32());
+  run(seed.i32());
 });

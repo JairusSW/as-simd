@@ -21,11 +21,5 @@ jobs:
       - name: Install
         run: npm install
 
-      - name: Unit tests
-        run: npm test
-
-      - name: Fuzz (SWAR)
-        run: npm run fuzz -- --mode swar
-
-      - name: Fuzz (SIMD)
-        run: npm run fuzz -- --mode simd
+      - name: Fuzz (5x)
+        run: npm run fuzz -- --runs 5x

@@ -2,21 +2,11 @@ import { i32x2 } from "../v64/i32x2";
 import { i32x2_scalar } from "../scalar/i32x2";
 import { expect, fuzz, FuzzSeed } from "as-test";
 
-let state: u64 = 0;
 let checkId: i32 = 0;
 
 // @ts-expect-error: decorator
-@inline function nextU32(): u32 {
-  state += 0x9e3779b97f4a7c15;
-  let z = state;
-  z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9;
-  z = (z ^ (z >> 27)) * 0x94d049bb133111eb;
-  return <u32>(z ^ (z >> 31));
-}
-
-// @ts-expect-error: decorator
-@inline function nextU64(): u64 {
-  return (<u64>nextU32() << 32) | <u64>nextU32();
+@inline function u64At(words: u32[], index: i32): u64 {
+  return (<u64>unchecked(words[index]) << 32) | <u64>unchecked(words[index + 1]);
 }
 
 // @ts-expect-error: decorator
@@ -49,16 +39,15 @@ let checkId: i32 = 0;
   return true;
 }
 
-fuzz("i32x2 scalar reference parity", (seedValue: i32): bool => {
-  state = <u64>seedValue;
-  const a = nextU64();
-  const b = nextU64();
-  const m = nextU64();
-  const idx = <u8>(nextU32() & 1);
-  const shift = <i32>(nextU32() & 63);
-  const laneVal = <i32>nextU32();
-  const l0 = <u8>(nextU32() & 3);
-  const l1 = <u8>(nextU32() & 3);
+fuzz("i32x2 scalar reference parity", (words: u32[]): bool => {
+  const a = u64At(words, 0);
+  const b = u64At(words, 2);
+  const m = u64At(words, 4);
+  const idx = <u8>(unchecked(words[6]) & 1);
+  const shift = <i32>(unchecked(words[7]) & 63);
+  const laneVal = <i32>unchecked(words[8]);
+  const l0 = <u8>(unchecked(words[9]) & 3);
+  const l1 = <u8>(unchecked(words[10]) & 3);
   checkId = 1;
 
   if (!check64(i32x2.splat(laneVal), i32x2_scalar.splat(laneVal))) return false;
@@ -103,6 +92,6 @@ fuzz("i32x2 scalar reference parity", (seedValue: i32): bool => {
   if (!check64(i32x2.shuffle(a, b, l0, l1), i32x2_scalar.shuffle(a, b, l0, l1))) return false;
   if (!check64(i32x2.relaxed_laneselect(a, b, m), i32x2_scalar.relaxed_laneselect(a, b, m))) return false;
   return true;
-}).generate((seed: FuzzSeed, run: (seedValue: i32) => bool): void => {
-  run(<i32>seed.u32());
+}).generate((seed: FuzzSeed, run: (words: u32[]) => bool): void => {
+  run(seed.array<u32>((s: FuzzSeed): u32 => s.u32(), { min: 11, max: 11 }));
 });

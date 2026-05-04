@@ -2,21 +2,11 @@ import { i16x4 } from "../v64/i16x4";
 import { i16x4_scalar } from "../scalar/i16x4";
 import { expect, fuzz, FuzzSeed } from "as-test";
 
-let state: u64 = 0;
 let checkId: i32 = 0;
 
 // @ts-expect-error: decorator
-@inline function nextU32(): u32 {
-  state += 0x9e3779b97f4a7c15;
-  let z = state;
-  z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9;
-  z = (z ^ (z >> 27)) * 0x94d049bb133111eb;
-  return <u32>(z ^ (z >> 31));
-}
-
-// @ts-expect-error: decorator
-@inline function nextU64(): u64 {
-  return (<u64>nextU32() << 32) | <u64>nextU32();
+@inline function u64At(words: u32[], index: i32): u64 {
+  return (<u64>unchecked(words[index]) << 32) | <u64>unchecked(words[index + 1]);
 }
 
 // @ts-expect-error: decorator
@@ -49,21 +39,19 @@ let checkId: i32 = 0;
   return true;
 }
 
-fuzz("i16x4 scalar reference parity", (seedValue: i32): bool => {
-  state = <u64>seedValue;
-  const a = nextU64();
-  const b = nextU64();
-  const c = nextU64();
-  const d = nextU64();
-  const m = nextU64();
-  const idx = <u8>(nextU32() & 3);
-  const shift = <i32>(nextU32() & 31);
-  const laneVal = <i16>nextU32();
-  const l0 = <u8>(nextU32() & 7);
-  const l1 = <u8>(nextU32() & 7);
-  const l2 = <u8>(nextU32() & 7);
-  const l3 = <u8>(nextU32() & 7);
-
+fuzz("i16x4 scalar reference parity", (words: u32[]): bool => {
+  const a = u64At(words, 0);
+  const b = u64At(words, 2);
+  const c = u64At(words, 4);
+  const d = u64At(words, 6);
+  const m = u64At(words, 8);
+  const idx = <u8>(unchecked(words[10]) & 3);
+  const shift = <i32>(unchecked(words[11]) & 31);
+  const laneVal = <i16>unchecked(words[12]);
+  const l0 = <u8>(unchecked(words[13]) & 7);
+  const l1 = <u8>(unchecked(words[14]) & 7);
+  const l2 = <u8>(unchecked(words[15]) & 7);
+  const l3 = <u8>(unchecked(words[16]) & 7);
   checkId = 1;
 
   if (!check64(i16x4.splat(laneVal), i16x4_scalar.splat(laneVal))) return false;
@@ -120,6 +108,6 @@ fuzz("i16x4 scalar reference parity", (seedValue: i32): bool => {
   if (!check64(i16x4.relaxed_q15mulr_s(a, b), i16x4_scalar.relaxed_q15mulr_s(a, b))) return false;
   if (!check64(i16x4.relaxed_dot_i8x8_i7x8_s(a, b), i16x4_scalar.relaxed_dot_i8x8_i7x8_s(a, b))) return false;
   return true;
-}).generate((seed: FuzzSeed, run: (seedValue: i32) => bool): void => {
-  run(<i32>seed.u32());
+}).generate((seed: FuzzSeed, run: (words: u32[]) => bool): void => {
+  run(seed.array<u32>((s: FuzzSeed): u32 => s.u32(), { min: 17, max: 17 }));
 });

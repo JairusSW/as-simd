@@ -2,21 +2,19 @@ import { i8x8 } from "../v64/i8x8";
 import { i8x8_scalar } from "../scalar/i8x8";
 import { expect, fuzz, FuzzSeed } from "as-test";
 
-let state: u64 = 0;
 let checkId: i32 = 0;
 
 // @ts-expect-error: decorator
-@inline function nextU32(): u32 {
-  state += 0x9e3779b97f4a7c15;
-  let z = state;
+@inline function mix64(seed: u64, stream: u64): u64 {
+  let z = seed + stream * 0x9e3779b97f4a7c15 + 0xbf58476d1ce4e5b9;
   z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9;
   z = (z ^ (z >> 27)) * 0x94d049bb133111eb;
-  return <u32>(z ^ (z >> 31));
+  return z ^ (z >> 31);
 }
 
 // @ts-expect-error: decorator
-@inline function nextU64(): u64 {
-  return (<u64>nextU32() << 32) | <u64>nextU32();
+@inline function mix32(seed: u64, stream: u64): u32 {
+  return mix64(seed, stream) as u32;
 }
 
 // @ts-expect-error: decorator
@@ -50,25 +48,24 @@ let checkId: i32 = 0;
 }
 
 fuzz("i8x8 scalar reference parity", (seedValue: i32): bool => {
-  state = <u64>seedValue;
-  const a = nextU64();
-  const b = nextU64();
-  const c = nextU64();
-  const d = nextU64();
-  const s = nextU64();
-  const m = nextU64();
-  const idx = <u8>(nextU32() & 7);
-  const shift = <i32>(nextU32() & 31);
-  const laneVal = <i8>nextU32();
-  const l0 = <u8>(nextU32() & 15);
-  const l1 = <u8>(nextU32() & 15);
-  const l2 = <u8>(nextU32() & 15);
-  const l3 = <u8>(nextU32() & 15);
-  const l4 = <u8>(nextU32() & 15);
-  const l5 = <u8>(nextU32() & 15);
-  const l6 = <u8>(nextU32() & 15);
-  const l7 = <u8>(nextU32() & 15);
-
+  const seed = seedValue as u32 as u64;
+  const a = mix64(seed, 0);
+  const b = mix64(seed, 1);
+  const c = mix64(seed, 2);
+  const d = mix64(seed, 3);
+  const s = mix64(seed, 4);
+  const m = mix64(seed, 5);
+  const idx = <u8>(mix32(seed, 6) & 7);
+  const shift = <i32>(mix32(seed, 7) & 31);
+  const laneVal = <i8>mix32(seed, 8);
+  const l0 = <u8>(mix32(seed, 9) & 15);
+  const l1 = <u8>(mix32(seed, 10) & 15);
+  const l2 = <u8>(mix32(seed, 11) & 15);
+  const l3 = <u8>(mix32(seed, 12) & 15);
+  const l4 = <u8>(mix32(seed, 13) & 15);
+  const l5 = <u8>(mix32(seed, 14) & 15);
+  const l6 = <u8>(mix32(seed, 15) & 15);
+  const l7 = <u8>(mix32(seed, 16) & 15);
   checkId = 1;
 
   if (!check64(i8x8.splat(laneVal), i8x8_scalar.splat(laneVal))) return false;
@@ -114,5 +111,5 @@ fuzz("i8x8 scalar reference parity", (seedValue: i32): bool => {
   if (!check64(i8x8.relaxed_laneselect(a, b, m), i8x8_scalar.relaxed_laneselect(a, b, m))) return false;
   return true;
 }).generate((seed: FuzzSeed, run: (seedValue: i32) => bool): void => {
-  run(<i32>seed.u32());
+  run(seed.i32());
 });

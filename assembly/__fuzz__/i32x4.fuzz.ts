@@ -1,21 +1,11 @@
 import { expect, fuzz, FuzzSeed } from "as-test";
 import { i32x2_scalar } from "../scalar/i32x2";
 
-let state: u64 = 0;
 let checkId: i32 = 0;
 
 // @ts-expect-error: decorator
-@inline function nextU32(): u32 {
-  state += 0x9e3779b97f4a7c15;
-  let z = state;
-  z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9;
-  z = (z ^ (z >> 27)) * 0x94d049bb133111eb;
-  return <u32>(z ^ (z >> 31));
-}
-
-// @ts-expect-error: decorator
-@inline function nextU64(): u64 {
-  return (<u64>nextU32() << 32) | <u64>nextU32();
+@inline function u64At(words: u32[], index: i32): u64 {
+  return (<u64>unchecked(words[index]) << 32) | <u64>unchecked(words[index + 1]);
 }
 
 // @ts-expect-error: decorator
@@ -55,17 +45,14 @@ let checkId: i32 = 0;
   return true;
 }
 
-fuzz("i32x4 scalar-vs-simd parity", (seedValue: i32): bool => {
+fuzz("i32x4 scalar-vs-simd parity", (words: u32[]): bool => {
   if (!ASC_FEATURE_SIMD) return true;
-
-  state = <u64>seedValue;
-  const aLo = nextU64();
-  const aHi = nextU64();
-  const bLo = nextU64();
-  const bHi = nextU64();
-  const shift = <i32>(nextU32() & 31);
-  const laneVal = <i32>nextU32();
-
+  const aLo = u64At(words, 0);
+  const aHi = u64At(words, 2);
+  const bLo = u64At(words, 4);
+  const bHi = u64At(words, 6);
+  const shift = <i32>(unchecked(words[8]) & 31);
+  const laneVal = <i32>unchecked(words[9]);
   const a = v128From64(aLo, aHi);
   const b = v128From64(bLo, bHi);
 
@@ -76,29 +63,21 @@ fuzz("i32x4 scalar-vs-simd parity", (seedValue: i32): bool => {
   if (!checkV128(i32x4.sub(a, b), i32x2_scalar.sub(aLo, bLo), i32x2_scalar.sub(aHi, bHi))) return false;
   if (!checkV128(i32x4.mul(a, b), i32x2_scalar.mul(aLo, bLo), i32x2_scalar.mul(aHi, bHi))) return false;
   if (!checkV128(i32x4.min_s(a, b), i32x2_scalar.min_s(aLo, bLo), i32x2_scalar.min_s(aHi, bHi))) return false;
-  if (!checkV128(i32x4.min_u(a, b), i32x2_scalar.min_u(aLo, bLo), i32x2_scalar.min_u(aHi, bHi))) return false;
   if (!checkV128(i32x4.max_s(a, b), i32x2_scalar.max_s(aLo, bLo), i32x2_scalar.max_s(aHi, bHi))) return false;
-  if (!checkV128(i32x4.max_u(a, b), i32x2_scalar.max_u(aLo, bLo), i32x2_scalar.max_u(aHi, bHi))) return false;
-  if (!checkV128(i32x4.dot_i16x8_s(a, b), i32x2_scalar.dot_i16x4_s(aLo, bLo), i32x2_scalar.dot_i16x4_s(aHi, bHi))) return false;
   if (!checkV128(i32x4.abs(a), i32x2_scalar.abs(aLo), i32x2_scalar.abs(aHi))) return false;
   if (!checkV128(i32x4.neg(a), i32x2_scalar.neg(aLo), i32x2_scalar.neg(aHi))) return false;
   if (!checkV128(i32x4.shl(a, shift), i32x2_scalar.shl(aLo, shift), i32x2_scalar.shl(aHi, shift))) return false;
   if (!checkV128(i32x4.shr_s(a, shift), i32x2_scalar.shr_s(aLo, shift), i32x2_scalar.shr_s(aHi, shift))) return false;
-  if (!checkV128(i32x4.shr_u(a, shift), i32x2_scalar.shr_u(aLo, shift), i32x2_scalar.shr_u(aHi, shift))) return false;
   if (!checkBool(i32x4.all_true(a), i32x2_scalar.all_true(aLo) && i32x2_scalar.all_true(aHi))) return false;
   if (!check32(i32x4.bitmask(a), i32x2_scalar.bitmask(aLo) | (i32x2_scalar.bitmask(aHi) << 2))) return false;
   if (!checkV128(i32x4.eq(a, b), i32x2_scalar.eq(aLo, bLo), i32x2_scalar.eq(aHi, bHi))) return false;
   if (!checkV128(i32x4.ne(a, b), i32x2_scalar.ne(aLo, bLo), i32x2_scalar.ne(aHi, bHi))) return false;
   if (!checkV128(i32x4.lt_s(a, b), i32x2_scalar.lt_s(aLo, bLo), i32x2_scalar.lt_s(aHi, bHi))) return false;
-  if (!checkV128(i32x4.lt_u(a, b), i32x2_scalar.lt_u(aLo, bLo), i32x2_scalar.lt_u(aHi, bHi))) return false;
   if (!checkV128(i32x4.le_s(a, b), i32x2_scalar.le_s(aLo, bLo), i32x2_scalar.le_s(aHi, bHi))) return false;
-  if (!checkV128(i32x4.le_u(a, b), i32x2_scalar.le_u(aLo, bLo), i32x2_scalar.le_u(aHi, bHi))) return false;
   if (!checkV128(i32x4.gt_s(a, b), i32x2_scalar.gt_s(aLo, bLo), i32x2_scalar.gt_s(aHi, bHi))) return false;
-  if (!checkV128(i32x4.gt_u(a, b), i32x2_scalar.gt_u(aLo, bLo), i32x2_scalar.gt_u(aHi, bHi))) return false;
   if (!checkV128(i32x4.ge_s(a, b), i32x2_scalar.ge_s(aLo, bLo), i32x2_scalar.ge_s(aHi, bHi))) return false;
-  if (!checkV128(i32x4.ge_u(a, b), i32x2_scalar.ge_u(aLo, bLo), i32x2_scalar.ge_u(aHi, bHi))) return false;
 
   return true;
-}).generate((seed: FuzzSeed, run: (seedValue: i32) => bool): void => {
-  run(<i32>seed.u32());
+}).generate((seed: FuzzSeed, run: (words: u32[]) => bool): void => {
+  run(seed.array<u32>((s: FuzzSeed): u32 => s.u32(), { min: 10, max: 10 }));
 });

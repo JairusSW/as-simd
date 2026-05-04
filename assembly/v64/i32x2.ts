@@ -398,8 +398,7 @@ export namespace i32x2 {
   /** Selects 32-bit lanes from `a` or `b` based on the high bit of each lane in `m`. */
   // @ts-expect-error: decorator
   @inline export function relaxed_laneselect(a: v64, b: v64, m: v64): v64 {
-    const x0 = ((select<v64>(a, b, (m & 0x80000000) != 0) & 0xffffffff) as u32) as v64;
-    const x1 = ((select<v64>(a >> 32, b >> 32, (m & 0x8000000000000000) != 0) & 0xffffffff) as u32) as v64;
-    return x0 | (x1 << 32);
+    const laneMask = (((m & 0x8000000080000000) >> 31) * 0xffffffff) as v64;
+    return b ^ ((a ^ b) & laneMask);
   }
 }

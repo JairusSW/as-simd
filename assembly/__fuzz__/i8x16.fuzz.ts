@@ -1,21 +1,11 @@
 import { expect, fuzz, FuzzSeed } from "as-test";
 import { i8x8_scalar } from "../scalar/i8x8";
 
-let state: u64 = 0;
 let checkId: i32 = 0;
 
 // @ts-expect-error: decorator
-@inline function nextU32(): u32 {
-  state += 0x9e3779b97f4a7c15;
-  let z = state;
-  z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9;
-  z = (z ^ (z >> 27)) * 0x94d049bb133111eb;
-  return <u32>(z ^ (z >> 31));
-}
-
-// @ts-expect-error: decorator
-@inline function nextU64(): u64 {
-  return (<u64>nextU32() << 32) | <u64>nextU32();
+@inline function u64At(words: u32[], index: i32): u64 {
+  return (<u64>unchecked(words[index]) << 32) | <u64>unchecked(words[index + 1]);
 }
 
 // @ts-expect-error: decorator
@@ -55,17 +45,14 @@ let checkId: i32 = 0;
   return true;
 }
 
-fuzz("i8x16 scalar-vs-simd parity", (seedValue: i32): bool => {
+fuzz("i8x16 scalar-vs-simd parity", (words: u32[]): bool => {
   if (!ASC_FEATURE_SIMD) return true;
-
-  state = <u64>seedValue;
-  const aLo = nextU64();
-  const aHi = nextU64();
-  const bLo = nextU64();
-  const bHi = nextU64();
-  const shift = <i32>(nextU32() & 31);
-  const laneVal = <i8>nextU32();
-
+  const aLo = u64At(words, 0);
+  const aHi = u64At(words, 2);
+  const bLo = u64At(words, 4);
+  const bHi = u64At(words, 6);
+  const shift = <i32>(unchecked(words[8]) & 31);
+  const laneVal = <i8>unchecked(words[9]);
   const a = v128From64(aLo, aHi);
   const b = v128From64(bLo, bHi);
 
@@ -93,6 +80,6 @@ fuzz("i8x16 scalar-vs-simd parity", (seedValue: i32): bool => {
   if (!checkV128(i8x16.ge_s(a, b), i8x8_scalar.ge_s(aLo, bLo), i8x8_scalar.ge_s(aHi, bHi))) return false;
 
   return true;
-}).generate((seed: FuzzSeed, run: (seedValue: i32) => bool): void => {
-  run(<i32>seed.u32());
+}).generate((seed: FuzzSeed, run: (words: u32[]) => bool): void => {
+  run(seed.array<u32>((s: FuzzSeed): u32 => s.u32(), { min: 10, max: 10 }));
 });
