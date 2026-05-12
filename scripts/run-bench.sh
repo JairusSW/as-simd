@@ -4,6 +4,10 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
+run_asc() {
+  node ../compiler2/bin/asc.js "$@" --enable multi-value
+}
+
 RUNTIMES=${RUNTIMES:-"incremental"}
 ENGINES=${ENGINES:-"turbofan"}
 MODE_FILTER=${JSON_MODE:-""}
@@ -142,11 +146,11 @@ mkdir -p ./build/charts
 
 FILES=()
 SWAR_ALIAS_SIMD_BENCHES=(
-  "i8x16.bench.ts"
-  "i16x8.bench.ts"
-  "i32x4.bench.ts"
-  "i64x2.bench.ts"
-  "v128.bench.ts"
+  "i8x16-swar.bench.ts"
+  "i16x8-swar.bench.ts"
+  "i32x4-swar.bench.ts"
+  "i64x2-swar.bench.ts"
+  "v128-swar.bench.ts"
 )
 
 if [[ -n "$BENCH_NAME" ]]; then
@@ -344,9 +348,6 @@ for file in "${FILES[@]}"; do
     file_mode=""
     if [[ "$filename_lower" == simd-* || "$filename_lower" == *-simd.bench.ts ]]; then
         file_mode="SIMD"
-    elif [[ "$filename_lower" == i8x16-swar.bench.ts || "$filename_lower" == i16x8-swar.bench.ts || "$filename_lower" == i32x4-swar.bench.ts || "$filename_lower" == i64x2-swar.bench.ts ]]; then
-        # SWAR wrappers are run via SIMD-enabled typing + forced SWAR lowering.
-        file_mode="SIMD"
     elif [[ "$filename_lower" == swar-* || "$filename_lower" == *-swar.bench.ts ]]; then
         file_mode="SWAR"
     fi
@@ -359,7 +360,7 @@ for file in "${FILES[@]}"; do
         output="./build/${filename%.ts}.${runtime}"
 
         if [[ (-z "$MODE_FILTER" || "$MODE_FILTER" == "SIMD") && (-z "$file_mode" || "$file_mode" == "SIMD") ]]; then
-            npx asc "$file" -o "${output}.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime $runtime --use BENCH_SAMPLES=$BENCH_SAMPLES --use AS_BENCH_RUNTIME_V8=1 --use AS_BENCH_FORCE_SIMD=1 --enable bulk-memory --enable simd --enable relaxed-simd --enable sign-extension --exportStart start --exportRuntime || {
+            run_asc "$file" -o "${output}.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime $runtime --use BENCH_SAMPLES=$BENCH_SAMPLES --use AS_BENCH_RUNTIME_V8=1 --use AS_BENCH_FORCE_SIMD=1 --enable bulk-memory --enable simd --enable relaxed-simd --enable sign-extension --exportStart start --exportRuntime || {
                 echo "Build failed"
                 exit 1
             }
@@ -370,12 +371,12 @@ for file in "${FILES[@]}"; do
 
         if [[ (-z "$MODE_FILTER" || "$MODE_FILTER" == "SWAR") && (-z "$file_mode" || "$file_mode" == "SWAR") ]]; then
             if [[ $swar_alias_simd -eq 1 ]]; then
-              AS_SIMD_FORCE_SWAR_V128=1 npx asc "$file" -o "${output}.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime $runtime --use BENCH_SAMPLES=$BENCH_SAMPLES --use AS_BENCH_RUNTIME_V8=1 --use AS_BENCH_FORCE_SWAR=1 --transform ./transform/index.mjs --enable bulk-memory --enable simd --enable relaxed-simd --enable sign-extension --exportStart start --exportRuntime || {
+              AS_SIMD_FORCE_SWAR_V128=1 run_asc "$file" -o "${output}.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime $runtime --use BENCH_SAMPLES=$BENCH_SAMPLES --use AS_BENCH_RUNTIME_V8=1 --use AS_BENCH_FORCE_SWAR=1 --transform ./transform/index.mjs --enable bulk-memory --enable simd --enable relaxed-simd --enable sign-extension --exportStart start --exportRuntime || {
                   echo "Build failed"
                   exit 1
               }
             else
-              npx asc "$file" -o "${output}.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime $runtime --use BENCH_SAMPLES=$BENCH_SAMPLES --use AS_BENCH_RUNTIME_V8=1 --use AS_BENCH_FORCE_SWAR=1 --enable bulk-memory --enable sign-extension --exportStart start --exportRuntime || {
+              run_asc "$file" -o "${output}.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime $runtime --use BENCH_SAMPLES=$BENCH_SAMPLES --use AS_BENCH_RUNTIME_V8=1 --use AS_BENCH_FORCE_SWAR=1 --enable bulk-memory --enable sign-extension --exportStart start --exportRuntime || {
                   echo "Build failed"
                   exit 1
               }
@@ -408,7 +409,7 @@ for file in "${FILES[@]}"; do
 
         if [[ $RUN_WAVM -eq 1 ]]; then
           if [[ (-z "$MODE_FILTER" || "$MODE_FILTER" == "SIMD") && (-z "$file_mode" || "$file_mode" == "SIMD") ]]; then
-            npx asc "$file" -o "${output}.wavm.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime "$runtime" --use BENCH_SAMPLES="$BENCH_SAMPLES" --use AS_BENCH_WASI=1 --use AS_BENCH_RUNTIME_WAVM=1 --use AS_BENCH_FORCE_SIMD=1 --config ./node_modules/@assemblyscript/wasi-shim/asconfig.json --enable bulk-memory --enable simd --enable sign-extension --exportRuntime || {
+            run_asc "$file" -o "${output}.wavm.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime "$runtime" --use BENCH_SAMPLES="$BENCH_SAMPLES" --use AS_BENCH_WASI=1 --use AS_BENCH_RUNTIME_WAVM=1 --use AS_BENCH_FORCE_SIMD=1 --config ./node_modules/@assemblyscript/wasi-shim/asconfig.json --enable bulk-memory --enable simd --enable sign-extension --exportRuntime || {
               echo "WAVM WASI SIMD build failed"
               exit 1
             }
@@ -418,12 +419,12 @@ for file in "${FILES[@]}"; do
           fi
           if [[ (-z "$MODE_FILTER" || "$MODE_FILTER" == "SWAR") && (-z "$file_mode" || "$file_mode" == "SWAR") ]]; then
             if [[ $swar_alias_simd -eq 1 ]]; then
-              AS_SIMD_FORCE_SWAR_V128=1 npx asc "$file" -o "${output}.wavm.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime "$runtime" --use BENCH_SAMPLES="$BENCH_SAMPLES" --use AS_BENCH_WASI=1 --use AS_BENCH_RUNTIME_WAVM=1 --use AS_BENCH_FORCE_SWAR=1 --config ./node_modules/@assemblyscript/wasi-shim/asconfig.json --transform ./transform/index.mjs --enable bulk-memory --enable simd --enable sign-extension --exportRuntime || {
+              AS_SIMD_FORCE_SWAR_V128=1 run_asc "$file" -o "${output}.wavm.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime "$runtime" --use BENCH_SAMPLES="$BENCH_SAMPLES" --use AS_BENCH_WASI=1 --use AS_BENCH_RUNTIME_WAVM=1 --use AS_BENCH_FORCE_SWAR=1 --config ./node_modules/@assemblyscript/wasi-shim/asconfig.json --transform ./transform/index.mjs --enable bulk-memory --enable simd --enable sign-extension --exportRuntime || {
                 echo "WAVM WASI SWAR build failed"
                 exit 1
               }
             else
-              npx asc "$file" -o "${output}.wavm.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime "$runtime" --use BENCH_SAMPLES="$BENCH_SAMPLES" --use AS_BENCH_WASI=1 --use AS_BENCH_RUNTIME_WAVM=1 --use AS_BENCH_FORCE_SWAR=1 --config ./node_modules/@assemblyscript/wasi-shim/asconfig.json --enable bulk-memory --enable sign-extension --exportRuntime || {
+              run_asc "$file" -o "${output}.wavm.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime "$runtime" --use BENCH_SAMPLES="$BENCH_SAMPLES" --use AS_BENCH_WASI=1 --use AS_BENCH_RUNTIME_WAVM=1 --use AS_BENCH_FORCE_SWAR=1 --config ./node_modules/@assemblyscript/wasi-shim/asconfig.json --enable bulk-memory --enable sign-extension --exportRuntime || {
                 echo "WAVM WASI SWAR build failed"
                 exit 1
               }
@@ -436,7 +437,7 @@ for file in "${FILES[@]}"; do
 
         if [[ $RUN_WASMTIME -eq 1 ]]; then
           if [[ (-z "$MODE_FILTER" || "$MODE_FILTER" == "SIMD") && (-z "$file_mode" || "$file_mode" == "SIMD") ]]; then
-            npx asc "$file" -o "${output}.wasmtime.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime "$runtime" --use BENCH_SAMPLES="$BENCH_SAMPLES" --use AS_BENCH_WASI=1 --use AS_BENCH_RUNTIME_WASMTIME=1 --use AS_BENCH_FORCE_SIMD=1 --config ./node_modules/@assemblyscript/wasi-shim/asconfig.json --enable bulk-memory --enable simd --enable relaxed-simd --enable sign-extension --exportRuntime || {
+            run_asc "$file" -o "${output}.wasmtime.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime "$runtime" --use BENCH_SAMPLES="$BENCH_SAMPLES" --use AS_BENCH_WASI=1 --use AS_BENCH_RUNTIME_WASMTIME=1 --use AS_BENCH_FORCE_SIMD=1 --config ./node_modules/@assemblyscript/wasi-shim/asconfig.json --enable bulk-memory --enable simd --enable relaxed-simd --enable sign-extension --exportRuntime || {
               echo "Wasmtime WASI SIMD build failed"
               exit 1
             }
@@ -446,12 +447,12 @@ for file in "${FILES[@]}"; do
           fi
           if [[ (-z "$MODE_FILTER" || "$MODE_FILTER" == "SWAR") && (-z "$file_mode" || "$file_mode" == "SWAR") ]]; then
             if [[ $swar_alias_simd -eq 1 ]]; then
-              AS_SIMD_FORCE_SWAR_V128=1 npx asc "$file" -o "${output}.wasmtime.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime "$runtime" --use BENCH_SAMPLES="$BENCH_SAMPLES" --use AS_BENCH_WASI=1 --use AS_BENCH_RUNTIME_WASMTIME=1 --use AS_BENCH_FORCE_SWAR=1 --config ./node_modules/@assemblyscript/wasi-shim/asconfig.json --transform ./transform/index.mjs --enable bulk-memory --enable simd --enable relaxed-simd --enable sign-extension --exportRuntime || {
+              AS_SIMD_FORCE_SWAR_V128=1 run_asc "$file" -o "${output}.wasmtime.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime "$runtime" --use BENCH_SAMPLES="$BENCH_SAMPLES" --use AS_BENCH_WASI=1 --use AS_BENCH_RUNTIME_WASMTIME=1 --use AS_BENCH_FORCE_SWAR=1 --config ./node_modules/@assemblyscript/wasi-shim/asconfig.json --transform ./transform/index.mjs --enable bulk-memory --enable simd --enable relaxed-simd --enable sign-extension --exportRuntime || {
                 echo "Wasmtime WASI SWAR build failed"
                 exit 1
               }
             else
-              npx asc "$file" -o "${output}.wasmtime.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime "$runtime" --use BENCH_SAMPLES="$BENCH_SAMPLES" --use AS_BENCH_WASI=1 --use AS_BENCH_RUNTIME_WASMTIME=1 --use AS_BENCH_FORCE_SWAR=1 --config ./node_modules/@assemblyscript/wasi-shim/asconfig.json --enable bulk-memory --enable sign-extension --exportRuntime || {
+              run_asc "$file" -o "${output}.wasmtime.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime "$runtime" --use BENCH_SAMPLES="$BENCH_SAMPLES" --use AS_BENCH_WASI=1 --use AS_BENCH_RUNTIME_WASMTIME=1 --use AS_BENCH_FORCE_SWAR=1 --config ./node_modules/@assemblyscript/wasi-shim/asconfig.json --enable bulk-memory --enable sign-extension --exportRuntime || {
                 echo "Wasmtime WASI SWAR build failed"
                 exit 1
               }
@@ -464,7 +465,7 @@ for file in "${FILES[@]}"; do
 
         if [[ $RUN_WASMER -eq 1 ]]; then
           if [[ (-z "$MODE_FILTER" || "$MODE_FILTER" == "SIMD") && (-z "$file_mode" || "$file_mode" == "SIMD") ]]; then
-            npx asc "$file" -o "${output}.wasmer.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime "$runtime" --use BENCH_SAMPLES="$BENCH_SAMPLES" --use AS_BENCH_WASI=1 --use AS_BENCH_RUNTIME_WASMER=1 --use AS_BENCH_FORCE_SIMD=1 --config ./node_modules/@assemblyscript/wasi-shim/asconfig.json --enable bulk-memory --enable simd --enable relaxed-simd --enable sign-extension --exportRuntime || {
+            run_asc "$file" -o "${output}.wasmer.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime "$runtime" --use BENCH_SAMPLES="$BENCH_SAMPLES" --use AS_BENCH_WASI=1 --use AS_BENCH_RUNTIME_WASMER=1 --use AS_BENCH_FORCE_SIMD=1 --config ./node_modules/@assemblyscript/wasi-shim/asconfig.json --enable bulk-memory --enable simd --enable relaxed-simd --enable sign-extension --exportRuntime || {
               echo "Wasmer WASI SIMD build failed"
               exit 1
             }
@@ -474,12 +475,12 @@ for file in "${FILES[@]}"; do
           fi
           if [[ (-z "$MODE_FILTER" || "$MODE_FILTER" == "SWAR") && (-z "$file_mode" || "$file_mode" == "SWAR") ]]; then
             if [[ $swar_alias_simd -eq 1 ]]; then
-              AS_SIMD_FORCE_SWAR_V128=1 npx asc "$file" -o "${output}.wasmer.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime "$runtime" --use BENCH_SAMPLES="$BENCH_SAMPLES" --use AS_BENCH_WASI=1 --use AS_BENCH_RUNTIME_WASMER=1 --use AS_BENCH_FORCE_SWAR=1 --config ./node_modules/@assemblyscript/wasi-shim/asconfig.json --transform ./transform/index.mjs --enable bulk-memory --enable simd --enable relaxed-simd --enable sign-extension --exportRuntime || {
+              AS_SIMD_FORCE_SWAR_V128=1 run_asc "$file" -o "${output}.wasmer.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime "$runtime" --use BENCH_SAMPLES="$BENCH_SAMPLES" --use AS_BENCH_WASI=1 --use AS_BENCH_RUNTIME_WASMER=1 --use AS_BENCH_FORCE_SWAR=1 --config ./node_modules/@assemblyscript/wasi-shim/asconfig.json --transform ./transform/index.mjs --enable bulk-memory --enable simd --enable relaxed-simd --enable sign-extension --exportRuntime || {
                 echo "Wasmer WASI SWAR build failed"
                 exit 1
               }
             else
-              npx asc "$file" -o "${output}.wasmer.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime "$runtime" --use BENCH_SAMPLES="$BENCH_SAMPLES" --use AS_BENCH_WASI=1 --use AS_BENCH_RUNTIME_WASMER=1 --use AS_BENCH_FORCE_SWAR=1 --config ./node_modules/@assemblyscript/wasi-shim/asconfig.json --enable bulk-memory --enable sign-extension --exportRuntime || {
+              run_asc "$file" -o "${output}.wasmer.tmp" -O3 --converge --noAssert --uncheckedBehavior always --runtime "$runtime" --use BENCH_SAMPLES="$BENCH_SAMPLES" --use AS_BENCH_WASI=1 --use AS_BENCH_RUNTIME_WASMER=1 --use AS_BENCH_FORCE_SWAR=1 --config ./node_modules/@assemblyscript/wasi-shim/asconfig.json --enable bulk-memory --enable sign-extension --exportRuntime || {
                 echo "Wasmer WASI SWAR build failed"
                 exit 1
               }
