@@ -34,6 +34,7 @@ export type ComparisonChartConfig = {
   title: string;
   subtitle: string;
   order: string[];
+  excludeOps?: string[];
   variants: [ChartVariant, ChartVariant, ChartVariant, ChartVariant];
   aliasesByVariantKey?: Record<string, Record<string, string>>;
   overlapGroups?: [number[], number[]];
@@ -111,15 +112,17 @@ export function createComparisonChart(config: ComparisonChartConfig): void {
     config.variants.map((v) => [v.key, loadSuite(logsDir, v.mode, v.suite, v.runtime)]),
   ) as Record<string, Record<string, BenchResult>>;
 
+  const excludedOps = new Set(config.excludeOps ?? []);
   const seen = new Set(config.order);
   const extras = new Set<string>();
   for (const v of config.variants) {
     for (const op of Object.keys(loaded[v.key])) {
+      if (excludedOps.has(op)) continue;
       if (!seen.has(op)) extras.add(op);
     }
   }
 
-  const orderedOps = config.order.concat([...extras].sort((a, b) => a.localeCompare(b)));
+  const orderedOps = config.order.filter((op) => !excludedOps.has(op)).concat([...extras].sort((a, b) => a.localeCompare(b)));
   const rank = new Map<string, number>();
   config.order.forEach((name, i) => rank.set(name, i));
 

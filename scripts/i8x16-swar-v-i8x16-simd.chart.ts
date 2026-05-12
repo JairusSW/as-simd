@@ -25,6 +25,7 @@ createComparisonChart({
   subtitle: chartSubtitle(ROOT),
   order: ORDER,
   variants: VARIANTS,
+  excludeOps: ["mul"],
   layout: { leftW: 220, rightW: 560 },
   missingRowsMessage: "No benchmark JSONs found for i8x16/i8x16 in build/logs/as",
 });

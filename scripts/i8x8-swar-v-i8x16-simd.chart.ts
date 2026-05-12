@@ -29,6 +29,7 @@ createComparisonChart({
   title: "i8x8 SWAR vs i8x16 SIMD",
   subtitle: chartSubtitle(ROOT),
   order: ORDER,
+  excludeOps: ["mul"],
   variants: VARIANTS,
   aliasesByVariantKey,
   layout: { leftW: 150, rightW: 520 },
