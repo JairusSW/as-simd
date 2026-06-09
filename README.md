@@ -26,7 +26,31 @@ npm install as-simd
 
 ## Docs
 
-I'll write them soon. Usage is exactly the same as existing SIMD api though.
+Half-width (64-bit) usage is exactly the same as the existing SIMD API. For the
+128-bit layer and its register-file calling convention, see
+[docs/register-file.md](./docs/register-file.md).
+
+### 128-bit vectors
+
+128-bit vectors are two `u64` halves. Two interchangeable APIs are provided:
+
+- **Value / hot-path API** (`i8x16_swar`, `i16x8_swar`, `i32x4_swar`,
+  `i64x2_swar`, `v128_swar`): an op takes the operand halves by value, returns
+  the low half, and exposes the high half via `take_hi()`. Fastest in tight loops.
+- **Register file** (`rf` + `v128r`): 64 heap-backed registers addressed by
+  index — the ergonomic primary interface.
+
+```ts
+import { v128r, rf } from "as-simd";
+
+rf.set(0, aLo, aHi);          // load operands into registers 0 and 1
+rf.set(1, bLo, bHi);
+v128r.add<u8>(2, 0, 1);       // reg2 = reg0 + reg1 (lane-wise, u8 lanes)
+const lo = rf.lo(2), hi = rf.hi(2);
+```
+
+Multi-value (`readonly [u64, u64]` tuple returns) was removed — it does not
+compile on released AssemblyScript and the global/register conventions are faster.
 
 ## Usage
 

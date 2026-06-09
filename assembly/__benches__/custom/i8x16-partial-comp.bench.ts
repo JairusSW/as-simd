@@ -14,9 +14,9 @@ let hi_sink: u64 = 0;
 
 // @ts-expect-error: decorator
 @inline function load_lib(ptr: usize, len: i32, fill: i8): u64 {
-  const p = i8x16_swar.loadPartial(ptr, len, 0, 1, fill);
-  hi_sink = p[1];
-  return p[0];
+  const lo = i8x16_swar.loadPartial(ptr, len, 0, 1, fill);
+  hi_sink = i8x16_swar.take_hi();
+  return lo;
 }
 
 // @ts-expect-error: decorator

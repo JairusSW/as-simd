@@ -14,16 +14,16 @@ let hi_sink: u64 = 0;
 
 // @ts-expect-error: decorator
 @inline function swizzle_lib(aLo: u64, aHi: u64, sLo: u64, sHi: u64): u64 {
-  const p = i8x16_swar.swizzle(aLo, aHi, sLo, sHi);
-  hi_sink = p[1];
-  return p[0];
+  const lo = i8x16_swar.swizzle(aLo, aHi, sLo, sHi);
+  hi_sink = i8x16_swar.take_hi();
+  return lo;
 }
 
 // @ts-expect-error: decorator
 @inline function relaxed_lib(aLo: u64, aHi: u64, sLo: u64, sHi: u64): u64 {
-  const p = i8x16_swar.relaxed_swizzle(aLo, aHi, sLo, sHi);
-  hi_sink = p[1];
-  return p[0];
+  const lo = i8x16_swar.relaxed_swizzle(aLo, aHi, sLo, sHi);
+  hi_sink = i8x16_swar.take_hi();
+  return lo;
 }
 
 // @ts-expect-error: decorator
@@ -95,7 +95,8 @@ let hi_sink: u64 = 0;
 
 // @ts-expect-error: decorator
 @inline function swizzle_via_relaxed(aLo: u64, aHi: u64, sLo: u64, sHi: u64): u64 {
-  const p = i8x16_swar.relaxed_swizzle(aLo, aHi, sLo, sHi);
+  const pLo = i8x16_swar.relaxed_swizzle(aLo, aHi, sLo, sHi);
+  const pHi = i8x16_swar.take_hi();
   const i0 = sLo as u8, i1 = (sLo >> 8) as u8, i2 = (sLo >> 16) as u8, i3 = (sLo >> 24) as u8;
   const i4 = (sLo >> 32) as u8, i5 = (sLo >> 40) as u8, i6 = (sLo >> 48) as u8, i7 = (sLo >> 56) as u8;
   const i8 = sHi as u8, i9 = (sHi >> 8) as u8, i10 = (sHi >> 16) as u8, i11 = (sHi >> 24) as u8;
@@ -118,7 +119,7 @@ let hi_sink: u64 = 0;
     ((i13 < 16 ? 0xff : 0) << 40) |
     ((i14 < 16 ? 0xff : 0) << 48) |
     ((i15 < 16 ? 0xff : 0) << 56);
-  return pair(p[0] & mLo, p[1] & mHi);
+  return pair(pLo & mLo, pHi & mHi);
 }
 
 const aLo: u64 = 0xfedcba9876543210;

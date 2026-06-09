@@ -73,17 +73,14 @@ export namespace i16x4 {
   /** Adds each 16-bit integer lane. */
   // @ts-expect-error: decorator
   @inline export function add(a: v64, b: v64): v64 {
-    if (ASC_FEATURE_SIMD) {
-      return i64x2.extract_lane(i16x8.add(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
-    }
+    // SWAR unconditionally: the scalar<->SIMD domain crossing of an i16x8.add
+    // wrap costs more than these few scalar ops for a single 64-bit value.
     return ((a & ~0x8000800080008000) + (b & ~0x8000800080008000)) ^ ((a ^ b) & 0x8000800080008000);
   }
   /** Subtracts each 16-bit integer lane. */
   // @ts-expect-error: decorator
   @inline export function sub(a: v64, b: v64): v64 {
-    if (ASC_FEATURE_SIMD) {
-      return i64x2.extract_lane(i16x8.sub(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
-    }
+    // SWAR unconditionally (see `add`).
     return ((a | 0x8000800080008000) - (b & ~0x8000800080008000)) ^ ((a ^ ~b) & 0x8000800080008000);
   }
   /** Multiplies each 16-bit integer lane. */

@@ -3,9 +3,8 @@
   "input": ["./assembly/__tests__/*.spec.ts"],
   "coverage": true,
   "buildOptions": {
-    "compiler": "../compiler2/bin/asc.js",
-    "target": "bindings",
-    "args": ["--enable", "sign-extension", "--enable", "multi-value"]
+    "target": "wasi",
+    "args": ["--enable", "sign-extension"]
   },
   "runOptions": { "reporter": "default" },
   "modes": {
@@ -16,7 +15,7 @@
         "input": ["./assembly/__fuzz__/*-swar.fuzz.ts"]
       },
       "buildOptions": {
-        "args": ["--enable", "sign-extension", "--enable", "multi-value", "--transform", "./transform/index.mjs"]
+        "args": ["--enable", "sign-extension", "--transform", "./transform/index.mjs"]
       }
     },
     "simd": {
@@ -28,7 +27,7 @@
         ]
       },
       "buildOptions": {
-        "args": ["--enable", "sign-extension", "--enable", "multi-value", "--enable simd", "--enable relaxed-simd"]
+        "args": ["--enable", "sign-extension", "--enable simd", "--enable relaxed-simd"]
       }
     },
     "simd-parity": {
@@ -49,7 +48,7 @@
         ]
       },
       "buildOptions": {
-        "args": ["--enable", "sign-extension", "--enable", "multi-value", "--enable simd", "--enable relaxed-simd"]
+        "args": ["--enable", "sign-extension", "--enable simd", "--enable relaxed-simd"]
       }
     }
   }

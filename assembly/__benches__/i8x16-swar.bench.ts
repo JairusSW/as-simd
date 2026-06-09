@@ -15,8 +15,9 @@ const i8x16_splat_x: i8 = -37;
 bench(
   "i8x16.splat",
   () => {
-    const pair = i8x16_swar.splat(blackbox(i8x16_splat_x));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.splat(blackbox(i8x16_splat_x));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -62,8 +63,9 @@ const i8x16_replace_lane_lane: u8 = 11;
 bench(
   "i8x16.replace_lane",
   () => {
-    const pair = i8x16_swar.replace_lane(blackbox(i8x16_replace_lane_a), blackbox(i8x16_replace_lane_hi), blackbox(i8x16_replace_lane_lane), blackbox(i8x16_replace_lane_x));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.replace_lane(blackbox(i8x16_replace_lane_a), blackbox(i8x16_replace_lane_hi), blackbox(i8x16_replace_lane_lane), blackbox(i8x16_replace_lane_x));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -77,8 +79,9 @@ const i8x16_add_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.add",
   () => {
-    const pair = i8x16_swar.add(blackbox(i8x16_add_a), blackbox(i8x16_add_hi), blackbox(i8x16_add_a), blackbox(i8x16_add_hi));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.add(blackbox(i8x16_add_a), blackbox(i8x16_add_hi), blackbox(i8x16_add_a), blackbox(i8x16_add_hi));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -92,8 +95,9 @@ const i8x16_sub_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.sub",
   () => {
-    const pair = i8x16_swar.sub(blackbox(i8x16_sub_a), blackbox(i8x16_sub_hi), blackbox(i8x16_sub_a), blackbox(i8x16_sub_hi));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.sub(blackbox(i8x16_sub_a), blackbox(i8x16_sub_hi), blackbox(i8x16_sub_a), blackbox(i8x16_sub_hi));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -106,8 +110,9 @@ const i8x16_mul_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.mul",
   () => {
-    const pair = i8x16_swar.mul(blackbox(i8x16_mul_a), blackbox(i8x16_mul_hi), blackbox(i8x16_mul_a), blackbox(i8x16_mul_hi));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.mul(blackbox(i8x16_mul_a), blackbox(i8x16_mul_hi), blackbox(i8x16_mul_a), blackbox(i8x16_mul_hi));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -121,8 +126,9 @@ const i8x16_min_s_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.min_s",
   () => {
-    const pair = i8x16_swar.min_s(blackbox(i8x16_min_s_a), blackbox(i8x16_min_s_hi), blackbox(i8x16_min_s_a), blackbox(i8x16_min_s_hi));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.min_s(blackbox(i8x16_min_s_a), blackbox(i8x16_min_s_hi), blackbox(i8x16_min_s_a), blackbox(i8x16_min_s_hi));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -136,8 +142,9 @@ const i8x16_min_u_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.min_u",
   () => {
-    const pair = i8x16_swar.min_u(blackbox(i8x16_min_u_a), blackbox(i8x16_min_u_hi), blackbox(i8x16_min_u_a), blackbox(i8x16_min_u_hi));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.min_u(blackbox(i8x16_min_u_a), blackbox(i8x16_min_u_hi), blackbox(i8x16_min_u_a), blackbox(i8x16_min_u_hi));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -151,8 +158,9 @@ const i8x16_max_s_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.max_s",
   () => {
-    const pair = i8x16_swar.max_s(blackbox(i8x16_max_s_a), blackbox(i8x16_max_s_hi), blackbox(i8x16_max_s_a), blackbox(i8x16_max_s_hi));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.max_s(blackbox(i8x16_max_s_a), blackbox(i8x16_max_s_hi), blackbox(i8x16_max_s_a), blackbox(i8x16_max_s_hi));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -166,8 +174,9 @@ const i8x16_max_u_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.max_u",
   () => {
-    const pair = i8x16_swar.max_u(blackbox(i8x16_max_u_a), blackbox(i8x16_max_u_hi), blackbox(i8x16_max_u_a), blackbox(i8x16_max_u_hi));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.max_u(blackbox(i8x16_max_u_a), blackbox(i8x16_max_u_hi), blackbox(i8x16_max_u_a), blackbox(i8x16_max_u_hi));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -181,8 +190,9 @@ const i8x16_avgr_u_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.avgr_u",
   () => {
-    const pair = i8x16_swar.avgr_u(blackbox(i8x16_avgr_u_a), blackbox(i8x16_avgr_u_hi), blackbox(i8x16_avgr_u_a), blackbox(i8x16_avgr_u_hi));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.avgr_u(blackbox(i8x16_avgr_u_a), blackbox(i8x16_avgr_u_hi), blackbox(i8x16_avgr_u_a), blackbox(i8x16_avgr_u_hi));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -196,8 +206,9 @@ const i8x16_abs_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.abs",
   () => {
-    const pair = i8x16_swar.abs(blackbox(i8x16_abs_a), blackbox(i8x16_abs_hi));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.abs(blackbox(i8x16_abs_a), blackbox(i8x16_abs_hi));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -211,8 +222,9 @@ const i8x16_neg_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.neg",
   () => {
-    const pair = i8x16_swar.neg(blackbox(i8x16_neg_a), blackbox(i8x16_neg_hi));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.neg(blackbox(i8x16_neg_a), blackbox(i8x16_neg_hi));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -226,8 +238,9 @@ const i8x16_add_sat_s_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.add_sat_s",
   () => {
-    const pair = i8x16_swar.add_sat_s(blackbox(i8x16_add_sat_s_a), blackbox(i8x16_add_sat_s_hi), blackbox(i8x16_add_sat_s_a), blackbox(i8x16_add_sat_s_hi));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.add_sat_s(blackbox(i8x16_add_sat_s_a), blackbox(i8x16_add_sat_s_hi), blackbox(i8x16_add_sat_s_a), blackbox(i8x16_add_sat_s_hi));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -241,8 +254,9 @@ const i8x16_add_sat_u_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.add_sat_u",
   () => {
-    const pair = i8x16_swar.add_sat_u(blackbox(i8x16_add_sat_u_a), blackbox(i8x16_add_sat_u_hi), blackbox(i8x16_add_sat_u_a), blackbox(i8x16_add_sat_u_hi));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.add_sat_u(blackbox(i8x16_add_sat_u_a), blackbox(i8x16_add_sat_u_hi), blackbox(i8x16_add_sat_u_a), blackbox(i8x16_add_sat_u_hi));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -256,8 +270,9 @@ const i8x16_sub_sat_s_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.sub_sat_s",
   () => {
-    const pair = i8x16_swar.sub_sat_s(blackbox(i8x16_sub_sat_s_a), blackbox(i8x16_sub_sat_s_hi), blackbox(i8x16_sub_sat_s_a), blackbox(i8x16_sub_sat_s_hi));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.sub_sat_s(blackbox(i8x16_sub_sat_s_a), blackbox(i8x16_sub_sat_s_hi), blackbox(i8x16_sub_sat_s_a), blackbox(i8x16_sub_sat_s_hi));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -271,8 +286,9 @@ const i8x16_sub_sat_u_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.sub_sat_u",
   () => {
-    const pair = i8x16_swar.sub_sat_u(blackbox(i8x16_sub_sat_u_a), blackbox(i8x16_sub_sat_u_hi), blackbox(i8x16_sub_sat_u_a), blackbox(i8x16_sub_sat_u_hi));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.sub_sat_u(blackbox(i8x16_sub_sat_u_a), blackbox(i8x16_sub_sat_u_hi), blackbox(i8x16_sub_sat_u_a), blackbox(i8x16_sub_sat_u_hi));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -287,8 +303,9 @@ const i8x16_shl_shift: i32 = 3;
 bench(
   "i8x16.shl",
   () => {
-    const pair = i8x16_swar.shl(blackbox(i8x16_shl_a), blackbox(i8x16_shl_hi), blackbox(i8x16_shl_shift));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.shl(blackbox(i8x16_shl_a), blackbox(i8x16_shl_hi), blackbox(i8x16_shl_shift));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -303,8 +320,9 @@ const i8x16_shr_s_shift: i32 = 3;
 bench(
   "i8x16.shr_s",
   () => {
-    const pair = i8x16_swar.shr_s(blackbox(i8x16_shr_s_a), blackbox(i8x16_shr_s_hi), blackbox(i8x16_shr_s_shift));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.shr_s(blackbox(i8x16_shr_s_a), blackbox(i8x16_shr_s_hi), blackbox(i8x16_shr_s_shift));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -319,8 +337,9 @@ const i8x16_shr_u_shift: i32 = 3;
 bench(
   "i8x16.shr_u",
   () => {
-    const pair = i8x16_swar.shr_u(blackbox(i8x16_shr_u_a), blackbox(i8x16_shr_u_hi), blackbox(i8x16_shr_u_shift));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.shr_u(blackbox(i8x16_shr_u_a), blackbox(i8x16_shr_u_hi), blackbox(i8x16_shr_u_shift));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -362,8 +381,9 @@ const i8x16_eq_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.eq",
   () => {
-    const pair = i8x16_swar.eq(blackbox(i8x16_eq_a), blackbox(i8x16_eq_hi), blackbox(i8x16_eq_a), blackbox(i8x16_eq_hi));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.eq(blackbox(i8x16_eq_a), blackbox(i8x16_eq_hi), blackbox(i8x16_eq_a), blackbox(i8x16_eq_hi));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -377,8 +397,9 @@ const i8x16_ne_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.ne",
   () => {
-    const pair = i8x16_swar.ne(blackbox(i8x16_ne_a), blackbox(i8x16_ne_hi), blackbox(i8x16_ne_a), blackbox(i8x16_ne_hi));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.ne(blackbox(i8x16_ne_a), blackbox(i8x16_ne_hi), blackbox(i8x16_ne_a), blackbox(i8x16_ne_hi));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -392,8 +413,9 @@ const i8x16_lt_s_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.lt_s",
   () => {
-    const pair = i8x16_swar.lt_s(blackbox(i8x16_lt_s_a), blackbox(i8x16_lt_s_hi), blackbox(i8x16_lt_s_a), blackbox(i8x16_lt_s_hi));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.lt_s(blackbox(i8x16_lt_s_a), blackbox(i8x16_lt_s_hi), blackbox(i8x16_lt_s_a), blackbox(i8x16_lt_s_hi));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -407,8 +429,9 @@ const i8x16_lt_u_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.lt_u",
   () => {
-    const pair = i8x16_swar.lt_u(blackbox(i8x16_lt_u_a), blackbox(i8x16_lt_u_hi), blackbox(i8x16_lt_u_a), blackbox(i8x16_lt_u_hi));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.lt_u(blackbox(i8x16_lt_u_a), blackbox(i8x16_lt_u_hi), blackbox(i8x16_lt_u_a), blackbox(i8x16_lt_u_hi));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -422,8 +445,9 @@ const i8x16_le_s_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.le_s",
   () => {
-    const pair = i8x16_swar.le_s(blackbox(i8x16_le_s_a), blackbox(i8x16_le_s_hi), blackbox(i8x16_le_s_a), blackbox(i8x16_le_s_hi));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.le_s(blackbox(i8x16_le_s_a), blackbox(i8x16_le_s_hi), blackbox(i8x16_le_s_a), blackbox(i8x16_le_s_hi));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -437,8 +461,9 @@ const i8x16_le_u_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.le_u",
   () => {
-    const pair = i8x16_swar.le_u(blackbox(i8x16_le_u_a), blackbox(i8x16_le_u_hi), blackbox(i8x16_le_u_a), blackbox(i8x16_le_u_hi));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.le_u(blackbox(i8x16_le_u_a), blackbox(i8x16_le_u_hi), blackbox(i8x16_le_u_a), blackbox(i8x16_le_u_hi));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -452,8 +477,9 @@ const i8x16_gt_s_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.gt_s",
   () => {
-    const pair = i8x16_swar.gt_s(blackbox(i8x16_gt_s_a), blackbox(i8x16_gt_s_hi), blackbox(i8x16_gt_s_a), blackbox(i8x16_gt_s_hi));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.gt_s(blackbox(i8x16_gt_s_a), blackbox(i8x16_gt_s_hi), blackbox(i8x16_gt_s_a), blackbox(i8x16_gt_s_hi));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -467,8 +493,9 @@ const i8x16_gt_u_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.gt_u",
   () => {
-    const pair = i8x16_swar.gt_u(blackbox(i8x16_gt_u_a), blackbox(i8x16_gt_u_hi), blackbox(i8x16_gt_u_a), blackbox(i8x16_gt_u_hi));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.gt_u(blackbox(i8x16_gt_u_a), blackbox(i8x16_gt_u_hi), blackbox(i8x16_gt_u_a), blackbox(i8x16_gt_u_hi));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -482,8 +509,9 @@ const i8x16_ge_s_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.ge_s",
   () => {
-    const pair = i8x16_swar.ge_s(blackbox(i8x16_ge_s_a), blackbox(i8x16_ge_s_hi), blackbox(i8x16_ge_s_a), blackbox(i8x16_ge_s_hi));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.ge_s(blackbox(i8x16_ge_s_a), blackbox(i8x16_ge_s_hi), blackbox(i8x16_ge_s_a), blackbox(i8x16_ge_s_hi));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -497,8 +525,9 @@ const i8x16_ge_u_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.ge_u",
   () => {
-    const pair = i8x16_swar.ge_u(blackbox(i8x16_ge_u_a), blackbox(i8x16_ge_u_hi), blackbox(i8x16_ge_u_a), blackbox(i8x16_ge_u_hi));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.ge_u(blackbox(i8x16_ge_u_a), blackbox(i8x16_ge_u_hi), blackbox(i8x16_ge_u_a), blackbox(i8x16_ge_u_hi));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -512,8 +541,9 @@ const i8x16_narrow_i16x8_s_x: i8 = -37;
 bench(
   "i8x16.narrow_i16x8_s",
   () => {
-    const pair = i8x16_swar.narrow_i16x8_s(blackbox(i8x16_narrow_i16x8_s_a), blackbox(i8x16_narrow_i16x8_s_hi), blackbox(i8x16_narrow_i16x8_s_a), blackbox(i8x16_narrow_i16x8_s_hi));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.narrow_i16x8_s(blackbox(i8x16_narrow_i16x8_s_a), blackbox(i8x16_narrow_i16x8_s_hi), blackbox(i8x16_narrow_i16x8_s_a), blackbox(i8x16_narrow_i16x8_s_hi));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -527,8 +557,9 @@ const i8x16_narrow_i16x8_u_x: i8 = -37;
 bench(
   "i8x16.narrow_i16x8_u",
   () => {
-    const pair = i8x16_swar.narrow_i16x8_u(blackbox(i8x16_narrow_i16x8_u_a), blackbox(i8x16_narrow_i16x8_u_hi), blackbox(i8x16_narrow_i16x8_u_a), blackbox(i8x16_narrow_i16x8_u_hi));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.narrow_i16x8_u(blackbox(i8x16_narrow_i16x8_u_a), blackbox(i8x16_narrow_i16x8_u_hi), blackbox(i8x16_narrow_i16x8_u_a), blackbox(i8x16_narrow_i16x8_u_hi));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -542,8 +573,9 @@ const i8x16_shuffle_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.shuffle",
   () => {
-    const pair = i8x16_swar.shuffle(blackbox(i8x16_shuffle_a), blackbox(i8x16_shuffle_hi), blackbox(i8x16_shuffle_a), blackbox(i8x16_shuffle_hi), 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0);
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.shuffle(blackbox(i8x16_shuffle_a), blackbox(i8x16_shuffle_hi), blackbox(i8x16_shuffle_a), blackbox(i8x16_shuffle_hi), 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0);
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   16,
@@ -557,8 +589,9 @@ const i8x16_swizzle_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.swizzle",
   () => {
-    const pair = i8x16_swar.swizzle(blackbox(i8x16_swizzle_a), blackbox(i8x16_swizzle_hi), blackbox(i8x16_swizzle_a), blackbox(i8x16_swizzle_hi));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.swizzle(blackbox(i8x16_swizzle_a), blackbox(i8x16_swizzle_hi), blackbox(i8x16_swizzle_a), blackbox(i8x16_swizzle_hi));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,
@@ -578,8 +611,9 @@ const i8x16_relaxed_laneselect_m: u64 = 0x00ff807f55aa33cc;
   bench(
     "i8x16.relaxed_swizzle",
     () => {
-    const pair = i8x16_swar.relaxed_swizzle(blackbox(i8x16_relaxed_swizzle_a), blackbox(i8x16_relaxed_swizzle_hi), blackbox(i8x16_relaxed_swizzle_a), blackbox(i8x16_relaxed_swizzle_hi));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.relaxed_swizzle(blackbox(i8x16_relaxed_swizzle_a), blackbox(i8x16_relaxed_swizzle_hi), blackbox(i8x16_relaxed_swizzle_a), blackbox(i8x16_relaxed_swizzle_hi));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
     },
     OPS,
     8,
@@ -589,8 +623,9 @@ const i8x16_relaxed_laneselect_m: u64 = 0x00ff807f55aa33cc;
   bench(
     "i8x16.relaxed_laneselect",
     () => {
-    const pair = i8x16_swar.relaxed_laneselect(blackbox(i8x16_relaxed_laneselect_a), blackbox(i8x16_relaxed_laneselect_hi), blackbox(i8x16_relaxed_laneselect_a), blackbox(i8x16_relaxed_laneselect_hi), blackbox(i8x16_relaxed_laneselect_m), blackbox(i8x16_relaxed_laneselect_b));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.relaxed_laneselect(blackbox(i8x16_relaxed_laneselect_a), blackbox(i8x16_relaxed_laneselect_hi), blackbox(i8x16_relaxed_laneselect_a), blackbox(i8x16_relaxed_laneselect_hi), blackbox(i8x16_relaxed_laneselect_m), blackbox(i8x16_relaxed_laneselect_b));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
     },
     OPS,
     24,
@@ -604,8 +639,9 @@ const i8x16_popcnt_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.popcnt",
   () => {
-    const pair = i8x16_swar.popcnt(blackbox(i8x16_popcnt_a), blackbox(i8x16_popcnt_hi));
-    bbPair(pair[0], pair[1]);
+    const lo = i8x16_swar.popcnt(blackbox(i8x16_popcnt_a), blackbox(i8x16_popcnt_hi));
+    const hi = i8x16_swar.take_hi();
+    bbPair(lo, hi);
   },
   OPS,
   8,

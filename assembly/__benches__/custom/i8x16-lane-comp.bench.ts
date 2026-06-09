@@ -48,9 +48,9 @@ let hi_sink: u64 = 0;
 
 // @ts-expect-error: decorator
 @inline function replace_lib(lo: u64, hi: u64, idx: u8, value: i8): u64 {
-  const p = i8x16_swar.replace_lane(lo, hi, idx, value);
-  hi_sink = p[1];
-  return p[0];
+  const rLo = i8x16_swar.replace_lane(lo, hi, idx, value);
+  hi_sink = i8x16_swar.take_hi();
+  return rLo;
 }
 
 // @ts-expect-error: decorator

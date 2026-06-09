@@ -5,7 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
 run_asc() {
-  node ../compiler2/bin/asc.js "$@" --enable multi-value
+  node ./node_modules/assemblyscript/bin/asc.js "$@"
 }
 
 RUNTIMES=${RUNTIMES:-"incremental"}

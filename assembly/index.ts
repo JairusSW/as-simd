@@ -10,3 +10,5 @@ export { i16x8_swar } from "./v128/i16x8_swar";
 export { i32x4_swar } from "./v128/i32x4_swar";
 export { i64x2_swar } from "./v128/i64x2_swar";
 export { v128_swar } from "./v128/v128_swar";
+export { rf, RF_REGS, RF_SLOT_BYTES } from "./v128/regfile";
+export { v128r } from "./v128/v128r";

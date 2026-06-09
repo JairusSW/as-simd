@@ -13,40 +13,36 @@ let hi_sink: u64 = 0;
 }
 
 // @ts-expect-error: decorator
-@inline function min_s_lib(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { const pair = i8x16_swar.min_s(aLo, aHi, bLo, bHi); hi_sink = pair[1]; return pair[0]; }
+@inline function min_s_lib(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { const lo = i8x16_swar.min_s(aLo, aHi, bLo, bHi); hi_sink = i8x16_swar.take_hi(); return lo; }
 // @ts-expect-error: decorator
-@inline function min_u_lib(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { const pair = i8x16_swar.min_u(aLo, aHi, bLo, bHi); hi_sink = pair[1]; return pair[0]; }
+@inline function min_u_lib(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { const lo = i8x16_swar.min_u(aLo, aHi, bLo, bHi); hi_sink = i8x16_swar.take_hi(); return lo; }
 // @ts-expect-error: decorator
-@inline function max_s_lib(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { const pair = i8x16_swar.max_s(aLo, aHi, bLo, bHi); hi_sink = pair[1]; return pair[0]; }
+@inline function max_s_lib(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { const lo = i8x16_swar.max_s(aLo, aHi, bLo, bHi); hi_sink = i8x16_swar.take_hi(); return lo; }
 // @ts-expect-error: decorator
-@inline function max_u_lib(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { const pair = i8x16_swar.max_u(aLo, aHi, bLo, bHi); hi_sink = pair[1]; return pair[0]; }
+@inline function max_u_lib(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { const lo = i8x16_swar.max_u(aLo, aHi, bLo, bHi); hi_sink = i8x16_swar.take_hi(); return lo; }
 
 // @ts-expect-error: decorator
 @inline function min_s_via_lt(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-  const m = i8x16_swar.lt_s(aLo, aHi, bLo, bHi);
-  const mLo = m[0];
-  const mHi = m[1];
+  const mLo = i8x16_swar.lt_s(aLo, aHi, bLo, bHi);
+  const mHi = i8x16_swar.take_hi();
   return set_pair(bLo ^ ((aLo ^ bLo) & mLo), bHi ^ ((aHi ^ bHi) & mHi));
 }
 // @ts-expect-error: decorator
 @inline function min_u_via_lt(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-  const m = i8x16_swar.lt_u(aLo, aHi, bLo, bHi);
-  const mLo = m[0];
-  const mHi = m[1];
+  const mLo = i8x16_swar.lt_u(aLo, aHi, bLo, bHi);
+  const mHi = i8x16_swar.take_hi();
   return set_pair(bLo ^ ((aLo ^ bLo) & mLo), bHi ^ ((aHi ^ bHi) & mHi));
 }
 // @ts-expect-error: decorator
 @inline function max_s_via_lt(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-  const m = i8x16_swar.lt_s(aLo, aHi, bLo, bHi);
-  const mLo = m[0];
-  const mHi = m[1];
+  const mLo = i8x16_swar.lt_s(aLo, aHi, bLo, bHi);
+  const mHi = i8x16_swar.take_hi();
   return set_pair(aLo ^ ((aLo ^ bLo) & mLo), aHi ^ ((aHi ^ bHi) & mHi));
 }
 // @ts-expect-error: decorator
 @inline function max_u_via_lt(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-  const m = i8x16_swar.lt_u(aLo, aHi, bLo, bHi);
-  const mLo = m[0];
-  const mHi = m[1];
+  const mLo = i8x16_swar.lt_u(aLo, aHi, bLo, bHi);
+  const mHi = i8x16_swar.take_hi();
   return set_pair(aLo ^ ((aLo ^ bLo) & mLo), aHi ^ ((aHi ^ bHi) & mHi));
 }
 

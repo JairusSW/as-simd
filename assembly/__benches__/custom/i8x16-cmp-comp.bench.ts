@@ -15,27 +15,27 @@ let hi_sink: u64 = 0;
 // signed
 // @ts-expect-error: decorator
 @inline function lt_s_lib(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-  const pair = i8x16_swar.lt_s(aLo, aHi, bLo, bHi);
-  hi_sink = pair[1];
-  return pair[0];
+  const lo = i8x16_swar.lt_s(aLo, aHi, bLo, bHi);
+  hi_sink = i8x16_swar.take_hi();
+  return lo;
 }
 // @ts-expect-error: decorator
 @inline function le_s_lib(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-  const pair = i8x16_swar.le_s(aLo, aHi, bLo, bHi);
-  hi_sink = pair[1];
-  return pair[0];
+  const lo = i8x16_swar.le_s(aLo, aHi, bLo, bHi);
+  hi_sink = i8x16_swar.take_hi();
+  return lo;
 }
 // @ts-expect-error: decorator
 @inline function gt_s_lib(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-  const pair = i8x16_swar.gt_s(aLo, aHi, bLo, bHi);
-  hi_sink = pair[1];
-  return pair[0];
+  const lo = i8x16_swar.gt_s(aLo, aHi, bLo, bHi);
+  hi_sink = i8x16_swar.take_hi();
+  return lo;
 }
 // @ts-expect-error: decorator
 @inline function ge_s_lib(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-  const pair = i8x16_swar.ge_s(aLo, aHi, bLo, bHi);
-  hi_sink = pair[1];
-  return pair[0];
+  const lo = i8x16_swar.ge_s(aLo, aHi, bLo, bHi);
+  hi_sink = i8x16_swar.take_hi();
+  return lo;
 }
 
 // @ts-expect-error: decorator
@@ -85,53 +85,53 @@ let hi_sink: u64 = 0;
 
 // @ts-expect-error: decorator
 @inline function lt_s_via_ge(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-  const pair = i8x16_swar.ge_s(aLo, aHi, bLo, bHi);
-  const lo = pair[0];
-  return set_pair(~lo, ~pair[1]);
+  const lo = i8x16_swar.ge_s(aLo, aHi, bLo, bHi);
+  const hi = i8x16_swar.take_hi();
+  return set_pair(~lo, ~hi);
 }
 // @ts-expect-error: decorator
 @inline function le_s_via_ge(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-  const pair = i8x16_swar.ge_s(bLo, bHi, aLo, aHi);
-  hi_sink = pair[1];
-  return pair[0];
+  const lo = i8x16_swar.ge_s(bLo, bHi, aLo, aHi);
+  hi_sink = i8x16_swar.take_hi();
+  return lo;
 }
 // @ts-expect-error: decorator
 @inline function gt_s_via_lt(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-  const pair = i8x16_swar.lt_s(bLo, bHi, aLo, aHi);
-  hi_sink = pair[1];
-  return pair[0];
+  const lo = i8x16_swar.lt_s(bLo, bHi, aLo, aHi);
+  hi_sink = i8x16_swar.take_hi();
+  return lo;
 }
 // @ts-expect-error: decorator
 @inline function ge_s_via_lt(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-  const pair = i8x16_swar.lt_s(aLo, aHi, bLo, bHi);
-  const lo = pair[0];
-  return set_pair(~lo, ~pair[1]);
+  const lo = i8x16_swar.lt_s(aLo, aHi, bLo, bHi);
+  const hi = i8x16_swar.take_hi();
+  return set_pair(~lo, ~hi);
 }
 
 // unsigned
 // @ts-expect-error: decorator
 @inline function lt_u_lib(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-  const pair = i8x16_swar.lt_u(aLo, aHi, bLo, bHi);
-  hi_sink = pair[1];
-  return pair[0];
+  const lo = i8x16_swar.lt_u(aLo, aHi, bLo, bHi);
+  hi_sink = i8x16_swar.take_hi();
+  return lo;
 }
 // @ts-expect-error: decorator
 @inline function le_u_lib(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-  const pair = i8x16_swar.le_u(aLo, aHi, bLo, bHi);
-  hi_sink = pair[1];
-  return pair[0];
+  const lo = i8x16_swar.le_u(aLo, aHi, bLo, bHi);
+  hi_sink = i8x16_swar.take_hi();
+  return lo;
 }
 // @ts-expect-error: decorator
 @inline function gt_u_lib(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-  const pair = i8x16_swar.gt_u(aLo, aHi, bLo, bHi);
-  hi_sink = pair[1];
-  return pair[0];
+  const lo = i8x16_swar.gt_u(aLo, aHi, bLo, bHi);
+  hi_sink = i8x16_swar.take_hi();
+  return lo;
 }
 // @ts-expect-error: decorator
 @inline function ge_u_lib(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-  const pair = i8x16_swar.ge_u(aLo, aHi, bLo, bHi);
-  hi_sink = pair[1];
-  return pair[0];
+  const lo = i8x16_swar.ge_u(aLo, aHi, bLo, bHi);
+  hi_sink = i8x16_swar.take_hi();
+  return lo;
 }
 // @ts-expect-error: decorator
 @inline function lt_u_old(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {

@@ -15,9 +15,9 @@ let hi_sink: u64 = 0;
 
 // @ts-expect-error: decorator
 @inline function mul_lib(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-  const pair = i8x16_swar.mul(aLo, aHi, bLo, bHi);
-  hi_sink = pair[1];
-  return pair[0];
+  const lo = i8x16_swar.mul(aLo, aHi, bLo, bHi);
+  hi_sink = i8x16_swar.take_hi();
+  return lo;
 }
 
 // @ts-expect-error: decorator
