@@ -1,3 +1,4 @@
+// Native-SIMD half of the physically split i8x16 benchmark suite.
 import { bench_common } from "./common";
 import { bench, blackbox, dumpToFile } from "./lib/bench";
 

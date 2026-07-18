@@ -1,3 +1,4 @@
+// Native-SIMD half of the physically split i64x2 benchmark suite.
 import { i64x2_swar } from "../index";
 import { bench_common } from "./common";
 import { bench, blackbox, dumpToFile } from "./lib/bench";

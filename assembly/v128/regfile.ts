@@ -1,4 +1,4 @@
-// Heap-backed 128-bit register file.
+// Statically reserved 128-bit register file.
 //
 // WebAssembly globals cannot be indexed by a runtime value, so an indexed
 // register file must live in linear memory. This module reserves a fixed,
@@ -25,45 +25,39 @@ export const RF_SLOT_BYTES: usize = 16;
 const RF_BYTES: usize = (RF_REGS as usize) * RF_SLOT_BYTES;
 
 export namespace rf {
-  let _base: usize = 0;
-
-  // @ts-expect-error: decorator
-  @inline function ensure(): usize {
-    if (_base == 0) _base = memory.data(RF_BYTES);
-    return _base;
-  }
+  const _base: usize = memory.data(RF_BYTES as i32, 16);
 
   /** Base address of the register file (lazily allocated, 16-byte aligned). */
   // @ts-expect-error: decorator
-  @inline export function base(): usize { return ensure(); }
+  @inline export function base(): usize { return _base; }
 
   /** Byte address of register `reg`'s low half. `reg` may be a runtime value. */
   // @ts-expect-error: decorator
-  @inline export function addr(reg: u32): usize { return ensure() + ((reg as usize) << 4); }
+  @inline export function addr(reg: u32): usize { return _base + ((reg as usize) << 4); }
 
   /** Reads the low 64 bits of register `reg`. */
   // @ts-expect-error: decorator
-  @inline export function lo(reg: u32): u64 { return load<u64>(ensure() + ((reg as usize) << 4)); }
+  @inline export function lo(reg: u32): u64 { return load<u64>(_base + ((reg as usize) << 4)); }
 
   /** Reads the high 64 bits of register `reg`. */
   // @ts-expect-error: decorator
-  @inline export function hi(reg: u32): u64 { return load<u64>(ensure() + ((reg as usize) << 4), 8); }
+  @inline export function hi(reg: u32): u64 { return load<u64>(_base + ((reg as usize) << 4), 8); }
 
   /** Writes both halves of register `reg`. */
   // @ts-expect-error: decorator
   @inline export function set(reg: u32, lo: u64, hi: u64): void {
-    const p = ensure() + ((reg as usize) << 4);
+    const p = _base + ((reg as usize) << 4);
     store<u64>(p, lo);
     store<u64>(p, hi, 8);
   }
 
   /** Writes only the low half of register `reg`. */
   // @ts-expect-error: decorator
-  @inline export function setLo(reg: u32, lo: u64): void { store<u64>(ensure() + ((reg as usize) << 4), lo); }
+  @inline export function setLo(reg: u32, lo: u64): void { store<u64>(_base + ((reg as usize) << 4), lo); }
 
   /** Writes only the high half of register `reg`. */
   // @ts-expect-error: decorator
-  @inline export function setHi(reg: u32, hi: u64): void { store<u64>(ensure() + ((reg as usize) << 4), hi, 8); }
+  @inline export function setHi(reg: u32, hi: u64): void { store<u64>(_base + ((reg as usize) << 4), hi, 8); }
 
   /** Loads a 128-bit value from memory into register `reg`. */
   // @ts-expect-error: decorator
@@ -74,12 +68,12 @@ export namespace rf {
   /** Stores register `reg` to memory as a 128-bit value. */
   // @ts-expect-error: decorator
   @inline export function store128(reg: u32, ptr: usize, immOffset: usize = 0, immAlign: usize = 1): void {
-    const p = ensure() + ((reg as usize) << 4);
+    const p = _base + ((reg as usize) << 4);
     store<u64>(ptr, load<u64>(p), immOffset, immAlign);
     store<u64>(ptr, load<u64>(p, 8), immOffset + 8, immAlign);
   }
 
   /** Zeroes every register. Primarily for tests/determinism. */
   // @ts-expect-error: decorator
-  @inline export function clear(): void { memory.fill(ensure(), 0, RF_BYTES); }
+  @inline export function clear(): void { memory.fill(_base, 0, RF_BYTES); }
 }

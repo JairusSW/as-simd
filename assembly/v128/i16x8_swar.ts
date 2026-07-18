@@ -1,3 +1,6 @@
+import { i16x4 } from "../v64/i16x4";
+import { i32x4_swar } from "./i32x4_swar";
+
 let __as_simd_i16x8_hi: u64 = 0;
 
 export function i16x8_swar(a: i16, b: i16, c: i16, d: i16, e: i16, f: i16, g: i16, h: i16): u64 {
@@ -63,7 +66,7 @@ export namespace i16x8_swar {
   @inline function sub_u_sat(a: u16, b: u16): u16 { return sat_u((a as i32) - (b as i32)); }
 
   // @ts-expect-error: decorator
-  @inline export function splat(x: i16): u64 { const p = pack4(x, x, x, x); return set_pair(p, p); }
+  @inline export function splat(x: i16): u64 { const p = i16x4.splat(x); return set_pair(p, p); }
   // @ts-expect-error: decorator
   @inline export function extract_lane_s(lo: u64, hi: u64, idx: u8): i16 { return lane_s(lo, hi, idx); }
   // @ts-expect-error: decorator
@@ -71,15 +74,7 @@ export namespace i16x8_swar {
   // @ts-expect-error: decorator
   @inline export function replace_lane(lo: u64, hi: u64, idx: u8, value: i16): u64 {
     const i = idx & 7;
-    const out0 = i == 0 ? value : lane_s(lo, hi, 0);
-    const out1 = i == 1 ? value : lane_s(lo, hi, 1);
-    const out2 = i == 2 ? value : lane_s(lo, hi, 2);
-    const out3 = i == 3 ? value : lane_s(lo, hi, 3);
-    const out4 = i == 4 ? value : lane_s(lo, hi, 4);
-    const out5 = i == 5 ? value : lane_s(lo, hi, 5);
-    const out6 = i == 6 ? value : lane_s(lo, hi, 6);
-    const out7 = i == 7 ? value : lane_s(lo, hi, 7);
-    return set_pair(pack4(out0, out1, out2, out3), pack4(out4, out5, out6, out7));
+    return i < 4 ? set_pair(i16x4.replace_lane(lo, i, value), hi) : set_pair(lo, i16x4.replace_lane(hi, i - 4, value));
   }
   // @ts-expect-error: decorator
   @inline export function loadPartial(ptr: usize, len: i32, immOffset: usize = 0, immAlign: usize = 1, fill: i16 = 0): u64 {
@@ -111,71 +106,73 @@ export namespace i16x8_swar {
   }
 
   // @ts-expect-error: decorator
-  @inline export function add(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(pack4(lane_s(aLo, aHi, 0) + lane_s(bLo, bHi, 0), lane_s(aLo, aHi, 1) + lane_s(bLo, bHi, 1), lane_s(aLo, aHi, 2) + lane_s(bLo, bHi, 2), lane_s(aLo, aHi, 3) + lane_s(bLo, bHi, 3)), pack4(lane_s(aLo, aHi, 4) + lane_s(bLo, bHi, 4), lane_s(aLo, aHi, 5) + lane_s(bLo, bHi, 5), lane_s(aLo, aHi, 6) + lane_s(bLo, bHi, 6), lane_s(aLo, aHi, 7) + lane_s(bLo, bHi, 7))); }
+  @inline export function add(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(i16x4.add(aLo, bLo), i16x4.add(aHi, bHi)); }
   // @ts-expect-error: decorator
-  @inline export function sub(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(pack4(lane_s(aLo, aHi, 0) - lane_s(bLo, bHi, 0), lane_s(aLo, aHi, 1) - lane_s(bLo, bHi, 1), lane_s(aLo, aHi, 2) - lane_s(bLo, bHi, 2), lane_s(aLo, aHi, 3) - lane_s(bLo, bHi, 3)), pack4(lane_s(aLo, aHi, 4) - lane_s(bLo, bHi, 4), lane_s(aLo, aHi, 5) - lane_s(bLo, bHi, 5), lane_s(aLo, aHi, 6) - lane_s(bLo, bHi, 6), lane_s(aLo, aHi, 7) - lane_s(bLo, bHi, 7))); }
+  @inline export function sub(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(i16x4.sub(aLo, bLo), i16x4.sub(aHi, bHi)); }
   // @ts-expect-error: decorator
-  @inline export function mul(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(pack4(lane_s(aLo, aHi, 0) * lane_s(bLo, bHi, 0), lane_s(aLo, aHi, 1) * lane_s(bLo, bHi, 1), lane_s(aLo, aHi, 2) * lane_s(bLo, bHi, 2), lane_s(aLo, aHi, 3) * lane_s(bLo, bHi, 3)), pack4(lane_s(aLo, aHi, 4) * lane_s(bLo, bHi, 4), lane_s(aLo, aHi, 5) * lane_s(bLo, bHi, 5), lane_s(aLo, aHi, 6) * lane_s(bLo, bHi, 6), lane_s(aLo, aHi, 7) * lane_s(bLo, bHi, 7))); }
+  @inline export function mul(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(i16x4.mul(aLo, bLo), i16x4.mul(aHi, bHi)); }
   // @ts-expect-error: decorator
-  @inline export function min_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(pack4(min<i16>(lane_s(aLo, aHi, 0), lane_s(bLo, bHi, 0)), min<i16>(lane_s(aLo, aHi, 1), lane_s(bLo, bHi, 1)), min<i16>(lane_s(aLo, aHi, 2), lane_s(bLo, bHi, 2)), min<i16>(lane_s(aLo, aHi, 3), lane_s(bLo, bHi, 3))), pack4(min<i16>(lane_s(aLo, aHi, 4), lane_s(bLo, bHi, 4)), min<i16>(lane_s(aLo, aHi, 5), lane_s(bLo, bHi, 5)), min<i16>(lane_s(aLo, aHi, 6), lane_s(bLo, bHi, 6)), min<i16>(lane_s(aLo, aHi, 7), lane_s(bLo, bHi, 7)))); }
+  @inline export function min_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(i16x4.min_s(aLo, bLo), i16x4.min_s(aHi, bHi)); }
   // @ts-expect-error: decorator
-  @inline export function min_u(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(pack4u(min<u16>(lane_u(aLo, aHi, 0), lane_u(bLo, bHi, 0)), min<u16>(lane_u(aLo, aHi, 1), lane_u(bLo, bHi, 1)), min<u16>(lane_u(aLo, aHi, 2), lane_u(bLo, bHi, 2)), min<u16>(lane_u(aLo, aHi, 3), lane_u(bLo, bHi, 3))), pack4u(min<u16>(lane_u(aLo, aHi, 4), lane_u(bLo, bHi, 4)), min<u16>(lane_u(aLo, aHi, 5), lane_u(bLo, bHi, 5)), min<u16>(lane_u(aLo, aHi, 6), lane_u(bLo, bHi, 6)), min<u16>(lane_u(aLo, aHi, 7), lane_u(bLo, bHi, 7)))); }
+  @inline export function min_u(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(i16x4.min_u(aLo, bLo), i16x4.min_u(aHi, bHi)); }
   // @ts-expect-error: decorator
-  @inline export function max_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(pack4(max<i16>(lane_s(aLo, aHi, 0), lane_s(bLo, bHi, 0)), max<i16>(lane_s(aLo, aHi, 1), lane_s(bLo, bHi, 1)), max<i16>(lane_s(aLo, aHi, 2), lane_s(bLo, bHi, 2)), max<i16>(lane_s(aLo, aHi, 3), lane_s(bLo, bHi, 3))), pack4(max<i16>(lane_s(aLo, aHi, 4), lane_s(bLo, bHi, 4)), max<i16>(lane_s(aLo, aHi, 5), lane_s(bLo, bHi, 5)), max<i16>(lane_s(aLo, aHi, 6), lane_s(bLo, bHi, 6)), max<i16>(lane_s(aLo, aHi, 7), lane_s(bLo, bHi, 7)))); }
+  @inline export function max_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(i16x4.max_s(aLo, bLo), i16x4.max_s(aHi, bHi)); }
   // @ts-expect-error: decorator
-  @inline export function max_u(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(pack4u(max<u16>(lane_u(aLo, aHi, 0), lane_u(bLo, bHi, 0)), max<u16>(lane_u(aLo, aHi, 1), lane_u(bLo, bHi, 1)), max<u16>(lane_u(aLo, aHi, 2), lane_u(bLo, bHi, 2)), max<u16>(lane_u(aLo, aHi, 3), lane_u(bLo, bHi, 3))), pack4u(max<u16>(lane_u(aLo, aHi, 4), lane_u(bLo, bHi, 4)), max<u16>(lane_u(aLo, aHi, 5), lane_u(bLo, bHi, 5)), max<u16>(lane_u(aLo, aHi, 6), lane_u(bLo, bHi, 6)), max<u16>(lane_u(aLo, aHi, 7), lane_u(bLo, bHi, 7)))); }
+  @inline export function max_u(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(i16x4.max_u(aLo, bLo), i16x4.max_u(aHi, bHi)); }
   // @ts-expect-error: decorator
   @inline export function avgr_u(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
+    return set_pair(i16x4.avgr_u(aLo, bLo), i16x4.avgr_u(aHi, bHi));
+  }
+  // @ts-expect-error: decorator
+  @inline export function abs(aLo: u64, aHi: u64): u64 {
+    const mLo = ((aLo & 0x8000800080008000) >> 15) * 0xffff;
+    const xLo = aLo ^ mLo;
+    const mHi = ((aHi & 0x8000800080008000) >> 15) * 0xffff;
+    const xHi = aHi ^ mHi;
     return set_pair(
-      pack4u(avgr_u16(lane_u(aLo, aHi, 0), lane_u(bLo, bHi, 0)), avgr_u16(lane_u(aLo, aHi, 1), lane_u(bLo, bHi, 1)), avgr_u16(lane_u(aLo, aHi, 2), lane_u(bLo, bHi, 2)), avgr_u16(lane_u(aLo, aHi, 3), lane_u(bLo, bHi, 3))),
-      pack4u(avgr_u16(lane_u(aLo, aHi, 4), lane_u(bLo, bHi, 4)), avgr_u16(lane_u(aLo, aHi, 5), lane_u(bLo, bHi, 5)), avgr_u16(lane_u(aLo, aHi, 6), lane_u(bLo, bHi, 6)), avgr_u16(lane_u(aLo, aHi, 7), lane_u(bLo, bHi, 7))),
+      ((xLo | 0x8000800080008000) - (mLo & 0x7fff7fff7fff7fff)) ^ ((xLo ^ ~mLo) & 0x8000800080008000),
+      ((xHi | 0x8000800080008000) - (mHi & 0x7fff7fff7fff7fff)) ^ ((xHi ^ ~mHi) & 0x8000800080008000),
     );
   }
   // @ts-expect-error: decorator
-  @inline export function abs(aLo: u64, aHi: u64): u64 { return set_pair(pack4(abs16(lane_s(aLo, aHi, 0)), abs16(lane_s(aLo, aHi, 1)), abs16(lane_s(aLo, aHi, 2)), abs16(lane_s(aLo, aHi, 3))), pack4(abs16(lane_s(aLo, aHi, 4)), abs16(lane_s(aLo, aHi, 5)), abs16(lane_s(aLo, aHi, 6)), abs16(lane_s(aLo, aHi, 7)))); }
-  // @ts-expect-error: decorator
-  @inline export function neg(aLo: u64, aHi: u64): u64 { return set_pair(pack4(-lane_s(aLo, aHi, 0), -lane_s(aLo, aHi, 1), -lane_s(aLo, aHi, 2), -lane_s(aLo, aHi, 3)), pack4(-lane_s(aLo, aHi, 4), -lane_s(aLo, aHi, 5), -lane_s(aLo, aHi, 6), -lane_s(aLo, aHi, 7))); }
-  // @ts-expect-error: decorator
-  @inline export function add_sat_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(pack4(add_s_sat(lane_s(aLo, aHi, 0), lane_s(bLo, bHi, 0)), add_s_sat(lane_s(aLo, aHi, 1), lane_s(bLo, bHi, 1)), add_s_sat(lane_s(aLo, aHi, 2), lane_s(bLo, bHi, 2)), add_s_sat(lane_s(aLo, aHi, 3), lane_s(bLo, bHi, 3))), pack4(add_s_sat(lane_s(aLo, aHi, 4), lane_s(bLo, bHi, 4)), add_s_sat(lane_s(aLo, aHi, 5), lane_s(bLo, bHi, 5)), add_s_sat(lane_s(aLo, aHi, 6), lane_s(bLo, bHi, 6)), add_s_sat(lane_s(aLo, aHi, 7), lane_s(bLo, bHi, 7)))); }
-  // @ts-expect-error: decorator
-  @inline export function add_sat_u(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(pack4u(add_u_sat(lane_u(aLo, aHi, 0), lane_u(bLo, bHi, 0)), add_u_sat(lane_u(aLo, aHi, 1), lane_u(bLo, bHi, 1)), add_u_sat(lane_u(aLo, aHi, 2), lane_u(bLo, bHi, 2)), add_u_sat(lane_u(aLo, aHi, 3), lane_u(bLo, bHi, 3))), pack4u(add_u_sat(lane_u(aLo, aHi, 4), lane_u(bLo, bHi, 4)), add_u_sat(lane_u(aLo, aHi, 5), lane_u(bLo, bHi, 5)), add_u_sat(lane_u(aLo, aHi, 6), lane_u(bLo, bHi, 6)), add_u_sat(lane_u(aLo, aHi, 7), lane_u(bLo, bHi, 7)))); }
-  // @ts-expect-error: decorator
-  @inline export function sub_sat_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(pack4(sub_s_sat(lane_s(aLo, aHi, 0), lane_s(bLo, bHi, 0)), sub_s_sat(lane_s(aLo, aHi, 1), lane_s(bLo, bHi, 1)), sub_s_sat(lane_s(aLo, aHi, 2), lane_s(bLo, bHi, 2)), sub_s_sat(lane_s(aLo, aHi, 3), lane_s(bLo, bHi, 3))), pack4(sub_s_sat(lane_s(aLo, aHi, 4), lane_s(bLo, bHi, 4)), sub_s_sat(lane_s(aLo, aHi, 5), lane_s(bLo, bHi, 5)), sub_s_sat(lane_s(aLo, aHi, 6), lane_s(bLo, bHi, 6)), sub_s_sat(lane_s(aLo, aHi, 7), lane_s(bLo, bHi, 7)))); }
-  // @ts-expect-error: decorator
-  @inline export function sub_sat_u(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(pack4u(sub_u_sat(lane_u(aLo, aHi, 0), lane_u(bLo, bHi, 0)), sub_u_sat(lane_u(aLo, aHi, 1), lane_u(bLo, bHi, 1)), sub_u_sat(lane_u(aLo, aHi, 2), lane_u(bLo, bHi, 2)), sub_u_sat(lane_u(aLo, aHi, 3), lane_u(bLo, bHi, 3))), pack4u(sub_u_sat(lane_u(aLo, aHi, 4), lane_u(bLo, bHi, 4)), sub_u_sat(lane_u(aLo, aHi, 5), lane_u(bLo, bHi, 5)), sub_u_sat(lane_u(aLo, aHi, 6), lane_u(bLo, bHi, 6)), sub_u_sat(lane_u(aLo, aHi, 7), lane_u(bLo, bHi, 7)))); }
-  // @ts-expect-error: decorator
-  @inline export function shl(aLo: u64, aHi: u64, b: i32): u64 { const s = b & 15; return set_pair(pack4(shl16(lane_s(aLo, aHi, 0), s), shl16(lane_s(aLo, aHi, 1), s), shl16(lane_s(aLo, aHi, 2), s), shl16(lane_s(aLo, aHi, 3), s)), pack4(shl16(lane_s(aLo, aHi, 4), s), shl16(lane_s(aLo, aHi, 5), s), shl16(lane_s(aLo, aHi, 6), s), shl16(lane_s(aLo, aHi, 7), s))); }
-  // @ts-expect-error: decorator
-  @inline export function shr_s(aLo: u64, aHi: u64, b: i32): u64 { const s = b & 15; return set_pair(pack4(shr16(lane_s(aLo, aHi, 0), s), shr16(lane_s(aLo, aHi, 1), s), shr16(lane_s(aLo, aHi, 2), s), shr16(lane_s(aLo, aHi, 3), s)), pack4(shr16(lane_s(aLo, aHi, 4), s), shr16(lane_s(aLo, aHi, 5), s), shr16(lane_s(aLo, aHi, 6), s), shr16(lane_s(aLo, aHi, 7), s))); }
-  // @ts-expect-error: decorator
-  @inline export function shr_u(aLo: u64, aHi: u64, b: i32): u64 { const s = b & 15; return set_pair(pack4u(((lane_u(aLo, aHi, 0) as u32) >> s) as u16, ((lane_u(aLo, aHi, 1) as u32) >> s) as u16, ((lane_u(aLo, aHi, 2) as u32) >> s) as u16, ((lane_u(aLo, aHi, 3) as u32) >> s) as u16), pack4u(((lane_u(aLo, aHi, 4) as u32) >> s) as u16, ((lane_u(aLo, aHi, 5) as u32) >> s) as u16, ((lane_u(aLo, aHi, 6) as u32) >> s) as u16, ((lane_u(aLo, aHi, 7) as u32) >> s) as u16)); }
-  // @ts-expect-error: decorator
-  @inline export function all_true(aLo: u64, aHi: u64): bool { return lane_s(aLo, aHi, 0) != 0 && lane_s(aLo, aHi, 1) != 0 && lane_s(aLo, aHi, 2) != 0 && lane_s(aLo, aHi, 3) != 0 && lane_s(aLo, aHi, 4) != 0 && lane_s(aLo, aHi, 5) != 0 && lane_s(aLo, aHi, 6) != 0 && lane_s(aLo, aHi, 7) != 0; }
-  // @ts-expect-error: decorator
-  @inline export function bitmask(aLo: u64, aHi: u64): i32 {
-    let m = 0;
-    if (lane_s(aLo, aHi, 0) < 0) m |= 1;
-    if (lane_s(aLo, aHi, 1) < 0) m |= 2;
-    if (lane_s(aLo, aHi, 2) < 0) m |= 4;
-    if (lane_s(aLo, aHi, 3) < 0) m |= 8;
-    if (lane_s(aLo, aHi, 4) < 0) m |= 16;
-    if (lane_s(aLo, aHi, 5) < 0) m |= 32;
-    if (lane_s(aLo, aHi, 6) < 0) m |= 64;
-    if (lane_s(aLo, aHi, 7) < 0) m |= 128;
-    return m;
+  @inline export function neg(aLo: u64, aHi: u64): u64 {
+    return set_pair(
+      (0x8000800080008000 - (aLo & 0x7fff7fff7fff7fff)) ^ ((~aLo) & 0x8000800080008000),
+      (0x8000800080008000 - (aHi & 0x7fff7fff7fff7fff)) ^ ((~aHi) & 0x8000800080008000),
+    );
   }
   // @ts-expect-error: decorator
-  @inline export function eq(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(pack4(mask(lane_s(aLo, aHi, 0) == lane_s(bLo, bHi, 0)), mask(lane_s(aLo, aHi, 1) == lane_s(bLo, bHi, 1)), mask(lane_s(aLo, aHi, 2) == lane_s(bLo, bHi, 2)), mask(lane_s(aLo, aHi, 3) == lane_s(bLo, bHi, 3))), pack4(mask(lane_s(aLo, aHi, 4) == lane_s(bLo, bHi, 4)), mask(lane_s(aLo, aHi, 5) == lane_s(bLo, bHi, 5)), mask(lane_s(aLo, aHi, 6) == lane_s(bLo, bHi, 6)), mask(lane_s(aLo, aHi, 7) == lane_s(bLo, bHi, 7)))); }
+  @inline export function add_sat_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(i16x4.add_sat_s(aLo, bLo), i16x4.add_sat_s(aHi, bHi)); }
   // @ts-expect-error: decorator
-  @inline export function ne(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(pack4(mask(lane_s(aLo, aHi, 0) != lane_s(bLo, bHi, 0)), mask(lane_s(aLo, aHi, 1) != lane_s(bLo, bHi, 1)), mask(lane_s(aLo, aHi, 2) != lane_s(bLo, bHi, 2)), mask(lane_s(aLo, aHi, 3) != lane_s(bLo, bHi, 3))), pack4(mask(lane_s(aLo, aHi, 4) != lane_s(bLo, bHi, 4)), mask(lane_s(aLo, aHi, 5) != lane_s(bLo, bHi, 5)), mask(lane_s(aLo, aHi, 6) != lane_s(bLo, bHi, 6)), mask(lane_s(aLo, aHi, 7) != lane_s(bLo, bHi, 7)))); }
+  @inline export function add_sat_u(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(i16x4.add_sat_u(aLo, bLo), i16x4.add_sat_u(aHi, bHi)); }
   // @ts-expect-error: decorator
-  @inline export function lt_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(pack4(mask(lane_s(aLo, aHi, 0) < lane_s(bLo, bHi, 0)), mask(lane_s(aLo, aHi, 1) < lane_s(bLo, bHi, 1)), mask(lane_s(aLo, aHi, 2) < lane_s(bLo, bHi, 2)), mask(lane_s(aLo, aHi, 3) < lane_s(bLo, bHi, 3))), pack4(mask(lane_s(aLo, aHi, 4) < lane_s(bLo, bHi, 4)), mask(lane_s(aLo, aHi, 5) < lane_s(bLo, bHi, 5)), mask(lane_s(aLo, aHi, 6) < lane_s(bLo, bHi, 6)), mask(lane_s(aLo, aHi, 7) < lane_s(bLo, bHi, 7)))); }
+  @inline export function sub_sat_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(i16x4.sub_sat_s(aLo, bLo), i16x4.sub_sat_s(aHi, bHi)); }
   // @ts-expect-error: decorator
-  @inline export function lt_u(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(pack4(mask(lane_u(aLo, aHi, 0) < lane_u(bLo, bHi, 0)), mask(lane_u(aLo, aHi, 1) < lane_u(bLo, bHi, 1)), mask(lane_u(aLo, aHi, 2) < lane_u(bLo, bHi, 2)), mask(lane_u(aLo, aHi, 3) < lane_u(bLo, bHi, 3))), pack4(mask(lane_u(aLo, aHi, 4) < lane_u(bLo, bHi, 4)), mask(lane_u(aLo, aHi, 5) < lane_u(bLo, bHi, 5)), mask(lane_u(aLo, aHi, 6) < lane_u(bLo, bHi, 6)), mask(lane_u(aLo, aHi, 7) < lane_u(bLo, bHi, 7)))); }
+  @inline export function sub_sat_u(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(i16x4.sub_sat_u(aLo, bLo), i16x4.sub_sat_u(aHi, bHi)); }
   // @ts-expect-error: decorator
-  @inline export function le_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(pack4(mask(lane_s(aLo, aHi, 0) <= lane_s(bLo, bHi, 0)), mask(lane_s(aLo, aHi, 1) <= lane_s(bLo, bHi, 1)), mask(lane_s(aLo, aHi, 2) <= lane_s(bLo, bHi, 2)), mask(lane_s(aLo, aHi, 3) <= lane_s(bLo, bHi, 3))), pack4(mask(lane_s(aLo, aHi, 4) <= lane_s(bLo, bHi, 4)), mask(lane_s(aLo, aHi, 5) <= lane_s(bLo, bHi, 5)), mask(lane_s(aLo, aHi, 6) <= lane_s(bLo, bHi, 6)), mask(lane_s(aLo, aHi, 7) <= lane_s(bLo, bHi, 7)))); }
+  @inline export function shl(aLo: u64, aHi: u64, b: i32): u64 { return set_pair(i16x4.shl(aLo, b), i16x4.shl(aHi, b)); }
   // @ts-expect-error: decorator
-  @inline export function le_u(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(pack4(mask(lane_u(aLo, aHi, 0) <= lane_u(bLo, bHi, 0)), mask(lane_u(aLo, aHi, 1) <= lane_u(bLo, bHi, 1)), mask(lane_u(aLo, aHi, 2) <= lane_u(bLo, bHi, 2)), mask(lane_u(aLo, aHi, 3) <= lane_u(bLo, bHi, 3))), pack4(mask(lane_u(aLo, aHi, 4) <= lane_u(bLo, bHi, 4)), mask(lane_u(aLo, aHi, 5) <= lane_u(bLo, bHi, 5)), mask(lane_u(aLo, aHi, 6) <= lane_u(bLo, bHi, 6)), mask(lane_u(aLo, aHi, 7) <= lane_u(bLo, bHi, 7)))); }
+  @inline export function shr_s(aLo: u64, aHi: u64, b: i32): u64 { return set_pair(i16x4.shr_s(aLo, b), i16x4.shr_s(aHi, b)); }
+  // @ts-expect-error: decorator
+  @inline export function shr_u(aLo: u64, aHi: u64, b: i32): u64 { return set_pair(i16x4.shr_u(aLo, b), i16x4.shr_u(aHi, b)); }
+  // @ts-expect-error: decorator
+  @inline export function all_true(aLo: u64, aHi: u64): bool { return i16x4.all_true(aLo) && i16x4.all_true(aHi); }
+  // @ts-expect-error: decorator
+  @inline export function bitmask(aLo: u64, aHi: u64): i32 {
+    return i16x4.bitmask(aLo) | (i16x4.bitmask(aHi) << 4);
+  }
+  // @ts-expect-error: decorator
+  @inline export function eq(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(i16x4.eq(aLo, bLo), i16x4.eq(aHi, bHi)); }
+  // @ts-expect-error: decorator
+  @inline export function ne(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(i16x4.ne(aLo, bLo), i16x4.ne(aHi, bHi)); }
+  // @ts-expect-error: decorator
+  @inline export function lt_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(i16x4.lt_s(aLo, bLo), i16x4.lt_s(aHi, bHi)); }
+  // @ts-expect-error: decorator
+  @inline export function lt_u(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(i16x4.lt_u(aLo, bLo), i16x4.lt_u(aHi, bHi)); }
+  // @ts-expect-error: decorator
+  @inline export function le_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(i16x4.le_s(aLo, bLo), i16x4.le_s(aHi, bHi)); }
+  // @ts-expect-error: decorator
+  @inline export function le_u(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(i16x4.le_u(aLo, bLo), i16x4.le_u(aHi, bHi)); }
   // @ts-expect-error: decorator
   @inline export function gt_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return lt_s(bLo, bHi, aLo, aHi); }
   // @ts-expect-error: decorator
@@ -235,13 +232,13 @@ export namespace i16x8_swar {
   @inline export function extadd_pairwise_i8x16_s(aLo: u64, aHi: u64): u64 {
     const ex = extend_low_i8x16_s(aLo, aHi);
     const eh = take_hi();
-    return extadd_pairwise_i16x8_s(ex, eh);
+    return set_pair(i32x4_swar.extadd_pairwise_i16x8_s(ex, eh), i32x4_swar.take_hi());
   }
   // @ts-expect-error: decorator
   @inline export function extadd_pairwise_i8x16_u(aLo: u64, aHi: u64): u64 {
     const ex = extend_low_i8x16_u(aLo, aHi);
     const eh = take_hi();
-    return extadd_pairwise_i16x8_u(ex, eh);
+    return set_pair(i32x4_swar.extadd_pairwise_i16x8_u(ex, eh), i32x4_swar.take_hi());
   }
   // @ts-expect-error: decorator
   @inline export function q15mulr_sat_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
@@ -302,5 +299,9 @@ export namespace i16x8_swar {
     const r6 = lane_s(mLo, mHi, 6) < 0 ? lane_s(aLo, aHi, 6) : lane_s(bLo, bHi, 6);
     const r7 = lane_s(mLo, mHi, 7) < 0 ? lane_s(aLo, aHi, 7) : lane_s(bLo, bHi, 7);
     return set_pair(pack4(r0, r1, r2, r3), pack4(r4, r5, r6, r7));
+  }
+  // @ts-expect-error: decorator
+  @inline export function relaxed_dot_i8x16_i7x16_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
+    return set_pair(i16x4.relaxed_dot_i8x8_i7x8_s(aLo, bLo), i16x4.relaxed_dot_i8x8_i7x8_s(aHi, bHi));
   }
 }

@@ -1,3 +1,4 @@
+// Native-SIMD half of the physically split i16x8 benchmark suite.
 import { i16x8_swar } from "../index";
 import { bench_common } from "./common";
 import { bench, blackbox, dumpToFile } from "./lib/bench";

@@ -1,4 +1,8 @@
-# 128-bit register file & calling convention
+# Internal register-file design notes
+
+> This document describes internal benchmarking machinery. The package root
+> exports the value-shaped `v128`, `v256`, and `v512` APIs; register-indexed
+> `*r` namespaces are not a separate public API.
 
 `as-simd` represents a 128-bit SWAR vector as two `u64` halves (`lo`, `hi`).
 Functions can only return one value, so the high half has to travel some other
@@ -19,8 +23,8 @@ way. This document records the design we ship and why.
    This is the fastest convention in tight loops (the optimizer keeps everything
    in wasm locals) and is what the higher layer is built on.
 
-2. **Register file / primary API** — `rf` (heap-backed, 64 × 16-byte slots) plus
-   `v128r`, a register-indexed VM. Vectors live in numbered registers; every op
+2. **Internal register-file API** — `rf` (statically reserved, 64 × 16-byte slots) plus
+   `v128r`, a register-indexed VM used by benchmarks and width-tuning work. Vectors live in numbered registers; every op
    names operands and destination by index:
 
    ```ts
@@ -31,9 +35,17 @@ way. This document records the design we ship and why.
    ```
 
    WebAssembly globals cannot be indexed by a runtime value, so the file is in
-   linear memory (`memory.data(64*16)`); that is what makes 64 dynamically
-   indexable registers possible. Aliasing (`dst == src`) is safe: every operand
-   half is loaded before the destination is written.
+   linear memory (`memory.data(64*16, 16)`); that is what makes 64 dynamically
+   indexable registers possible. The base is resolved eagerly to a fixed data
+   address, eliminating lazy-initialization branches from hot operations.
+   Aliasing (`dst == src`) is safe: every operand is loaded before the
+   destination is written.
+
+   SIMD builds use direct `v128.load → operation → v128.store` kernels where
+   measurement shows a win (lane arithmetic, saturation, comparisons,
+   narrowing, conversions, and relaxed SIMD). Simple word operations retain
+   their faster scalar path. Lane extraction is one typed load; replacement is
+   a fixed-width copy plus one typed store.
 
 ## Why not multi-value?
 
@@ -64,12 +76,16 @@ Representative result (V8 / Node, 20M iters, best-of-9):
 | lt_s     | 80%              | —              | **100%**        |
 | madd     | 83%              | —              | **100%**        |
 
-The global/value path is ~20–30% faster in tight loops; constant-index heap
-forwarding closes much of the gap but does not beat it. (The multi-value variant
-is not benchmarkable — it does not compile on the released compiler.)
+These historical results predate eager bases and direct native register
+kernels. Current per-operation measurements are maintained in
+[`charts/chart-register-v8.md`](../charts/chart-register-v8.md); scalar hot
+paths can still win for simple operations, while lane-heavy native operations
+are substantially faster. (The multi-value variant is not benchmarkable — it
+does not compile on the released compiler.)
 
 ## Decision
 
-Ship **both**: the register file (`rf` + `v128r`) is the primary, ergonomic
-64-register interface; the value API (`*_swar`) is retained and documented as the
-hot-path for inner loops where it measurably wins.
+Expose one value-oriented contract: `v128`, `v256`, and `v512` use matching
+signatures and return vector values. Keep the register file internal for
+benchmarking and implementation experiments, and retain `v128_swar` as the
+explicit allocation-free low-level primitive.

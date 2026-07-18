@@ -94,9 +94,6 @@ export namespace i16x4 {
   /** Computes the signed minimum of each 16-bit integer lane. */
   // @ts-expect-error: decorator
   @inline export function min_s(a: v64, b: v64): v64 {
-    if (ASC_FEATURE_SIMD) {
-      return i64x2.extract_lane(i16x8.min_s(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
-    }
     const ax = a ^ 0x8000800080008000;
     const bx = b ^ 0x8000800080008000;
     const d = ((ax | 0x8000800080008000) - (bx & 0x7fff7fff7fff7fff)) ^ ((ax ^ ~bx) & 0x8000800080008000);
@@ -106,9 +103,6 @@ export namespace i16x4 {
   /** Computes the unsigned minimum of each 16-bit integer lane. */
   // @ts-expect-error: decorator
   @inline export function min_u(a: v64, b: v64): v64 {
-    if (ASC_FEATURE_SIMD) {
-      return i64x2.extract_lane(i16x8.min_u(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
-    }
     const d = ((a | 0x8000800080008000) - (b & 0x7fff7fff7fff7fff)) ^ ((a ^ ~b) & 0x8000800080008000);
     const mask = ((((~a & b) | (~(a ^ b) & d)) & 0x8000800080008000) >> 15) * 0xffff;
     return b ^ ((a ^ b) & mask);
@@ -116,9 +110,6 @@ export namespace i16x4 {
   /** Computes the signed maximum of each 16-bit integer lane. */
   // @ts-expect-error: decorator
   @inline export function max_s(a: v64, b: v64): v64 {
-    if (ASC_FEATURE_SIMD) {
-      return i64x2.extract_lane(i16x8.max_s(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
-    }
     const ax = a ^ 0x8000800080008000;
     const bx = b ^ 0x8000800080008000;
     const d = ((ax | 0x8000800080008000) - (bx & 0x7fff7fff7fff7fff)) ^ ((ax ^ ~bx) & 0x8000800080008000);
@@ -128,9 +119,6 @@ export namespace i16x4 {
   /** Computes the unsigned maximum of each 16-bit integer lane. */
   // @ts-expect-error: decorator
   @inline export function max_u(a: v64, b: v64): v64 {
-    if (ASC_FEATURE_SIMD) {
-      return i64x2.extract_lane(i16x8.max_u(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
-    }
     const d = ((a | 0x8000800080008000) - (b & 0x7fff7fff7fff7fff)) ^ ((a ^ ~b) & 0x8000800080008000);
     const mask = ((((~a & b) | (~(a ^ b) & d)) & 0x8000800080008000) >> 15) * 0xffff;
     return a ^ ((a ^ b) & mask);
@@ -255,9 +243,6 @@ export namespace i16x4 {
   /** Computes which 16-bit integer lanes are not equal. */
   // @ts-expect-error: decorator
   @inline export function ne(a: v64, b: v64): v64 {
-    if (ASC_FEATURE_SIMD) {
-      return i64x2.extract_lane(i16x8.ne(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
-    }
     const x = a ^ b;
     const mask = (((x & 0x7fff7fff7fff7fff) + 0x7fff7fff7fff7fff) | x) & 0x8000800080008000;
     return (mask >> 15) * 0xffff;
@@ -276,9 +261,6 @@ export namespace i16x4 {
   /** Computes which 16-bit unsigned integer lanes of the first vector are less than those of the second. */
   // @ts-expect-error: decorator
   @inline export function lt_u(a: v64, b: v64): v64 {
-    if (ASC_FEATURE_SIMD) {
-      return i64x2.extract_lane(i16x8.lt_u(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
-    }
     const d = ((a | 0x8000800080008000) - (b & 0x7fff7fff7fff7fff)) ^ ((a ^ ~b) & 0x8000800080008000);
     return ((((~a & b) | (~(a ^ b) & d)) & 0x8000800080008000) >> 15) * 0xffff;
   }
@@ -305,9 +287,6 @@ export namespace i16x4 {
   /** Computes which 16-bit signed integer lanes of the first vector are greater than those of the second. */
   // @ts-expect-error: decorator
   @inline export function gt_s(a: v64, b: v64): v64 {
-    if (ASC_FEATURE_SIMD) {
-      return i64x2.extract_lane(i16x8.gt_s(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
-    }
     const bx = b ^ 0x8000800080008000;
     const ax = a ^ 0x8000800080008000;
     const d = ((bx | 0x8000800080008000) - (ax & 0x7fff7fff7fff7fff)) ^ ((bx ^ ~ax) & 0x8000800080008000);
@@ -316,9 +295,6 @@ export namespace i16x4 {
   /** Computes which 16-bit unsigned integer lanes of the first vector are greater than those of the second. */
   // @ts-expect-error: decorator
   @inline export function gt_u(a: v64, b: v64): v64 {
-    if (ASC_FEATURE_SIMD) {
-      return i64x2.extract_lane(i16x8.gt_u(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
-    }
     const d = ((b | 0x8000800080008000) - (a & 0x7fff7fff7fff7fff)) ^ ((b ^ ~a) & 0x8000800080008000);
     return ((((~b & a) | (~(b ^ a) & d)) & 0x8000800080008000) >> 15) * 0xffff;
   }

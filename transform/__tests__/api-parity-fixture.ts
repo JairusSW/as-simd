@@ -1,0 +1,68 @@
+import { v256, v512 } from "../../assembly";
+
+export function exerciseV256(ptr: usize): i32 {
+  let a = v256.splat<i16>(1), b = v256.splat<i16>(2), c = v256.splat<i16>(3);
+  a = v256.load(ptr, 0, 1);
+  a = v256.loadPartial(ptr, 7, 0, 1, -1);
+  v256.store(ptr, a, 0, 1);
+  v256.storePartial(ptr, a, 7, 0, 1);
+  a = v256.load_ext<i8>(ptr); a = v256.load_zero<i32>(ptr); a = v256.load_splat<i16>(ptr);
+  a = v256.load8_splat(ptr); a = v256.load16_splat(ptr); a = v256.load32_splat(ptr); a = v256.load64_splat(ptr);
+  a = v256.load8x8_s(ptr); a = v256.load8x8_u(ptr); a = v256.load16x4_s(ptr); a = v256.load16x4_u(ptr);
+  a = v256.load32x2_s(ptr); a = v256.load32x2_u(ptr); a = v256.load32_zero(ptr); a = v256.load64_zero(ptr);
+  a = v256.load_lane<i16>(ptr, a, 1); v256.store_lane<i16>(ptr, a, 1);
+  a = v256.load8_lane(ptr, a, 1); a = v256.load16_lane(ptr, a, 1); a = v256.load32_lane(ptr, a, 1); a = v256.load64_lane(ptr, a, 1);
+  v256.store8_lane(ptr, a, 1); v256.store16_lane(ptr, a, 1); v256.store32_lane(ptr, a, 1); v256.store64_lane(ptr, a, 1);
+  a = v256.shuffle<i16>(a, b, 0, 1, 2, 3); a = v256.swizzle(a, b);
+  a = v256.add<i16>(a,b); a = v256.sub<i16>(a,b); a = v256.mul<i16>(a,b); a = v256.div<f32>(a,b);
+  a = v256.neg<i16>(a); a = v256.abs<i16>(a); a = v256.add_sat<i16>(a,b); a = v256.sub_sat<i16>(a,b);
+  a = v256.avgr<u16>(a,b); a = v256.min<i16>(a,b); a = v256.max<i16>(a,b); a = v256.pmin<f32>(a,b); a = v256.pmax<f32>(a,b);
+  a = v256.dot<i16>(a,b); a = v256.sqrt<f32>(a); a = v256.ceil<f32>(a); a = v256.floor<f32>(a); a = v256.trunc<f32>(a); a = v256.nearest<f32>(a);
+  a = v256.shl<i16>(a,3); a = v256.shr<i16>(a,3); a = v256.and(a,b); a = v256.or(a,b); a = v256.xor(a,b); a = v256.andnot(a,b); a = v256.not(a);
+  a = v256.bitselect(a,b,c); a = v256.popcnt<i8>(a);
+  a = v256.eq<i16>(a,b); a = v256.ne<i16>(a,b); a = v256.lt<i16>(a,b); a = v256.le<i16>(a,b); a = v256.gt<i16>(a,b); a = v256.ge<i16>(a,b);
+  a = v256.convert<i32>(a); a = v256.convert_low<i32>(a); a = v256.trunc_sat<i32>(a); a = v256.trunc_sat_zero<i32>(a);
+  a = v256.narrow<i16>(a,b); a = v256.extend_low<i8>(a); a = v256.extend_high<i8>(a); a = v256.extadd_pairwise<i8>(a);
+  a = v256.extmul_low<i8>(a,b); a = v256.extmul_high<i8>(a,b); a = v256.demote_zero(a); a = v256.promote_low(a); a = v256.q15mulr_sat<i16>(a,b);
+  a = v256.relaxed_swizzle(a,b); a = v256.relaxed_trunc<i32>(a); a = v256.relaxed_trunc_zero<i32>(a);
+  a = v256.relaxed_madd<f32>(a,b,c); a = v256.relaxed_nmadd<f32>(a,b,c); a = v256.relaxed_laneselect<i16>(a,b,c);
+  a = v256.relaxed_min<f32>(a,b); a = v256.relaxed_max<f32>(a,b); a = v256.relaxed_q15mulr<i16>(a,b);
+  a = v256.relaxed_dot<i16>(a,b); a = v256.relaxed_dot_add<i8>(a,b,c);
+  a = v256.replace_lane<i16>(a, 1, 7);
+  const reductions = (v256.any_true(a) as i32) + (v256.all_true<i16>(a) as i32) + (v256.bitmask<i16>(a) as i32);
+  return v256.extract_lane<i16>(a, 1) + reductions;
+}
+
+export function exerciseV512(ptr: usize): i32 {
+  let a = v512.splat<i16>(1), b = v512.splat<i16>(2), c = v512.splat<i16>(3);
+  a = v512.load(ptr, 0, 1);
+  a = v512.loadPartial(ptr, 7, 0, 1, -1);
+  v512.store(ptr, a, 0, 1);
+  v512.storePartial(ptr, a, 7, 0, 1);
+  a = v512.load_ext<i8>(ptr); a = v512.load_zero<i32>(ptr); a = v512.load_splat<i16>(ptr);
+  a = v512.load8_splat(ptr); a = v512.load16_splat(ptr); a = v512.load32_splat(ptr); a = v512.load64_splat(ptr);
+  a = v512.load8x8_s(ptr); a = v512.load8x8_u(ptr); a = v512.load16x4_s(ptr); a = v512.load16x4_u(ptr);
+  a = v512.load32x2_s(ptr); a = v512.load32x2_u(ptr); a = v512.load32_zero(ptr); a = v512.load64_zero(ptr);
+  a = v512.load_lane<i16>(ptr, a, 1); v512.store_lane<i16>(ptr, a, 1);
+  a = v512.load8_lane(ptr, a, 1); a = v512.load16_lane(ptr, a, 1); a = v512.load32_lane(ptr, a, 1); a = v512.load64_lane(ptr, a, 1);
+  v512.store8_lane(ptr, a, 1); v512.store16_lane(ptr, a, 1); v512.store32_lane(ptr, a, 1); v512.store64_lane(ptr, a, 1);
+  a = v512.shuffle<i16>(a, b, 0, 1, 2, 3); a = v512.swizzle(a, b);
+  a = v512.add<i16>(a,b); a = v512.sub<i16>(a,b); a = v512.mul<i16>(a,b); a = v512.div<f32>(a,b);
+  a = v512.neg<i16>(a); a = v512.abs<i16>(a); a = v512.add_sat<i16>(a,b); a = v512.sub_sat<i16>(a,b);
+  a = v512.avgr<u16>(a,b); a = v512.min<i16>(a,b); a = v512.max<i16>(a,b); a = v512.pmin<f32>(a,b); a = v512.pmax<f32>(a,b);
+  a = v512.dot<i16>(a,b); a = v512.sqrt<f32>(a); a = v512.ceil<f32>(a); a = v512.floor<f32>(a); a = v512.trunc<f32>(a); a = v512.nearest<f32>(a);
+  a = v512.shl<i16>(a,3); a = v512.shr<i16>(a,3); a = v512.and(a,b); a = v512.or(a,b); a = v512.xor(a,b); a = v512.andnot(a,b); a = v512.not(a);
+  a = v512.bitselect(a,b,c); a = v512.popcnt<i8>(a);
+  a = v512.eq<i16>(a,b); a = v512.ne<i16>(a,b); a = v512.lt<i16>(a,b); a = v512.le<i16>(a,b); a = v512.gt<i16>(a,b); a = v512.ge<i16>(a,b);
+  a = v512.convert<i32>(a); a = v512.convert_low<i32>(a); a = v512.trunc_sat<i32>(a); a = v512.trunc_sat_zero<i32>(a);
+  a = v512.narrow<i16>(a,b); a = v512.extend_low<i8>(a); a = v512.extend_high<i8>(a); a = v512.extadd_pairwise<i8>(a);
+  a = v512.extmul_low<i8>(a,b); a = v512.extmul_high<i8>(a,b); a = v512.demote_zero(a); a = v512.promote_low(a); a = v512.q15mulr_sat<i16>(a,b);
+  a = v512.relaxed_swizzle(a,b); a = v512.relaxed_trunc<i32>(a); a = v512.relaxed_trunc_zero<i32>(a);
+  a = v512.relaxed_madd<f32>(a,b,c); a = v512.relaxed_nmadd<f32>(a,b,c); a = v512.relaxed_laneselect<i16>(a,b,c);
+  a = v512.relaxed_min<f32>(a,b); a = v512.relaxed_max<f32>(a,b); a = v512.relaxed_q15mulr<i16>(a,b);
+  a = v512.relaxed_dot<i16>(a,b); a = v512.relaxed_dot_add<i8>(a,b,c);
+  a = v512.replace_lane<i16>(a, 1, 7);
+  const reductions = (v512.any_true(a) as i32) + (v512.all_true<i16>(a) as i32) + (v512.bitmask<i16>(a) as i32);
+  return v512.extract_lane<i16>(a, 1) + reductions;
+}
+

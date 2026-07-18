@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1897" viewBox="0 0 1280 1897" role="img" aria-labelledby="title desc">
+<title id="title">Register-backed v128 throughput on V8</title><desc id="desc">Strict SWAR and native SIMD throughput for each v128 register operation in millions of operations per second.</desc>
+<rect width="1280" height="1897" fill="transparent"/>
+<text x="640" y="40" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="25" font-weight="700" fill="#374151">Register-backed v128 Throughput on V8</text>
+<text x="640" y="66" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="600" fill="#6b7280">Sat Jul 18 2026 - v0.0.0 - 9103aa4 - main</text>
+<text x="640" y="90" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="12" fill="#6b7280">Node v24.18.0 / V8 13.6.233.17-node.50 · AMD Ryzen 7 7800X3D 8-Core Processor · best of 7 measured rounds</text>
+<rect x="520" y="108" width="13" height="13" rx="2" fill="#44AF69"/><text x="540" y="119" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="600" fill="#374151">strict SWAR</text>
+<rect x="665" y="108" width="13" height="13" rx="2" fill="#2B9EB3"/><text x="685" y="119" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="600" fill="#374151">native SIMD</text>
+<line x1="245" y1="137" x2="245" y2="1822" stroke="#d1d5db" opacity="0.65"/><text x="245" y="130" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="12" fill="#6b7280">0</text>
+<line x1="427" y1="137" x2="427" y2="1822" stroke="#d1d5db" opacity="0.65"/><text x="427" y="130" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="12" fill="#6b7280">1000</text>
+<line x1="609" y1="137" x2="609" y2="1822" stroke="#d1d5db" opacity="0.65"/><text x="609" y="130" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="12" fill="#6b7280">2000</text>
+<line x1="791" y1="137" x2="791" y2="1822" stroke="#d1d5db" opacity="0.65"/><text x="791" y="130" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="12" fill="#6b7280">3000</text>
+<line x1="973" y1="137" x2="973" y2="1822" stroke="#d1d5db" opacity="0.65"/><text x="973" y="130" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="12" fill="#6b7280">4000</text>
+<line x1="1155" y1="137" x2="1155" y2="1822" stroke="#d1d5db" opacity="0.65"/><text x="1155" y="130" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="12" fill="#6b7280">5000</text>
+<text x="229" y="170" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.add&lt;i8&gt;</text>
+<rect x="245" y="150" width="160.1239042290171" height="12" rx="2" fill="#44AF69"/><rect x="245" y="165" width="161.50194680835887" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="170" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">1.01×</text>
+<text x="229" y="213" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.min&lt;i8&gt;</text>
+<rect x="245" y="193" width="51.56884394623478" height="12" rx="2" fill="#44AF69"/><rect x="245" y="208" width="85.9025532292003" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="213" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">1.67×</text>
+<text x="229" y="256" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.mul&lt;i8&gt;</text>
+<rect x="245" y="236" width="21.19934642337222" height="12" rx="2" fill="#44AF69"/><rect x="245" y="251" width="45.622637451351636" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="256" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">2.15×</text>
+<text x="229" y="299" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.add_sat&lt;i16&gt;</text>
+<rect x="245" y="279" width="52.66158752406312" height="12" rx="2" fill="#44AF69"/><rect x="245" y="294" width="77.33261127902176" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="299" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">1.47×</text>
+<text x="229" y="342" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.xor</text>
+<rect x="245" y="322" width="270.17414059386283" height="12" rx="2" fill="#44AF69"/><rect x="245" y="337" width="276.2280004128776" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="342" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">1.02×</text>
+<text x="229" y="385" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.bitselect</text>
+<rect x="245" y="365" width="199.8975799487572" height="12" rx="2" fill="#44AF69"/><rect x="245" y="380" width="200.32189086253146" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="385" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">1.00×</text>
+<text x="229" y="428" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.bitmask&lt;i8&gt;</text>
+<rect x="245" y="408" width="220.9109444865884" height="12" rx="2" fill="#44AF69"/><rect x="245" y="423" width="460.4960199984696" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="428" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">2.08×</text>
+<text x="229" y="471" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.max&lt;i16&gt;</text>
+<rect x="245" y="451" width="51.160589929386106" height="12" rx="2" fill="#44AF69"/><rect x="245" y="466" width="85.1374162337737" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="471" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">1.66×</text>
+<text x="229" y="514" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.sub_sat&lt;i8&gt;</text>
+<rect x="245" y="494" width="34.91270983294129" height="12" rx="2" fill="#44AF69"/><rect x="245" y="509" width="77.73026764303467" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="514" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">2.23×</text>
+<text x="229" y="557" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.dot&lt;i16&gt;</text>
+<rect x="245" y="537" width="44.4544824366551" height="12" rx="2" fill="#44AF69"/><rect x="245" y="552" width="71.50373266507984" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="557" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">1.61×</text>
+<text x="229" y="600" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.lt&lt;i8&gt;</text>
+<rect x="245" y="580" width="54.57827375367435" height="12" rx="2" fill="#44AF69"/><rect x="245" y="595" width="85.0635628125392" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="600" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">1.56×</text>
+<text x="229" y="643" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.all_true&lt;i8&gt;</text>
+<rect x="245" y="623" width="229.66284988881108" height="12" rx="2" fill="#44AF69"/><rect x="245" y="638" width="347.1190454301792" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="643" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">1.51×</text>
+<text x="229" y="686" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.swizzle</text>
+<rect x="245" y="666" width="14.217836578051163" height="12" rx="2" fill="#44AF69"/><rect x="245" y="681" width="77.7257281128376" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="686" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">5.47×</text>
+<text x="229" y="729" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.narrow&lt;i16&gt;</text>
+<rect x="245" y="709" width="25.46090296486244" height="12" rx="2" fill="#44AF69"/><rect x="245" y="724" width="77.95197045021291" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="729" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">3.06×</text>
+<text x="229" y="772" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.extract_lane</text>
+<rect x="245" y="752" width="430.65162974718214" height="12" rx="2" fill="#44AF69"/><rect x="245" y="767" width="435.05048796766255" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="772" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">1.01×</text>
+<text x="229" y="815" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.replace_lane</text>
+<rect x="245" y="795" width="470.45880590313186" height="12" rx="2" fill="#44AF69"/><rect x="245" y="810" width="722.9991594140342" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="815" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">1.54×</text>
+<text x="229" y="858" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.replace_lane.inplace</text>
+<rect x="245" y="838" width="840.7064520987992" height="12" rx="2" fill="#44AF69"/><rect x="245" y="853" width="842.2112580507974" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="858" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">1.00×</text>
+<text x="229" y="901" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.load</text>
+<rect x="245" y="881" width="415.7437434754131" height="12" rx="2" fill="#44AF69"/><rect x="245" y="896" width="411.3099695206781" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="901" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#44AF69">0.99×</text>
+<text x="229" y="944" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.store</text>
+<rect x="245" y="924" width="531.5138556220555" height="12" rx="2" fill="#44AF69"/><rect x="245" y="939" width="529.4537753397025" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="944" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#44AF69">1.00×</text>
+<text x="229" y="987" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.abs&lt;i8&gt;</text>
+<rect x="245" y="967" width="64.9557604874102" height="12" rx="2" fill="#44AF69"/><rect x="245" y="982" width="77.89091099732809" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="987" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">1.20×</text>
+<text x="229" y="1030" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.sqrt&lt;f32&gt;</text>
+<rect x="245" y="1010" width="33.85055661226431" height="12" rx="2" fill="#44AF69"/><rect x="245" y="1025" width="36.25184595595147" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="1030" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">1.07×</text>
+<text x="229" y="1073" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.extend_low&lt;i8&gt;</text>
+<rect x="245" y="1053" width="55.25460685283997" height="12" rx="2" fill="#44AF69"/><rect x="245" y="1068" width="77.5309708538972" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="1073" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">1.40×</text>
+<text x="229" y="1116" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.extadd&lt;i8&gt;</text>
+<rect x="245" y="1096" width="34.88676226597721" height="12" rx="2" fill="#44AF69"/><rect x="245" y="1111" width="71.46419133555509" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="1116" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">2.05×</text>
+<text x="229" y="1159" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.extmul&lt;i8&gt;</text>
+<rect x="245" y="1139" width="19.113807566038076" height="12" rx="2" fill="#44AF69"/><rect x="245" y="1154" width="61.04552195879461" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="1159" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">3.19×</text>
+<text x="229" y="1202" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.q15mulr</text>
+<rect x="245" y="1182" width="29.09857879024088" height="12" rx="2" fill="#44AF69"/><rect x="245" y="1197" width="61.100480075207486" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="1202" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">2.10×</text>
+<text x="229" y="1245" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.trunc_sat&lt;i32&gt;</text>
+<rect x="245" y="1225" width="42.07003041986496" height="12" rx="2" fill="#44AF69"/><rect x="245" y="1240" width="53.55073755842375" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="1245" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">1.27×</text>
+<text x="229" y="1288" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.convert&lt;i32&gt;</text>
+<rect x="245" y="1268" width="69.90109890673398" height="12" rx="2" fill="#44AF69"/><rect x="245" y="1283" width="71.78327131617203" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="1288" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">1.03×</text>
+<text x="229" y="1331" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.convert_low&lt;i32&gt;</text>
+<rect x="245" y="1311" width="65.49536326417268" height="12" rx="2" fill="#44AF69"/><rect x="245" y="1326" width="71.80719373937882" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="1331" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">1.10×</text>
+<text x="229" y="1374" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.trunc_zero&lt;i32&gt;</text>
+<rect x="245" y="1354" width="44.953740871662035" height="12" rx="2" fill="#44AF69"/><rect x="245" y="1369" width="50.59809074684267" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="1374" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">1.13×</text>
+<text x="229" y="1417" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.demote&lt;f64&gt;</text>
+<rect x="245" y="1397" width="53.373101833532814" height="12" rx="2" fill="#44AF69"/><rect x="245" y="1412" width="71.82385633333479" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="1417" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">1.35×</text>
+<text x="229" y="1460" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.promote&lt;f32&gt;</text>
+<rect x="245" y="1440" width="65.82184053056949" height="12" rx="2" fill="#44AF69"/><rect x="245" y="1455" width="72.0271011861995" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="1460" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">1.09×</text>
+<text x="229" y="1503" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.any_true</text>
+<rect x="245" y="1483" width="440.5580926978125" height="12" rx="2" fill="#44AF69"/><rect x="245" y="1498" width="448.362828997374" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="1503" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">1.02×</text>
+<text x="229" y="1546" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.any_true.zero</text>
+<rect x="245" y="1526" width="451.32452589214313" height="12" rx="2" fill="#44AF69"/><rect x="245" y="1541" width="452.5317222870451" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="1546" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">1.00×</text>
+<text x="229" y="1589" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.popcnt&lt;i8&gt;</text>
+<rect x="245" y="1569" width="92.65608859958002" height="12" rx="2" fill="#44AF69"/><rect x="245" y="1584" width="92.79546464716054" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="1589" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">1.00×</text>
+<text x="229" y="1632" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.load_ext&lt;i8&gt;</text>
+<rect x="245" y="1612" width="70.02114638619565" height="12" rx="2" fill="#44AF69"/><rect x="245" y="1627" width="828.5962214188453" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="1632" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">11.83×</text>
+<text x="229" y="1675" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.load_zero&lt;i32&gt;</text>
+<rect x="245" y="1655" width="417.13479733879933" height="12" rx="2" fill="#44AF69"/><rect x="245" y="1670" width="824.9837722982957" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="1675" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">1.98×</text>
+<text x="229" y="1718" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.load_splat&lt;i8&gt;</text>
+<rect x="245" y="1698" width="326.87544788228604" height="12" rx="2" fill="#44AF69"/><rect x="245" y="1713" width="831.9961965875282" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="1718" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">2.55×</text>
+<text x="229" y="1761" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.load_lane&lt;i16&gt;</text>
+<rect x="245" y="1741" width="814.1865292395887" height="12" rx="2" fill="#44AF69"/><rect x="245" y="1756" width="817.8966574090582" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="1761" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#2B9EB3">1.00×</text>
+<text x="229" y="1804" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">v128r.store_lane&lt;i16&gt;</text>
+<rect x="245" y="1784" width="813.2101066832056" height="12" rx="2" fill="#44AF69"/><rect x="245" y="1799" width="809.1024919458146" height="12" rx="2" fill="#2B9EB3"/>
+<text x="1171" y="1804" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="#44AF69">0.99×</text>
+<text x="640" y="1873" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="12" fill="#6b7280">Million operations/s · higher is better · scalar dispatch is retained when vector-domain transitions lose</text></svg>

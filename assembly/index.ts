@@ -1,4 +1,4 @@
-export type v32 = u32;
+export { v32 } from "./v32/v32";
 export type v16 = u16;
 export type v8 = u8;
 export { v64 } from "./v64/v64";
@@ -10,5 +10,9 @@ export { i16x8_swar } from "./v128/i16x8_swar";
 export { i32x4_swar } from "./v128/i32x4_swar";
 export { i64x2_swar } from "./v128/i64x2_swar";
 export { v128_swar } from "./v128/v128_swar";
-export { rf, RF_REGS, RF_SLOT_BYTES } from "./v128/regfile";
-export { v128r } from "./v128/v128r";
+export { V128Fallback } from "./v128/v128_fallback";
+export { V128Fallback as v128 } from "./v128/v128_fallback";
+export { v256 } from "./v256/value";
+export { i8x32, i16x16, i32x8, i64x4, f32x8, f64x4 } from "./v256/lanes";
+export { v512 } from "./v512/value";
+export { i8x64, i16x32, i32x16, i64x8, f32x16, f64x8 } from "./v512/lanes";

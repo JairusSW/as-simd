@@ -1,5 +1,56 @@
 # API
 
+## Width-generic APIs
+
+`v32`, `v64`, `v128`, `v256`, and `v512` are value APIs. `v128`, `v256`, and
+`v512` intentionally expose the same 95 public methods with matching argument
+order and generic signatures. A method that returns `v128` at 128-bit width
+returns `v256` or `v512` at the corresponding wider width. Every generic method
+takes a lane type such as `i8`, `u16`, `i32`, or `f32` where supported.
+
+`v256` and `v512` are immutable value types that store their complete width in
+one managed object. Destination-register variants such as `v512r.add(dst, a,
+b)` are internal benchmarking and implementation machinery and are not
+exported from the package root.
+
+The shared width API includes:
+
+- lane splat/extract/replace and memory load/store
+- add, subtract, multiply, minimum, maximum, absolute value, and negation
+- saturating add/subtract and unsigned average
+- lane shifts, comparisons, bitwise operations, and boolean reductions
+
+`v128.bitmask<T>` returns `i32`, `v256.bitmask<T>` returns `u32`, and
+`v512.bitmask<T>` returns `u64`, providing enough bits for every byte lane.
+
+## Lane-specific APIs
+
+The six native v128 lane families have width-scaled public counterparts:
+
+| v128 | v256 | v512 |
+|---|---|---|
+| `i8x16` | `i8x32` | `i8x64` |
+| `i16x8` | `i16x16` | `i16x32` |
+| `i32x4` | `i32x8` | `i32x16` |
+| `i64x2` | `i64x4` | `i64x8` |
+| `f32x4` | `f32x8` | `f32x16` |
+| `f64x2` | `f64x4` | `f64x8` |
+
+Every wider namespace preserves the corresponding native method set and
+argument order. Embedded source widths scale as well: for example,
+`i64x4.extend_low_i32x8_s` and `i64x8.extend_low_i32x16_s` correspond to
+`i64x2.extend_low_i32x4_s`. Shuffles accept one lane index per result lane.
+Their `bitmask` results widen to `u32` for v256 and `u64` for v512.
+
+```ts
+import { v512 } from "as-simd";
+
+const a = v512.splat<i8>(10);
+const b = v512.splat<i8>(20);
+const sum = v512.add<i8>(a, b);
+const lane63 = v512.extract_lane<i8>(sum, 63); // 30
+```
+
 This file records the public `v64` namespace surface so the lane families stay aligned intentionally.
 
 ## Shared `v64` method surface

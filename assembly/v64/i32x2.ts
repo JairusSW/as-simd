@@ -57,18 +57,12 @@ export namespace i32x2 {
   /** Multiplies each 32-bit integer lane. */
   // @ts-expect-error: decorator
   @inline export function mul(a: v64, b: v64): v64 {
-    if (ASC_FEATURE_SIMD) {
-      return i64x2.extract_lane(i32x4.mul(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
-    }
     return ((((a & 0xffffffff) * (b & 0xffffffff)) & 0xffffffff) as v64)
       | ((((((a >> 32) & 0xffffffff) * ((b >> 32) & 0xffffffff)) & 0xffffffff) as v64) << 32);
   }
   /** Computes the signed minimum of each 32-bit integer lane. */
   // @ts-expect-error: decorator
   @inline export function min_s(a: v64, b: v64): v64 {
-    if (ASC_FEATURE_SIMD) {
-      return i64x2.extract_lane(i32x4.min_s(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
-    }
     const a0 = (a & 0xffffffff) as i32;
     const a1 = ((a >> 32) & 0xffffffff) as i32;
     const b0 = (b & 0xffffffff) as i32;
@@ -79,9 +73,6 @@ export namespace i32x2 {
   /** Computes the unsigned minimum of each 32-bit integer lane. */
   // @ts-expect-error: decorator
   @inline export function min_u(a: v64, b: v64): v64 {
-    if (ASC_FEATURE_SIMD) {
-      return i64x2.extract_lane(i32x4.min_u(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
-    }
     const a0 = (a & 0xffffffff) as u32;
     const a1 = ((a >> 32) & 0xffffffff) as u32;
     const b0 = (b & 0xffffffff) as u32;
@@ -118,9 +109,6 @@ export namespace i32x2 {
   /** Computes the dot product of two 16-bit integer lanes each, yielding 32-bit integer lanes. */
   // @ts-expect-error: decorator
   @inline export function dot_i16x4_s(a: v64, b: v64): v64 {
-    if (ASC_FEATURE_SIMD) {
-      return i64x2.extract_lane(i32x4.dot_i16x8_s(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
-    }
     const a0 = ((a << 48) as i64 >> 48) as i32;
     const a1 = ((a << 32) as i64 >> 48) as i32;
     const a2 = ((a << 16) as i64 >> 48) as i32;
@@ -134,9 +122,6 @@ export namespace i32x2 {
   /** Computes the absolute value of each 32-bit integer lane. */
   // @ts-expect-error: decorator
   @inline export function abs(a: v64): v64 {
-    if (ASC_FEATURE_SIMD) {
-      return i64x2.extract_lane(i32x4.abs(i64x2(a as i64, 0)), 0) as v64;
-    }
     const mask = ((a & 0x8000000080000000) >> 31) * 0xffffffff;
     const x = a ^ mask;
     return ((x | 0x8000000080000000) - (mask & 0x7fffffff7fffffff)) ^ ((x ^ ~mask) & 0x8000000080000000);
@@ -170,7 +155,8 @@ export namespace i32x2 {
   @inline export function shr_u(a: v64, b: i32): v64 {
     const shift = b & 31;
     if (shift == 0) return a;
-    return (a & (((0xffffffff << shift) as v64) * 0x0000000100000001)) >> shift;
+    const keep = ((0xffffffff as v64) >> shift) * 0x0000000100000001;
+    return (a >> shift) & keep;
   }
   /** Reduces a vector to a scalar indicating whether all 32-bit integer lanes are considered `true`. */
   // @ts-expect-error: decorator
@@ -227,9 +213,6 @@ export namespace i32x2 {
   /** Computes which 32-bit unsigned integer lanes are less than. */
   // @ts-expect-error: decorator
   @inline export function lt_u(a: v64, b: v64): v64 {
-    if (ASC_FEATURE_SIMD) {
-      return i64x2.extract_lane(i32x4.lt_u(i64x2(a as i64, 0), i64x2(b as i64, 0)), 0) as v64;
-    }
     const d = ((a | 0x8000000080000000) - (b & 0x7fffffff7fffffff)) ^ ((a ^ ~b) & 0x8000000080000000);
     return ((((~a & b) | (~(a ^ b) & d)) & 0x8000000080000000) >> 31) * 0xffffffff;
   }

@@ -1,3 +1,6 @@
+import { i32x2 } from "../v64/i32x2";
+import { i32x2_scalar } from "../scalar/i32x2";
+
 let __as_simd_i32x4_hi: u64 = 0;
 
 export function i32x4_swar(a: i32, b: i32, c: i32, d: i32): u64 {
@@ -16,6 +19,30 @@ export namespace i32x4_swar {
   @inline export function unpack_hi(x: u64): i32 { return ((x >> 32) as u32) as i32; }
   // @ts-expect-error: decorator
   @inline export function take_hi(): u64 { return __as_simd_i32x4_hi; }
+  // @ts-expect-error: decorator
+  @inline export function relaxed_dot_i8x16_i7x16_add_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64, cLo: u64, cHi: u64): u64 {
+    const p0 = (((aLo as u8) as i8 as i32) * ((bLo as u8) as i8 as i32)
+      + ((((aLo >> 8) as u8) as i8 as i32) * (((bLo >> 8) as u8) as i8 as i32))
+      + ((((aLo >> 16) as u8) as i8 as i32) * (((bLo >> 16) as u8) as i8 as i32))
+      + ((((aLo >> 24) as u8) as i8 as i32) * (((bLo >> 24) as u8) as i8 as i32))
+      + unpack_lo(cLo)) as i32;
+    const p1 = ((((aLo >> 32) as u8) as i8 as i32) * (((bLo >> 32) as u8) as i8 as i32)
+      + ((((aLo >> 40) as u8) as i8 as i32) * (((bLo >> 40) as u8) as i8 as i32))
+      + ((((aLo >> 48) as u8) as i8 as i32) * (((bLo >> 48) as u8) as i8 as i32))
+      + ((((aLo >> 56) as u8) as i8 as i32) * (((bLo >> 56) as u8) as i8 as i32))
+      + unpack_hi(cLo)) as i32;
+    const p2 = (((aHi as u8) as i8 as i32) * ((bHi as u8) as i8 as i32)
+      + ((((aHi >> 8) as u8) as i8 as i32) * (((bHi >> 8) as u8) as i8 as i32))
+      + ((((aHi >> 16) as u8) as i8 as i32) * (((bHi >> 16) as u8) as i8 as i32))
+      + ((((aHi >> 24) as u8) as i8 as i32) * (((bHi >> 24) as u8) as i8 as i32))
+      + unpack_lo(cHi)) as i32;
+    const p3 = ((((aHi >> 32) as u8) as i8 as i32) * (((bHi >> 32) as u8) as i8 as i32)
+      + ((((aHi >> 40) as u8) as i8 as i32) * (((bHi >> 40) as u8) as i8 as i32))
+      + ((((aHi >> 48) as u8) as i8 as i32) * (((bHi >> 48) as u8) as i8 as i32))
+      + ((((aHi >> 56) as u8) as i8 as i32) * (((bHi >> 56) as u8) as i8 as i32))
+      + unpack_hi(cHi)) as i32;
+    return set_pair(pack2(p0, p1), pack2(p2, p3));
+  }
   // @ts-expect-error: decorator
   @inline function set_pair(lo: u64, hi: u64): u64 {
     __as_simd_i32x4_hi = hi;
@@ -55,11 +82,14 @@ export namespace i32x4_swar {
   }
 
   // @ts-expect-error: decorator
-  @inline export function splat(x: i32): u64 { const p = pack2(x, x); return set_pair(p, p); }
+  @inline export function splat(x: i32): u64 { const p = i32x2.splat(x); return set_pair(p, p); }
   // @ts-expect-error: decorator
   @inline export function extract_lane(lo: u64, hi: u64, idx: u8): i32 { return lane(lo, hi, idx); }
   // @ts-expect-error: decorator
-  @inline export function replace_lane(lo: u64, hi: u64, idx: u8, value: i32): u64 { return rep(lo, hi, idx, value); }
+  @inline export function replace_lane(lo: u64, hi: u64, idx: u8, value: i32): u64 {
+    const i = idx & 3;
+    return i < 2 ? set_pair(i32x2.replace_lane(lo, i, value), hi) : set_pair(lo, i32x2.replace_lane(hi, i - 2, value));
+  }
   // @ts-expect-error: decorator
   @inline export function load_lo(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): u64 {
     const lo = pack2(load<i32>(ptr, immOffset, immAlign), load<i32>(ptr, immOffset + 4, immAlign));
@@ -96,114 +126,78 @@ export namespace i32x4_swar {
   @inline export function extract_lane_pair(lo: u64, hi: u64, idx: u8): i32 { return extract_lane(lo, hi, idx); }
 
   // @ts-expect-error: decorator
-  @inline export function add(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(pack2(unpack_lo(aLo) + unpack_lo(bLo), unpack_hi(aLo) + unpack_hi(bLo)), pack2(unpack_lo(aHi) + unpack_lo(bHi), unpack_hi(aHi) + unpack_hi(bHi))); }
+  @inline export function add(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(i32x2.add(aLo, bLo), i32x2.add(aHi, bHi)); }
   // @ts-expect-error: decorator
-  @inline export function sub(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(pack2(unpack_lo(aLo) - unpack_lo(bLo), unpack_hi(aLo) - unpack_hi(bLo)), pack2(unpack_lo(aHi) - unpack_lo(bHi), unpack_hi(aHi) - unpack_hi(bHi))); }
+  @inline export function sub(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(i32x2.sub(aLo, bLo), i32x2.sub(aHi, bHi)); }
   // @ts-expect-error: decorator
-  @inline export function mul(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(pack2(unpack_lo(aLo) * unpack_lo(bLo), unpack_hi(aLo) * unpack_hi(bLo)), pack2(unpack_lo(aHi) * unpack_lo(bHi), unpack_hi(aHi) * unpack_hi(bHi))); }
-  // @ts-expect-error: decorator
-  @inline export function min_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(pack2(min<i32>(unpack_lo(aLo), unpack_lo(bLo)), min<i32>(unpack_hi(aLo), unpack_hi(bLo))), pack2(min<i32>(unpack_lo(aHi), unpack_lo(bHi)), min<i32>(unpack_hi(aHi), unpack_hi(bHi)))); }
-  // @ts-expect-error: decorator
-  @inline export function min_u(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-    const l0 = (unpack_lo(aLo) as u32) < (unpack_lo(bLo) as u32) ? unpack_lo(aLo) : unpack_lo(bLo);
-    const l1 = (unpack_hi(aLo) as u32) < (unpack_hi(bLo) as u32) ? unpack_hi(aLo) : unpack_hi(bLo);
-    const h0 = (unpack_lo(aHi) as u32) < (unpack_lo(bHi) as u32) ? unpack_lo(aHi) : unpack_lo(bHi);
-    const h1 = (unpack_hi(aHi) as u32) < (unpack_hi(bHi) as u32) ? unpack_hi(aHi) : unpack_hi(bHi);
-    return set_pair(pack2(l0, l1), pack2(h0, h1));
+  @inline export function mul(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
+    return set_pair(i32x2_scalar.mul(aLo, bLo), i32x2_scalar.mul(aHi, bHi));
   }
   // @ts-expect-error: decorator
-  @inline export function max_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(pack2(max<i32>(unpack_lo(aLo), unpack_lo(bLo)), max<i32>(unpack_hi(aLo), unpack_hi(bLo))), pack2(max<i32>(unpack_lo(aHi), unpack_lo(bHi)), max<i32>(unpack_hi(aHi), unpack_hi(bHi)))); }
+  @inline export function min_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(i32x2_scalar.min_s(aLo, bLo), i32x2_scalar.min_s(aHi, bHi)); }
+  // @ts-expect-error: decorator
+  @inline export function min_u(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
+    return set_pair(i32x2_scalar.min_u(aLo, bLo), i32x2_scalar.min_u(aHi, bHi));
+  }
+  // @ts-expect-error: decorator
+  @inline export function max_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(i32x2_scalar.max_s(aLo, bLo), i32x2_scalar.max_s(aHi, bHi)); }
   // @ts-expect-error: decorator
   @inline export function max_u(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-    const l0 = (unpack_lo(aLo) as u32) > (unpack_lo(bLo) as u32) ? unpack_lo(aLo) : unpack_lo(bLo);
-    const l1 = (unpack_hi(aLo) as u32) > (unpack_hi(bLo) as u32) ? unpack_hi(aLo) : unpack_hi(bLo);
-    const h0 = (unpack_lo(aHi) as u32) > (unpack_lo(bHi) as u32) ? unpack_lo(aHi) : unpack_lo(bHi);
-    const h1 = (unpack_hi(aHi) as u32) > (unpack_hi(bHi) as u32) ? unpack_hi(aHi) : unpack_hi(bHi);
-    return set_pair(pack2(l0, l1), pack2(h0, h1));
+    return set_pair(i32x2_scalar.max_u(aLo, bLo), i32x2_scalar.max_u(aHi, bHi));
   }
   // @ts-expect-error: decorator
   @inline export function dot_i16x8_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-    const r0 = i16_lane_s(aLo, aHi, 0) as i32 * i16_lane_s(bLo, bHi, 0) as i32 + i16_lane_s(aLo, aHi, 1) as i32 * i16_lane_s(bLo, bHi, 1) as i32;
-    const r1 = i16_lane_s(aLo, aHi, 2) as i32 * i16_lane_s(bLo, bHi, 2) as i32 + i16_lane_s(aLo, aHi, 3) as i32 * i16_lane_s(bLo, bHi, 3) as i32;
-    const r2 = i16_lane_s(aLo, aHi, 4) as i32 * i16_lane_s(bLo, bHi, 4) as i32 + i16_lane_s(aLo, aHi, 5) as i32 * i16_lane_s(bLo, bHi, 5) as i32;
-    const r3 = i16_lane_s(aLo, aHi, 6) as i32 * i16_lane_s(bLo, bHi, 6) as i32 + i16_lane_s(aLo, aHi, 7) as i32 * i16_lane_s(bLo, bHi, 7) as i32;
-    return set_pair(pack2(r0, r1), pack2(r2, r3));
+    return set_pair(i32x2.dot_i16x4_s(aLo, bLo), i32x2.dot_i16x4_s(aHi, bHi));
   }
   // @ts-expect-error: decorator
   @inline export function abs(aLo: u64, aHi: u64): u64 {
-    const l0 = unpack_lo(aLo) < 0 ? -unpack_lo(aLo) : unpack_lo(aLo);
-    const l1 = unpack_hi(aLo) < 0 ? -unpack_hi(aLo) : unpack_hi(aLo);
-    const h0 = unpack_lo(aHi) < 0 ? -unpack_lo(aHi) : unpack_lo(aHi);
-    const h1 = unpack_hi(aHi) < 0 ? -unpack_hi(aHi) : unpack_hi(aHi);
-    return set_pair(pack2(l0, l1), pack2(h0, h1));
+    return set_pair(i32x2_scalar.abs(aLo), i32x2_scalar.abs(aHi));
   }
   // @ts-expect-error: decorator
-  @inline export function neg(aLo: u64, aHi: u64): u64 { return set_pair(pack2(-unpack_lo(aLo), -unpack_hi(aLo)), pack2(-unpack_lo(aHi), -unpack_hi(aHi))); }
+  @inline export function neg(aLo: u64, aHi: u64): u64 { return set_pair(i32x2_scalar.neg(aLo), i32x2_scalar.neg(aHi)); }
   // @ts-expect-error: decorator
-  @inline export function shl(aLo: u64, aHi: u64, b: i32): u64 { const s = b & 31; return set_pair(pack2(unpack_lo(aLo) << s, unpack_hi(aLo) << s), pack2(unpack_lo(aHi) << s, unpack_hi(aHi) << s)); }
+  @inline export function shl(aLo: u64, aHi: u64, b: i32): u64 { return set_pair(i32x2_scalar.shl(aLo, b), i32x2_scalar.shl(aHi, b)); }
   // @ts-expect-error: decorator
-  @inline export function shr_s(aLo: u64, aHi: u64, b: i32): u64 { const s = b & 31; return set_pair(pack2(unpack_lo(aLo) >> s, unpack_hi(aLo) >> s), pack2(unpack_lo(aHi) >> s, unpack_hi(aHi) >> s)); }
+  @inline export function shr_s(aLo: u64, aHi: u64, b: i32): u64 { return set_pair(i32x2_scalar.shr_s(aLo, b), i32x2_scalar.shr_s(aHi, b)); }
   // @ts-expect-error: decorator
   @inline export function shr_u(aLo: u64, aHi: u64, b: i32): u64 {
-    const s = b & 31;
-    return set_pair(pack2(((unpack_lo(aLo) as u32) >> s) as i32, ((unpack_hi(aLo) as u32) >> s) as i32), pack2(((unpack_lo(aHi) as u32) >> s) as i32, ((unpack_hi(aHi) as u32) >> s) as i32));
+    return set_pair(i32x2_scalar.shr_u(aLo, b), i32x2_scalar.shr_u(aHi, b));
   }
   // @ts-expect-error: decorator
-  @inline export function all_true(aLo: u64, aHi: u64): bool { return unpack_lo(aLo) != 0 && unpack_hi(aLo) != 0 && unpack_lo(aHi) != 0 && unpack_hi(aHi) != 0; }
+  @inline export function all_true(aLo: u64, aHi: u64): bool { return i32x2.all_true(aLo) && i32x2.all_true(aHi); }
   // @ts-expect-error: decorator
   @inline export function any_true(aLo: u64, aHi: u64): bool { return aLo != 0 || aHi != 0; }
   // @ts-expect-error: decorator
   @inline export function bitmask(aLo: u64, aHi: u64): i32 {
-    let m = 0;
-    if (unpack_lo(aLo) < 0) m |= 1;
-    if (unpack_hi(aLo) < 0) m |= 2;
-    if (unpack_lo(aHi) < 0) m |= 4;
-    if (unpack_hi(aHi) < 0) m |= 8;
-    return m;
+    return i32x2.bitmask(aLo) | (i32x2.bitmask(aHi) << 2);
   }
   // @ts-expect-error: decorator
-  @inline export function eq(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(pack2(mask(unpack_lo(aLo) == unpack_lo(bLo)), mask(unpack_hi(aLo) == unpack_hi(bLo))), pack2(mask(unpack_lo(aHi) == unpack_lo(bHi)), mask(unpack_hi(aHi) == unpack_hi(bHi)))); }
+  @inline export function eq(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(i32x2_scalar.eq(aLo, bLo), i32x2_scalar.eq(aHi, bHi)); }
   // @ts-expect-error: decorator
-  @inline export function ne(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(pack2(mask(unpack_lo(aLo) != unpack_lo(bLo)), mask(unpack_hi(aLo) != unpack_hi(bLo))), pack2(mask(unpack_lo(aHi) != unpack_lo(bHi)), mask(unpack_hi(aHi) != unpack_hi(bHi)))); }
+  @inline export function ne(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(i32x2_scalar.ne(aLo, bLo), i32x2_scalar.ne(aHi, bHi)); }
   // @ts-expect-error: decorator
-  @inline export function lt_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(pack2(mask(unpack_lo(aLo) < unpack_lo(bLo)), mask(unpack_hi(aLo) < unpack_hi(bLo))), pack2(mask(unpack_lo(aHi) < unpack_lo(bHi)), mask(unpack_hi(aHi) < unpack_hi(bHi)))); }
+  @inline export function lt_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(i32x2_scalar.lt_s(aLo, bLo), i32x2_scalar.lt_s(aHi, bHi)); }
   // @ts-expect-error: decorator
   @inline export function lt_u(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-    const l0 = mask((unpack_lo(aLo) as u32) < (unpack_lo(bLo) as u32));
-    const l1 = mask((unpack_hi(aLo) as u32) < (unpack_hi(bLo) as u32));
-    const h0 = mask((unpack_lo(aHi) as u32) < (unpack_lo(bHi) as u32));
-    const h1 = mask((unpack_hi(aHi) as u32) < (unpack_hi(bHi) as u32));
-    return set_pair(pack2(l0, l1), pack2(h0, h1));
+    return set_pair(i32x2_scalar.lt_u(aLo, bLo), i32x2_scalar.lt_u(aHi, bHi));
   }
   // @ts-expect-error: decorator
-  @inline export function le_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(pack2(mask(unpack_lo(aLo) <= unpack_lo(bLo)), mask(unpack_hi(aLo) <= unpack_hi(bLo))), pack2(mask(unpack_lo(aHi) <= unpack_lo(bHi)), mask(unpack_hi(aHi) <= unpack_hi(bHi)))); }
+  @inline export function le_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(i32x2_scalar.le_s(aLo, bLo), i32x2_scalar.le_s(aHi, bHi)); }
   // @ts-expect-error: decorator
   @inline export function le_u(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-    const l0 = mask((unpack_lo(aLo) as u32) <= (unpack_lo(bLo) as u32));
-    const l1 = mask((unpack_hi(aLo) as u32) <= (unpack_hi(bLo) as u32));
-    const h0 = mask((unpack_lo(aHi) as u32) <= (unpack_lo(bHi) as u32));
-    const h1 = mask((unpack_hi(aHi) as u32) <= (unpack_hi(bHi) as u32));
-    return set_pair(pack2(l0, l1), pack2(h0, h1));
+    return set_pair(i32x2_scalar.le_u(aLo, bLo), i32x2_scalar.le_u(aHi, bHi));
   }
   // @ts-expect-error: decorator
-  @inline export function gt_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(pack2(mask(unpack_lo(aLo) > unpack_lo(bLo)), mask(unpack_hi(aLo) > unpack_hi(bLo))), pack2(mask(unpack_lo(aHi) > unpack_lo(bHi)), mask(unpack_hi(aHi) > unpack_hi(bHi)))); }
+  @inline export function gt_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(i32x2_scalar.gt_s(aLo, bLo), i32x2_scalar.gt_s(aHi, bHi)); }
   // @ts-expect-error: decorator
   @inline export function gt_u(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-    const l0 = mask((unpack_lo(aLo) as u32) > (unpack_lo(bLo) as u32));
-    const l1 = mask((unpack_hi(aLo) as u32) > (unpack_hi(bLo) as u32));
-    const h0 = mask((unpack_lo(aHi) as u32) > (unpack_lo(bHi) as u32));
-    const h1 = mask((unpack_hi(aHi) as u32) > (unpack_hi(bHi) as u32));
-    return set_pair(pack2(l0, l1), pack2(h0, h1));
+    return set_pair(i32x2_scalar.gt_u(aLo, bLo), i32x2_scalar.gt_u(aHi, bHi));
   }
   // @ts-expect-error: decorator
-  @inline export function ge_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(pack2(mask(unpack_lo(aLo) >= unpack_lo(bLo)), mask(unpack_hi(aLo) >= unpack_hi(bLo))), pack2(mask(unpack_lo(aHi) >= unpack_lo(bHi)), mask(unpack_hi(aHi) >= unpack_hi(bHi)))); }
+  @inline export function ge_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 { return set_pair(i32x2_scalar.ge_s(aLo, bLo), i32x2_scalar.ge_s(aHi, bHi)); }
   // @ts-expect-error: decorator
   @inline export function ge_u(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-    const l0 = mask((unpack_lo(aLo) as u32) >= (unpack_lo(bLo) as u32));
-    const l1 = mask((unpack_hi(aLo) as u32) >= (unpack_hi(bLo) as u32));
-    const h0 = mask((unpack_lo(aHi) as u32) >= (unpack_lo(bHi) as u32));
-    const h1 = mask((unpack_hi(aHi) as u32) >= (unpack_hi(bHi) as u32));
-    return set_pair(pack2(l0, l1), pack2(h0, h1));
+    return set_pair(i32x2_scalar.ge_u(aLo, bLo), i32x2_scalar.ge_u(aHi, bHi));
   }
 
   // @ts-expect-error: decorator
@@ -274,10 +268,6 @@ export namespace i32x4_swar {
   }
   // @ts-expect-error: decorator
   @inline export function relaxed_laneselect(aLo: u64, aHi: u64, bLo: u64, bHi: u64, mLo: u64, mHi: u64): u64 {
-    const r0 = unpack_lo(mLo) < 0 ? unpack_lo(aLo) : unpack_lo(bLo);
-    const r1 = unpack_hi(mLo) < 0 ? unpack_hi(aLo) : unpack_hi(bLo);
-    const r2 = unpack_lo(mHi) < 0 ? unpack_lo(aHi) : unpack_lo(bHi);
-    const r3 = unpack_hi(mHi) < 0 ? unpack_hi(aHi) : unpack_hi(bHi);
-    return set_pair(pack2(r0, r1), pack2(r2, r3));
+    return set_pair(i32x2.relaxed_laneselect(aLo, bLo, mLo), i32x2.relaxed_laneselect(aHi, bHi, mHi));
   }
 }

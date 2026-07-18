@@ -2,6 +2,11 @@
 ╠═╣ ╚═╗ ══ ╚═╗ ║ ║║║ ║ ║
 ╩ ╩ ╚═╝    ╚═╝ ╩ ╩ ╩ ╩═╝</pre></h1>
 
+`as-simd` is a portable vector layer and AssemblyScript transform. Write one
+`v64`/`v128`/`v256`/`v512` code path; builds with `--enable simd` select measured
+native WebAssembly SIMD kernels, while builds without it use allocation-free
+SWAR fallbacks.
+
 <details>
 <summary>Table of Contents</summary>
 
@@ -10,6 +15,7 @@
 - [Usage](#usage)
 - [Examples](#examples)
 - [Performance](#performance)
+  - [Benchmark Overview](#benchmark-overview)
   - [Comparison to SIMD](#comparison-to-simd)
   - [Running Benchmarks Locally](#running-benchmarks-locally)
 - [Contributing](#contributing)
@@ -26,52 +32,109 @@ npm install as-simd
 
 ## Docs
 
-Half-width (64-bit) usage is exactly the same as the existing SIMD API. For the
-128-bit layer and its register-file calling convention, see
-[docs/register-file.md](./docs/register-file.md).
+Half-width (64-bit) usage follows the same value-oriented convention as the
+AssemblyScript SIMD API. The complete width-generic surface is summarized in
+[API.md](./API.md).
 
-### 128-bit vectors
+### One API at every width
 
-128-bit vectors are two `u64` halves. Two interchangeable APIs are provided:
-
-- **Value / hot-path API** (`i8x16_swar`, `i16x8_swar`, `i32x4_swar`,
-  `i64x2_swar`, `v128_swar`): an op takes the operand halves by value, returns
-  the low half, and exposes the high half via `take_hi()`. Fastest in tight loops.
-- **Register file** (`rf` + `v128r`): 64 heap-backed registers addressed by
-  index — the ergonomic primary interface.
+`v128`, `v256`, and `v512` have the same method names, argument order, generic
+parameters, and value semantics. Only the vector parameter/return type and the
+width of `bitmask` differ:
 
 ```ts
-import { v128r, rf } from "as-simd";
+const a128: v128 = v128.splat<i16>(10);
+const b128: v128 = v128.add<i16>(a128, a128);
 
-rf.set(0, aLo, aHi);          // load operands into registers 0 and 1
-rf.set(1, bLo, bHi);
-v128r.add<u8>(2, 0, 1);       // reg2 = reg0 + reg1 (lane-wise, u8 lanes)
-const lo = rf.lo(2), hi = rf.hi(2);
+const a256: v256 = v256.splat<i16>(10);
+const b256: v256 = v256.add<i16>(a256, a256);
+
+const a512: v512 = v512.splat<i16>(10);
+const b512: v512 = v512.add<i16>(a512, a512);
 ```
 
-Multi-value (`readonly [u64, u64]` tuple returns) was removed — it does not
-compile on released AssemblyScript and the global/register conventions are faster.
+The native lane namespaces scale the same way:
+
+| lanes | 128-bit | 256-bit | 512-bit |
+|---|---|---|---|
+| signed bytes | `i8x16` | `i8x32` | `i8x64` |
+| signed 16-bit | `i16x8` | `i16x16` | `i16x32` |
+| signed 32-bit | `i32x4` | `i32x8` | `i32x16` |
+| signed 64-bit | `i64x2` | `i64x4` | `i64x8` |
+| 32-bit floats | `f32x4` | `f32x8` | `f32x16` |
+| 64-bit floats | `f64x2` | `f64x4` | `f64x8` |
+
+Each wider namespace mirrors its v128 counterpart, with lane counts embedded
+in conversion, narrowing, extension, dot-product, and shuffle method names
+scaled to the vector width.
+
+The public API does not expose destination-register forms such as
+`v512r.add(dst, a, b)`. Operations take vector values and return vector values,
+just like AssemblyScript's native `v128` namespace. `v128_swar` remains
+available as an explicit low-level two-`u64` interface.
+
+### Vector widths
+
+- `v32` is a packed scalar value and delegates to the tuned `v64` SWAR kernels.
+- `v64` is the allocation-free SWAR hot path.
+- `v128`, `v256`, and `v512` are immutable value-semantics facades. Lowercase
+  `v256` and `v512` use one raw-width managed object per result rather than a
+  tree of 128-bit wrapper objects.
+- `v128_swar` is the explicit allocation-free two-half primitive.
+- Width-specific implementation code lives independently under
+  `assembly/v256` and `assembly/v512`, allowing each width to be tuned without
+  changing the shared public signatures.
+
+The generic operations dispatch at compile time. Without `--enable simd`, the
+exact same APIs use SWAR. With SIMD enabled, their 128-bit chunks use the
+adaptive native/SWAR kernels selected for `v128`; enabling SIMD does not force
+every operation through a native instruction.
+
+The repository also retains width-specific register kernels as internal
+benchmark and tuning machinery. Those experiments show that the native/SWAR
+crossover can change with width:
+
+| representative operation | v256 SIMD build | v512 SIMD build |
+|---|---|---|
+| i64 add/subtract | SWAR | 4 native chunks |
+| integer negation and i32/i64 shifts | SWAR | 4 native chunks |
+| u8/u16 rounded average | SWAR | 4 native chunks |
+| `all_true<i64>` | SWAR | 4 native chunks |
+| bitmask and saturating arithmetic | 2 native chunks | 4 native chunks |
+
+These internal choices are backed by the repository benchmark suite and
+protected by WAT code-shape tests; they are not a second public API. A separate
+API-parity gate compares all 95 public methods and compiles every signature for
+both v256 and v512 in SWAR and SIMD builds.
 
 ## Usage
 
 ### Transform-only flow (recommended)
 
-Use `as-simd` directly as a transform.
+Use `as-simd` directly as a transform. Its TypeScript implementation follows a
+Valent-Block-style pipeline: inline small helpers, remove control-flow shells,
+then rewrite the resulting pure Binaryen expression islands bottom-up to a
+bounded fixed point, so one contraction can expose another outer fusion. The
+domain-specific rules fuse masked bitselects, merge or factor constant masks,
+turn addition of disjoint masked fields into one mask, cancel shift/repack
+pairs, and avoid expanding a one-bit-per-lane comparison mask when a bitmask or
+`any_true`/`all_true` reduction immediately contracts it again. Binaryen's
+normal cleanup passes run after these rewrites.
+
+Set `AS_SIMD_OPTIMIZE=0` to disable the extra pipeline for diagnostic builds.
+Set `AS_SIMD_OPTIMIZE_DEBUG=1` to print the number of inspected expressions and
+successful SWAR fusions.
 
 CLI:
 
 ```bash
-npx asc assembly/index.ts --transform as-simd/transform
+npx asc assembly/index.ts --transform as-simd
 ```
 
 Programmatic `asc.main()`:
 
 ```js
-await asc.main([
-  "assembly/index.ts",
-  "--transform",
-  "as-simd/transform",
-]);
+await asc.main(["assembly/index.ts", "--transform", "as-simd"]);
 ```
 
 If a tool expects a direct source entrypoint, use `as-simd/sources`.
@@ -79,10 +142,59 @@ If a tool expects a direct source entrypoint, use `as-simd/sources`.
 To opt into real SIMD codegen, explicitly enable SIMD:
 
 ```bash
-npx asc assembly/index.ts --transform as-simd/transform --enable simd
+npx asc assembly/index.ts --transform as-simd --enable simd
 ```
 
-Without explicit SIMD opt-in, `as-simd` runs in strict SWAR mode. `v128`-family globals (`v128`, `i8x16`, `i16x8`, `i32x4`, `i64x2`) will fail with a clear diagnostic.
+Without explicit SIMD opt-in, imported `as-simd` APIs compile to strict SWAR.
+The transform also redirects the generic AssemblyScript `v128` API as
+described below; lane-specific native globals still require `--enable simd`.
+
+### Portable vector imports and automatic injection
+
+Portable value-semantics widths can be imported normally from the package:
+
+```ts
+import { v64, v128, v256, v512 } from "as-simd";
+
+const a: v256 = v256.splat<i16>(4);
+const b: v256 = v256.add<i16>(a, a);
+```
+
+With `--transform as-simd`, the imports may be omitted. The transform detects
+uses of `v64`, `v128`, `v256`, `v512`, and the twelve wide lane namespaces in
+each user source and injects only the missing names. Existing declarations and
+manual imports are never overridden. The injected module specifier is derived from the transform's real
+package location and the current source file, so it works from the repository
+itself as well as flat npm, pnpm, linked, nested, and workspace installs. In
+SIMD builds an unimported `v128` remains AssemblyScript's native
+type; without SIMD it is redirected to the two-`u64` facade. The other widths
+are imported from `as-simd` in both modes and dispatch their 128-bit chunks to
+native SIMD or SWAR as appropriate.
+
+For example, this source needs no import when the transform is enabled:
+
+```ts
+const a = v256.splat<i16>(4);
+const b = v256.add<i16>(a, a);
+export const lane0 = v256.extract_lane<i16>(b, 0);
+```
+
+Compile it as strict portable SWAR or adaptive SIMD without changing the source:
+
+```bash
+npx asc assembly/index.ts --transform as-simd
+npx asc assembly/index.ts --transform as-simd --enable simd
+```
+
+Set `AS_SIMD_AUTO_INJECT=0` to require explicit imports. The narrower
+`AS_SIMD_V128_FALLBACK=0` switch leaves an unimported `v128` native-only while
+continuing to inject the other widths. Lane-specific builtin namespaces such
+as `i8x16` remain native-only; portable source should use the generic width
+names or explicit `i8x16_swar` APIs.
+
+The lowercase `v256` and `v512` value types store all four or eight scalar words
+directly in one immutable value object. For a strict zero-allocation low-level
+loop, use `v64` or `v128_swar`.
 
 For IntelliSense on global aliases, include:
 
@@ -117,6 +229,18 @@ import { i8x8 } from "as-simd";
 let x = i8x8.splat(5); // [5,5,5,5,5,5,5,5]
 x = i8x8.replace_lane(x, 2, -7); // [5,5,-7,5,5,5,5,5]
 const v = i8x8.extract_lane_s(x, 2); // -7
+```
+
+### Wide vectors
+
+```ts
+import { v512 } from "as-simd";
+
+const a = v512.splat<i16>(32000);
+const b = v512.splat<i16>(1000);
+const sum = v512.add_sat<i16>(a, b);
+
+const last = v512.extract_lane<i16>(sum, 31); // 32767
 ```
 
 ### Arithmetic and comparisons
@@ -181,7 +305,44 @@ Correctness is validated by:
 - deterministic unit parity tests against scalar
 - mode-specific fuzz parity in SWAR and SIMD builds
 
-All charts and benchmark results are located [Here](https://github.com/JairusSW/as-simd/tree/main/charts)
+All generated charts and exact Markdown result tables are in
+[charts](./charts/).
+
+### Benchmark Overview
+
+These summaries use the geometric mean across every operation in each
+same-width V8 benchmark suite. Each operation gets equal weight, and the
+families are not treated as equivalent workloads. The [overview table](charts/chart-overview-v8.md)
+includes sample counts, medians, win counts, and the best and worst operation
+for each family.
+
+![V8 SWAR and SIMD throughput overview](https://raw.githubusercontent.com/JairusSW/as-simd/refs/heads/main/charts/chart-overview-v8.svg)
+
+![Native SIMD speedup over SWAR on V8](https://raw.githubusercontent.com/JairusSW/as-simd/refs/heads/main/charts/chart-speedup-v8.svg)
+
+The register-kernel chart records internal implementation research used to
+choose native SIMD versus SWAR paths. These destination-register helpers are
+not a second public API. See the [register benchmark table](charts/chart-register-v8.md)
+for exact values.
+
+![Register-backed v128 throughput on V8](https://raw.githubusercontent.com/JairusSW/as-simd/refs/heads/main/charts/chart-register-v8.svg)
+
+The focused wide-kernel chart measures the dedicated fixed-width scheduler.
+Its fallback module is compiled without the WebAssembly SIMD feature, while
+the adaptive module is compiled with SIMD enabled and still retains SWAR for
+operations where two native chunks lose at v256 width. The exact values and
+runtime metadata are also available in the
+[wide benchmark table](charts/chart-wide-v8.md).
+
+![Dedicated wide-kernel throughput on V8](https://raw.githubusercontent.com/JairusSW/as-simd/refs/heads/main/charts/chart-wide-v8.svg)
+
+The immutable-value benchmark isolates the documented lowercase facades from
+the retained nested compatibility classes. It runs the same splat/add/subtract/
+extract expression chain through both representations; the raw-width layout is
+2.45× faster for v256 and 3.14× faster for v512 on this V8 host. Exact values
+are in the [wide-value benchmark table](charts/chart-wide-values-v8.md).
+
+![Dedicated wide-value throughput on V8](https://raw.githubusercontent.com/JairusSW/as-simd/refs/heads/main/charts/chart-wide-values-v8.svg)
 
 ### Comparison to SIMD
 
@@ -216,28 +377,37 @@ npm install
 4. Run benchmarks:
 
 ```bash
-npm run bench
+npm run bench -- --v8
 ```
 
-Run modes separately:
+Run one suite and mode explicitly:
 
 ```bash
-npm run bench:swar
-npm run bench:simd
+BENCH_SAMPLES=7 npm run bench -- i32x4 --mode swar --v8
+BENCH_SAMPLES=7 npm run bench -- i32x4 --mode simd --v8
 ```
 
-Run both sequentially:
+Run the dedicated v256/v512 register-kernel benchmark:
 
 ```bash
-npm run bench:split
+npm run bench:wide
 ```
 
-Focused split benchmark (single dispatcher benchmark with mode-based branch):
+Run the lowercase raw-width value-layout benchmark:
 
 ```bash
-npm run bench:swar:i32x4
-npm run bench:simd:i32x4
+npm run bench:wide-values
 ```
+
+Regenerate its chart after the benchmark:
+
+```bash
+npm run charts:wide
+```
+
+The i8x16, i16x8, i32x4, i64x2, and generic v128 fallback benchmarks are
+compiled without the WebAssembly SIMD feature. Transform tests inspect their
+emitted WAT and reject any `v128` type or SIMD opcode.
 
 5. Build charts:
 
@@ -252,7 +422,17 @@ Contributions are welcome. For changes to core vector behavior:
 1. keep scalar and vector implementations behaviorally aligned
 2. update or add deterministic tests in `assembly/__tests__`
 3. update or add fuzz checks in `assembly/__fuzz__`
-4. run `npm test` and both fuzz modes before opening a PR
+4. run the deterministic, transform, and full multi-mode fuzz suites before
+   opening a PR
+
+The full local verification gate is:
+
+```bash
+npm run test:transform
+npm test
+npm run fuzz
+npm pack --dry-run
+```
 
 Prefer narrowly scoped commits with Conventional Commit messages.
 

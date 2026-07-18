@@ -48,7 +48,11 @@ export namespace i32x2_scalar {
   export function neg(a: u64): u64 { return pack2((-get32s(a, 0)) as u32, (-get32s(a, 1)) as u32); }
   export function shl(a: u64, b: i32): u64 { const s = b & 31; return ((a & (((0xffffffff >>> s) as u64) * 0x0000000100000001)) << s) & 0xffffffffffffffff; }
   export function shr_s(a: u64, b: i32): u64 { const s = b & 31; return pack2((get32s(a, 0) >> s) as u32, (get32s(a, 1) >> s) as u32); }
-  export function shr_u(a: u64, b: i32): u64 { const s = b & 31; return (a & (((0xffffffff << s) as u64) * 0x0000000100000001)) >> s; }
+  export function shr_u(a: u64, b: i32): u64 {
+    const s = b & 31;
+    if (s == 0) return a;
+    return (a >> s) & (((0xffffffff as u64) >> s) * 0x0000000100000001);
+  }
   export function all_true(a: u64): bool { return get32u(a, 0) != 0 && get32u(a, 1) != 0; }
   export function any_true(a: u64): bool { return a != 0; }
   export function bitmask(a: u64): i32 { return ((((a >> 31) & 1) as i32) | ((((a >> 63) & 1) as i32) << 1)); }

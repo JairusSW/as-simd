@@ -1,4 +1,4 @@
-import { i8x16_swar } from "../index";
+import { i8x16_swar } from "../v128/i8x16_swar";
 import { bench_common } from "./common";
 import { bench, blackbox, dumpToFile } from "./lib/bench";
 
@@ -24,7 +24,6 @@ bench(
 );
 dumpToFile("i8x16", "splat");
 
-const i8x16_extract_lane_s_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_extract_lane_s_a: u64 = 0xfedcba9876543210;
 const i8x16_extract_lane_s_hi: u64 = 0x0123456789abcdef;
 const i8x16_extract_lane_s_lane: u8 = 11;
@@ -39,7 +38,6 @@ bench(
 );
 dumpToFile("i8x16", "extract-lane-s");
 
-const i8x16_extract_lane_u_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_extract_lane_u_a: u64 = 0xfedcba9876543210;
 const i8x16_extract_lane_u_hi: u64 = 0x0123456789abcdef;
 const i8x16_extract_lane_u_lane: u8 = 11;
@@ -54,7 +52,6 @@ bench(
 );
 dumpToFile("i8x16", "extract-lane-u");
 
-const i8x16_replace_lane_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_replace_lane_a: u64 = 0xfedcba9876543210;
 const i8x16_replace_lane_hi: u64 = 0x0123456789abcdef;
 const i8x16_replace_lane_x: i8 = -37;
@@ -72,7 +69,6 @@ bench(
 );
 dumpToFile("i8x16", "replace-lane");
 
-const i8x16_add_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_add_a: u64 = 0xfedcba9876543210;
 const i8x16_add_hi: u64 = 0x0123456789abcdef;
 
@@ -88,7 +84,6 @@ bench(
 );
 dumpToFile("i8x16", "add");
 
-const i8x16_sub_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_sub_a: u64 = 0xfedcba9876543210;
 const i8x16_sub_hi: u64 = 0x0123456789abcdef;
 
@@ -119,7 +114,6 @@ bench(
 );
 dumpToFile("i8x16", "mul");
 
-const i8x16_min_s_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_min_s_a: u64 = 0xfedcba9876543210;
 const i8x16_min_s_hi: u64 = 0x0123456789abcdef;
 
@@ -135,7 +129,6 @@ bench(
 );
 dumpToFile("i8x16", "min-s");
 
-const i8x16_min_u_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_min_u_a: u64 = 0xfedcba9876543210;
 const i8x16_min_u_hi: u64 = 0x0123456789abcdef;
 
@@ -151,7 +144,6 @@ bench(
 );
 dumpToFile("i8x16", "min-u");
 
-const i8x16_max_s_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_max_s_a: u64 = 0xfedcba9876543210;
 const i8x16_max_s_hi: u64 = 0x0123456789abcdef;
 
@@ -167,7 +159,6 @@ bench(
 );
 dumpToFile("i8x16", "max-s");
 
-const i8x16_max_u_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_max_u_a: u64 = 0xfedcba9876543210;
 const i8x16_max_u_hi: u64 = 0x0123456789abcdef;
 
@@ -183,7 +174,6 @@ bench(
 );
 dumpToFile("i8x16", "max-u");
 
-const i8x16_avgr_u_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_avgr_u_a: u64 = 0xfedcba9876543210;
 const i8x16_avgr_u_hi: u64 = 0x0123456789abcdef;
 
@@ -199,7 +189,6 @@ bench(
 );
 dumpToFile("i8x16", "avgr-u");
 
-const i8x16_abs_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_abs_a: u64 = 0xfedcba9876543210;
 const i8x16_abs_hi: u64 = 0x0123456789abcdef;
 
@@ -215,7 +204,6 @@ bench(
 );
 dumpToFile("i8x16", "abs");
 
-const i8x16_neg_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_neg_a: u64 = 0xfedcba9876543210;
 const i8x16_neg_hi: u64 = 0x0123456789abcdef;
 
@@ -231,7 +219,6 @@ bench(
 );
 dumpToFile("i8x16", "neg");
 
-const i8x16_add_sat_s_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_add_sat_s_a: u64 = 0xfedcba9876543210;
 const i8x16_add_sat_s_hi: u64 = 0x0123456789abcdef;
 
@@ -247,7 +234,6 @@ bench(
 );
 dumpToFile("i8x16", "add-sat-s");
 
-const i8x16_add_sat_u_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_add_sat_u_a: u64 = 0xfedcba9876543210;
 const i8x16_add_sat_u_hi: u64 = 0x0123456789abcdef;
 
@@ -263,7 +249,6 @@ bench(
 );
 dumpToFile("i8x16", "add-sat-u");
 
-const i8x16_sub_sat_s_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_sub_sat_s_a: u64 = 0xfedcba9876543210;
 const i8x16_sub_sat_s_hi: u64 = 0x0123456789abcdef;
 
@@ -279,7 +264,6 @@ bench(
 );
 dumpToFile("i8x16", "sub-sat-s");
 
-const i8x16_sub_sat_u_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_sub_sat_u_a: u64 = 0xfedcba9876543210;
 const i8x16_sub_sat_u_hi: u64 = 0x0123456789abcdef;
 
@@ -295,7 +279,6 @@ bench(
 );
 dumpToFile("i8x16", "sub-sat-u");
 
-const i8x16_shl_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_shl_a: u64 = 0xfedcba9876543210;
 const i8x16_shl_hi: u64 = 0x0123456789abcdef;
 const i8x16_shl_shift: i32 = 3;
@@ -312,7 +295,6 @@ bench(
 );
 dumpToFile("i8x16", "shl");
 
-const i8x16_shr_s_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_shr_s_a: u64 = 0xfedcba9876543210;
 const i8x16_shr_s_hi: u64 = 0x0123456789abcdef;
 const i8x16_shr_s_shift: i32 = 3;
@@ -329,7 +311,6 @@ bench(
 );
 dumpToFile("i8x16", "shr-s");
 
-const i8x16_shr_u_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_shr_u_a: u64 = 0xfedcba9876543210;
 const i8x16_shr_u_hi: u64 = 0x0123456789abcdef;
 const i8x16_shr_u_shift: i32 = 3;
@@ -346,7 +327,6 @@ bench(
 );
 dumpToFile("i8x16", "shr-u");
 
-const i8x16_all_true_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_all_true_a: u64 = 0xfedcba9876543210;
 const i8x16_all_true_hi: u64 = 0x0123456789abcdef;
 
@@ -360,7 +340,6 @@ bench(
 );
 dumpToFile("i8x16", "all-true");
 
-const i8x16_bitmask_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_bitmask_a: u64 = 0xfedcba9876543210;
 const i8x16_bitmask_hi: u64 = 0x0123456789abcdef;
 
@@ -374,7 +353,6 @@ bench(
 );
 dumpToFile("i8x16", "bitmask");
 
-const i8x16_eq_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_eq_a: u64 = 0xfedcba9876543210;
 const i8x16_eq_hi: u64 = 0x0123456789abcdef;
 
@@ -390,7 +368,6 @@ bench(
 );
 dumpToFile("i8x16", "eq");
 
-const i8x16_ne_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_ne_a: u64 = 0xfedcba9876543210;
 const i8x16_ne_hi: u64 = 0x0123456789abcdef;
 
@@ -406,7 +383,6 @@ bench(
 );
 dumpToFile("i8x16", "ne");
 
-const i8x16_lt_s_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_lt_s_a: u64 = 0xfedcba9876543210;
 const i8x16_lt_s_hi: u64 = 0x0123456789abcdef;
 
@@ -422,7 +398,6 @@ bench(
 );
 dumpToFile("i8x16", "lt-s");
 
-const i8x16_lt_u_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_lt_u_a: u64 = 0xfedcba9876543210;
 const i8x16_lt_u_hi: u64 = 0x0123456789abcdef;
 
@@ -438,7 +413,6 @@ bench(
 );
 dumpToFile("i8x16", "lt-u");
 
-const i8x16_le_s_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_le_s_a: u64 = 0xfedcba9876543210;
 const i8x16_le_s_hi: u64 = 0x0123456789abcdef;
 
@@ -454,7 +428,6 @@ bench(
 );
 dumpToFile("i8x16", "le-s");
 
-const i8x16_le_u_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_le_u_a: u64 = 0xfedcba9876543210;
 const i8x16_le_u_hi: u64 = 0x0123456789abcdef;
 
@@ -470,7 +443,6 @@ bench(
 );
 dumpToFile("i8x16", "le-u");
 
-const i8x16_gt_s_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_gt_s_a: u64 = 0xfedcba9876543210;
 const i8x16_gt_s_hi: u64 = 0x0123456789abcdef;
 
@@ -486,7 +458,6 @@ bench(
 );
 dumpToFile("i8x16", "gt-s");
 
-const i8x16_gt_u_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_gt_u_a: u64 = 0xfedcba9876543210;
 const i8x16_gt_u_hi: u64 = 0x0123456789abcdef;
 
@@ -502,7 +473,6 @@ bench(
 );
 dumpToFile("i8x16", "gt-u");
 
-const i8x16_ge_s_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_ge_s_a: u64 = 0xfedcba9876543210;
 const i8x16_ge_s_hi: u64 = 0x0123456789abcdef;
 
@@ -518,7 +488,6 @@ bench(
 );
 dumpToFile("i8x16", "ge-s");
 
-const i8x16_ge_u_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_ge_u_a: u64 = 0xfedcba9876543210;
 const i8x16_ge_u_hi: u64 = 0x0123456789abcdef;
 
@@ -566,7 +535,6 @@ bench(
 );
 dumpToFile("i8x16", "narrow-i16x8-u");
 
-const i8x16_shuffle_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_shuffle_a: u64 = 0xfedcba9876543210;
 const i8x16_shuffle_hi: u64 = 0x0123456789abcdef;
 
@@ -582,7 +550,6 @@ bench(
 );
 dumpToFile("i8x16", "shuffle");
 
-const i8x16_swizzle_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_swizzle_a: u64 = 0xfedcba9876543210;
 const i8x16_swizzle_hi: u64 = 0x0123456789abcdef;
 
@@ -598,8 +565,6 @@ bench(
 );
 dumpToFile("i8x16", "swizzle");
 
-const i8x16_relaxed_swizzle_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
-const i8x16_relaxed_laneselect_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_relaxed_swizzle_a: u64 = 0xfedcba9876543210;
 const i8x16_relaxed_swizzle_hi: u64 = 0x0123456789abcdef;
 const i8x16_relaxed_laneselect_a: u64 = 0xfedcba9876543210;
@@ -632,7 +597,6 @@ const i8x16_relaxed_laneselect_m: u64 = 0x00ff807f55aa33cc;
   );
   dumpToFile("i8x16", "relaxed-laneselect");
 
-const i8x16_popcnt_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_popcnt_a: u64 = 0xfedcba9876543210;
 const i8x16_popcnt_hi: u64 = 0x0123456789abcdef;
 

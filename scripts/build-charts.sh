@@ -10,6 +10,28 @@ if [[ ${#chart_files[@]} -eq 0 ]]; then
   exit 1
 fi
 
+run_chart() {
+  local chart="$1" chart_output
+  if chart_output=$(bun run "$chart" 2>&1); then
+    [[ -z "$chart_output" ]] || printf '%s\n' "$chart_output"
+    return 0
+  fi
+  if [[ "$chart_output" == *"No benchmark JSON"* || "$chart_output" == *"No overlapping benchmark methods"* ]]; then
+    printf '%s\n' "$chart_output"
+    return 0
+  fi
+  printf '%s\n' "$chart_output" >&2
+  return 1
+}
+
 for chart in "${chart_files[@]}"; do
-  bun run "$chart"
+  [[ "$(basename "$chart")" == overview-*.chart.ts ]] && continue
+  run_chart "$chart"
+done
+
+# Overview charts aggregate the detailed markdown tables, so they must run
+# after every source chart has refreshed its table.
+for chart in "${chart_files[@]}"; do
+  [[ "$(basename "$chart")" != overview-*.chart.ts ]] && continue
+  run_chart "$chart"
 done

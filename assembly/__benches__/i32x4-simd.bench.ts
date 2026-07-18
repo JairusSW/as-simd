@@ -1,3 +1,4 @@
+// Native-SIMD half of the physically split i32x4 benchmark suite.
 import { i32x4_swar } from "../index";
 import { bench_common } from "./common";
 import { bench, blackbox, dumpToFile } from "./lib/bench";

@@ -1,3 +1,4 @@
+// Native-SIMD half of the physically split generic-v128 benchmark suite.
 import { v128_swar } from "../index";
 import { bench_common } from "./common";
 import { bench, blackbox, dumpToFile } from "./lib/bench";
