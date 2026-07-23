@@ -6,7 +6,6 @@
     "target": "wasi",
     "args": ["--enable", "sign-extension"]
   },
-  "runOptions": { "reporter": "default" },
   "modes": {
     "swar": {
       "coverage": false,
