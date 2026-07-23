@@ -2,6 +2,7 @@ import binaryen from "binaryen";
 import { ExpressionRewriter } from "./visitor.js";
 
 type Ref = binaryen.ExpressionRef;
+type WideCarrierName = "i32" | "i64" | "f32" | "f64" | "v128" | "funcref" | "externref";
 const INSTRUCTION_MODULE = "as-simd";
 const raw = binaryen as unknown as {
   _BinaryenBlockSetChildAt(expr: Ref, index: number, child: Ref): void;
@@ -10,6 +11,31 @@ const raw = binaryen as unknown as {
   _BinaryenSIMDTernary(module: number, op: number, a: Ref, b: Ref, c: Ref): Ref;
   _BinaryenFunctionSetBody(func: number, body: Ref): void;
 };
+
+function wideCarrier(module: binaryen.Module): binaryen.Type {
+  const name = (process.env["AS_SIMD_WIDE_CARRIER"] ?? "externref").toLowerCase() as WideCarrierName;
+  const carriers: Record<WideCarrierName, binaryen.Type> = {
+    i32: binaryen.i32,
+    i64: binaryen.i64,
+    f32: binaryen.f32,
+    f64: binaryen.f64,
+    v128: binaryen.v128,
+    funcref: binaryen.funcref,
+    externref: binaryen.externref,
+  };
+  const carrier = carriers[name];
+  if (carrier === undefined) {
+    throw new Error(
+      `as-simd: unsupported AS_SIMD_WIDE_CARRIER "${name}"; expected i32, i64, f32, f64, v128, funcref, or externref`,
+    );
+  }
+  if (name === "funcref" || name === "externref") {
+    module.setFeatures(module.getFeatures() | binaryen.Features.ReferenceTypes);
+  } else if (name === "v128") {
+    module.setFeatures(module.getFeatures() | binaryen.Features.SIMD128);
+  }
+  return carrier;
+}
 
 const binarySubopcode = new Map<number, number>([
   [binaryen.EqVecI8x16,35],[binaryen.NeVecI8x16,36],[binaryen.LtSVecI8x16,37],[binaryen.LtUVecI8x16,38],[binaryen.GtSVecI8x16,39],[binaryen.GtUVecI8x16,40],[binaryen.LeSVecI8x16,41],[binaryen.LeUVecI8x16,42],[binaryen.GeSVecI8x16,43],[binaryen.GeUVecI8x16,44],
@@ -106,9 +132,11 @@ class KernelRewriter extends ExpressionRewriter {
   readonly loads = new Map<number, string>();
   readonly stores = new Map<number, string>();
   private readonly originalFunctions: string[] = [];
+  private readonly carrier: binaryen.Type;
 
   constructor(module: binaryen.Module) {
     super(module);
+    this.carrier = wideCarrier(module);
     for (let i = 0, n = module.getNumFunctions(); i < n; i++) {
       this.originalFunctions.push(binaryen.getFunctionInfo(module.getFunctionByIndex(i)).name);
     }
@@ -180,11 +208,10 @@ class KernelRewriter extends ExpressionRewriter {
     const key = `${bits}:${subopcode}`;
     const existing = this.helpers.get(key);
     if (existing) return existing;
-    this.enableExternref();
     const name = `__as_simd_instruction_v${bits}_fd_${subopcode}`;
     const arity = kind === "unary" ? 1 : kind === "binary" ? 2 : 3;
-    const params = binaryen.createType(Array.from({length:arity}, () => binaryen.externref));
-    this.module.addFunctionImport(name, INSTRUCTION_MODULE, instructionName(bits,subopcode), params, binaryen.externref);
+    const params = binaryen.createType(Array.from({length:arity}, () => this.carrier));
+    this.module.addFunctionImport(name, INSTRUCTION_MODULE, instructionName(bits,subopcode), params, this.carrier);
     this.helpers.set(key,name);
     return name;
   }
@@ -192,9 +219,8 @@ class KernelRewriter extends ExpressionRewriter {
   private load(bits: number): string {
     const existing=this.loads.get(bits);
     if (existing) return existing;
-    this.enableExternref();
     const name=`__as_simd_instruction_v${bits}_load`;
-    this.module.addFunctionImport(name,INSTRUCTION_MODULE,`v${bits}.load`,binaryen.i32,binaryen.externref);
+    this.module.addFunctionImport(name,INSTRUCTION_MODULE,`v${bits}.load`,binaryen.i32,this.carrier);
     this.loads.set(bits,name);
     return name;
   }
@@ -202,13 +228,12 @@ class KernelRewriter extends ExpressionRewriter {
   private store(bits: number): string {
     const existing=this.stores.get(bits);
     if (existing) return existing;
-    this.enableExternref();
     const name=`__as_simd_instruction_v${bits}_store`;
     this.module.addFunctionImport(
       name,
       INSTRUCTION_MODULE,
       `v${bits}.store`,
-      binaryen.createType([binaryen.externref,binaryen.i32]),
+      binaryen.createType([this.carrier,binaryen.i32]),
       binaryen.none,
     );
     this.stores.set(bits,name);
@@ -217,13 +242,9 @@ class KernelRewriter extends ExpressionRewriter {
 
   private kernel(bits:number,subopcode:number,op:number,kind:KernelKind,dst:number,inputs:number[]): Ref {
     const load=this.load(bits);
-    const values=inputs.map(input=>this.module.call(load,[this.module.i32.const(input)],binaryen.externref));
-    const result=this.module.call(this.helper(bits,subopcode,op,kind),values,binaryen.externref);
+    const values=inputs.map(input=>this.module.call(load,[this.module.i32.const(input)],this.carrier));
+    const result=this.module.call(this.helper(bits,subopcode,op,kind),values,this.carrier);
     return this.module.call(this.store(bits),[result,this.module.i32.const(dst)],binaryen.none);
-  }
-
-  private enableExternref(): void {
-    this.module.setFeatures(this.module.getFeatures() | binaryen.Features.ReferenceTypes);
   }
 }
 

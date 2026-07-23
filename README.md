@@ -129,8 +129,8 @@ successful SWAR fusions.
 
 In SIMD builds, the transform recognizes adjacent 128-bit chunks of eligible
 `v256` and `v512` operations and replaces them with ordinary function imports
-from `as-simd`. Vector operations use standard `externref` parameters and
-results, bracketed by pointer-based `v256.load`/`v256.store` or
+from `as-simd`. By default, vector operations use standard `externref`
+parameters and results, bracketed by pointer-based `v256.load`/`v256.store` or
 `v512.load`/`v512.store` imports. Import names are dedicated, architecture-neutral
 Wasm-SIMD-style operations such as `i8x32.add`, `i16x32.mul`, and
 `v512.bitselect`; numeric Wasm opcodes and machine instruction names are never
@@ -142,7 +142,7 @@ selects the native backend internally: cost-selected AVX-512/ZMM or AVX2/YMM
 on amd64 and 128-bit NEON chunks on arm64. Simple operations stay on YMM when
 the host cracks ZMM into 256-bit halves; operations that collapse a longer
 sequence, such as `i64x8.mul`, use the full width. The imports remain unchanged.
-Wago erases the `externref` carriers into native register bundles, so an
+Wago erases the carrier values into registered native register bundles, so an
 expression chain has one set of checked input loads and one final store instead
 of a linear-memory round trip per operation. No host reference is allocated or
 entered into the runtime reference store. Every backend retains validated call
@@ -160,7 +160,29 @@ The Wasm validator checks each physical signature: load is
 store is `(externref, i32) -> ()`. These are carrier signatures rather than
 runtime object semantics;
 the plugin owns the semantic operation catalog while Wago owns target
-selection and lowering. Current
+selection and lowering. `externref` is the recommended default because it makes
+the opaque nature of a custom value clear, but `i32`, `i64`, `f32`, `f64`,
+`v128`, and `funcref` are also available when an embedding requires a different
+portable validation signature. Select the same carrier in the transform and
+plugin:
+
+```bash
+AS_SIMD_WIDE_CARRIER=v128 npx asc assembly/index.ts \
+  --transform as-simd --enable simd
+```
+
+```go
+if err := rt.Use(wide.New(wide.WithCarrier(wago.WasmV128))); err != nil {
+	panic(err)
+}
+```
+
+The setting changes only the module's physical import signatures; it does not
+make the carrier interchangeable with ordinary values of that Wasm type.
+Wago's registered custom-type identity still prevents a plain `v128`, scalar,
+or reference expression from being consumed by a wide instruction.
+
+Current
 automatic v512 recognition covers chunk-independent unary and binary SIMD
 operations. The plugin registers reviewed unary, binary, and ternary virtual
 kernels directly under the same import module. Automatic ternary grouping is
