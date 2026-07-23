@@ -3,6 +3,7 @@ import { Feature, Parser } from "assemblyscript/dist/assemblyscript.js";
 import binaryen from "binaryen";
 import { optimizeSwarExpressions } from "./swar.js";
 import { injectPortableVectors } from "./v128.js";
+import { insertWideIntrinsicKernels } from "./wide-intrinsics.js";
 
 const CLEANUP_PASSES = ["precompute", "optimize-instructions", "local-cse", "code-folding", "dce", "vacuum"];
 
@@ -27,9 +28,23 @@ export default class AsSimdTransform extends Transform {
     (module as binaryen.Module & { updateMaps(): void }).updateMaps();
     const stats = optimizeSwarExpressions(module);
     module.runPasses(CLEANUP_PASSES);
-
+    let wideKernels = 0;
+    if (process.env["AS_SIMD_WIDE_INTRINSICS"] !== "0" && this.fallbackSources === 0 && (module.getFeatures() & binaryen.Features.SIMD128)) {
+      // AssemblyScript's afterCompile hook precedes its final emission cleanup.
+      // Run Binaryen's configured pipeline here so adjacent v128 halves have the
+      // same canonical store/load shape the emitted module would otherwise gain
+      // only after this transform returns. Scalar-only SWAR builds deliberately
+      // retain their requested optimization level and skip this SIMD pipeline.
+      for (let i = 0; i < 4; i++) module.optimize();
+      (module as binaryen.Module & { updateMaps(): void }).updateMaps();
+      wideKernels = insertWideIntrinsicKernels(module);
+    }
+    if (wideKernels) {
+      module.optimize();
+      (module as binaryen.Module & { updateMaps(): void }).updateMaps();
+    }
     if (process.env["AS_SIMD_OPTIMIZE_DEBUG"] === "1") {
-      console.error(`[as-simd] auto-injected vectors in ${this.fallbackSources} source(s); ` + `visited ${stats.expressions} expressions; fused ${stats.rewrites} SWAR patterns`);
+      console.error(`[as-simd] auto-injected vectors in ${this.fallbackSources} source(s); ` + `visited ${stats.expressions} expressions; fused ${stats.rewrites} SWAR patterns; emitted ${wideKernels} wide custom-instruction call(s)`);
     }
   }
 }

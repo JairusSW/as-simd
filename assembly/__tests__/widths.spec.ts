@@ -3,9 +3,9 @@ import { v32 } from "../v32/v32";
 import { v64 } from "../v64/v64";
 import { v128_swar } from "../v128/v128_swar";
 import { v256 } from "../v256/value";
-import { i8x32, i16x16 } from "../v256/lanes";
+import { i8x32, i16x16, i32x8, i64x4 } from "../v256/lanes";
 import { v512 } from "../v512/value";
-import { i8x64, i16x32 } from "../v512/lanes";
+import { i8x64, i16x32, i32x16, i64x8 } from "../v512/lanes";
 import { wrf } from "../wide/regfile";
 import { v256r, v512r } from "../wide/wide";
 
@@ -110,6 +110,133 @@ describe("32 through 512 bit vectors", () => {
     let mask512 = i8x64.splat(0);
     mask512 = i8x64.replace_lane(mask512, 0, 63);
     expect<i32>(i8x64.extract_lane_u(i8x64.swizzle(bytes512, mask512), 0)).toBe(63);
+  });
+
+  test("i64x4 and i64x8 agree with scalar edge-value semantics", () => {
+    let a4 = i64x4.splat(0), b4 = i64x4.splat(0), m4 = i64x4.splat(0);
+    const av4 = [i64.MIN_VALUE, -1, 0, i64.MAX_VALUE];
+    const bv4 = [1 as i64, i64.MIN_VALUE, -7, 3];
+    for (let i: u8 = 0; i < 4; i++) {
+      a4 = i64x4.replace_lane(a4, i, av4[i]);
+      b4 = i64x4.replace_lane(b4, i, bv4[i]);
+      m4 = i64x4.replace_lane(m4, i, (i & 1) == 0 ? -1 : 0);
+    }
+    const add4 = i64x4.add(a4, b4), sub4 = i64x4.sub(a4, b4), mul4 = i64x4.mul(a4, b4);
+    const abs4 = i64x4.abs(a4), neg4 = i64x4.neg(a4);
+    const shl4 = i64x4.shl(a4, 67), shrs4 = i64x4.shr_s(a4, 67), shru4 = i64x4.shr_u(a4, 67);
+    const eq4 = i64x4.eq(a4, b4), ne4 = i64x4.ne(a4, b4);
+    const lt4 = i64x4.lt_s(a4, b4), le4 = i64x4.le_s(a4, b4);
+    const gt4 = i64x4.gt_s(a4, b4), ge4 = i64x4.ge_s(a4, b4);
+    const sel4 = i64x4.relaxed_laneselect(a4, b4, m4);
+    for (let i: u8 = 0; i < 4; i++) {
+      const a = av4[i], b = bv4[i];
+      expect<i64>(i64x4.extract_lane(add4, i)).toBe(a + b);
+      expect<i64>(i64x4.extract_lane(sub4, i)).toBe(a - b);
+      expect<i64>(i64x4.extract_lane(mul4, i)).toBe(a * b);
+      expect<i64>(i64x4.extract_lane(abs4, i)).toBe(a < 0 ? -a : a);
+      expect<i64>(i64x4.extract_lane(neg4, i)).toBe(-a);
+      expect<i64>(i64x4.extract_lane(shl4, i)).toBe(a << 67);
+      expect<i64>(i64x4.extract_lane(shrs4, i)).toBe(a >> 67);
+      expect<u64>(i64x4.extract_lane(shru4, i) as u64).toBe((a as u64) >> 67);
+      expect<i64>(i64x4.extract_lane(eq4, i)).toBe(a == b ? -1 : 0);
+      expect<i64>(i64x4.extract_lane(ne4, i)).toBe(a != b ? -1 : 0);
+      expect<i64>(i64x4.extract_lane(lt4, i)).toBe(a < b ? -1 : 0);
+      expect<i64>(i64x4.extract_lane(le4, i)).toBe(a <= b ? -1 : 0);
+      expect<i64>(i64x4.extract_lane(gt4, i)).toBe(a > b ? -1 : 0);
+      expect<i64>(i64x4.extract_lane(ge4, i)).toBe(a >= b ? -1 : 0);
+      expect<i64>(i64x4.extract_lane(sel4, i)).toBe((i & 1) == 0 ? a : b);
+    }
+    expect<bool>(i64x4.all_true(a4)).toBe(false);
+    expect<u32>(i64x4.bitmask(a4)).toBe(0x3);
+    const shuffled4 = i64x4.shuffle(a4, b4, 7, 0, 5, 2);
+    expect<i64>(i64x4.extract_lane(shuffled4, 0)).toBe(bv4[3]);
+    expect<i64>(i64x4.extract_lane(shuffled4, 1)).toBe(av4[0]);
+    expect<i64>(i64x4.extract_lane(shuffled4, 2)).toBe(bv4[1]);
+    expect<i64>(i64x4.extract_lane(shuffled4, 3)).toBe(av4[2]);
+
+    let x8 = i32x8.splat(0), y8 = i32x8.splat(0);
+    for (let i: u8 = 0; i < 8; i++) {
+      x8 = i32x8.replace_lane(x8, i, i == 0 ? i32.MIN_VALUE : (i as i32 * 0x20000001) - 7);
+      y8 = i32x8.replace_lane(y8, i, i == 7 ? i32.MAX_VALUE : 11 - i as i32 * 17);
+    }
+    const exl4s = i64x4.extend_low_i32x8_s(x8), exl4u = i64x4.extend_low_i32x8_u(x8);
+    const exh4s = i64x4.extend_high_i32x8_s(x8), exh4u = i64x4.extend_high_i32x8_u(x8);
+    const ml4s = i64x4.extmul_low_i32x8_s(x8, y8), ml4u = i64x4.extmul_low_i32x8_u(x8, y8);
+    const mh4s = i64x4.extmul_high_i32x8_s(x8, y8), mh4u = i64x4.extmul_high_i32x8_u(x8, y8);
+    for (let i: u8 = 0; i < 4; i++) {
+      const xl = i32x8.extract_lane(x8, i), xh = i32x8.extract_lane(x8, i + 4);
+      const yl = i32x8.extract_lane(y8, i), yh = i32x8.extract_lane(y8, i + 4);
+      expect<i64>(i64x4.extract_lane(exl4s, i)).toBe(xl as i64);
+      expect<u64>(i64x4.extract_lane(exl4u, i) as u64).toBe(xl as u32 as u64);
+      expect<i64>(i64x4.extract_lane(exh4s, i)).toBe(xh as i64);
+      expect<u64>(i64x4.extract_lane(exh4u, i) as u64).toBe(xh as u32 as u64);
+      expect<i64>(i64x4.extract_lane(ml4s, i)).toBe((xl as i64) * yl);
+      expect<u64>(i64x4.extract_lane(ml4u, i) as u64).toBe((xl as u32 as u64) * (yl as u32 as u64));
+      expect<i64>(i64x4.extract_lane(mh4s, i)).toBe((xh as i64) * yh);
+      expect<u64>(i64x4.extract_lane(mh4u, i) as u64).toBe((xh as u32 as u64) * (yh as u32 as u64));
+    }
+
+    let a8 = i64x8.splat(0), b8 = i64x8.splat(0), m8 = i64x8.splat(0);
+    for (let i: u8 = 0; i < 8; i++) {
+      const a = i == 0 ? i64.MIN_VALUE : i == 7 ? i64.MAX_VALUE : (i as i64 - 4) * 0x100000001;
+      const b = i == 1 ? i64.MIN_VALUE : (11 - i as i64) * -0x100000003;
+      a8 = i64x8.replace_lane(a8, i, a);
+      b8 = i64x8.replace_lane(b8, i, b);
+      m8 = i64x8.replace_lane(m8, i, (i & 1) == 0 ? -1 : 0);
+    }
+    const add8 = i64x8.add(a8, b8), sub8 = i64x8.sub(a8, b8), mul8 = i64x8.mul(a8, b8);
+    const abs8 = i64x8.abs(a8), neg8 = i64x8.neg(a8);
+    const shl8 = i64x8.shl(a8, 127), shrs8 = i64x8.shr_s(a8, 127), shru8 = i64x8.shr_u(a8, 127);
+    const eq8 = i64x8.eq(a8, b8), ne8 = i64x8.ne(a8, b8), lt8 = i64x8.lt_s(a8, b8);
+    const le8 = i64x8.le_s(a8, b8), gt8 = i64x8.gt_s(a8, b8), ge8 = i64x8.ge_s(a8, b8);
+    const sel8 = i64x8.relaxed_laneselect(a8, b8, m8);
+    for (let i: u8 = 0; i < 8; i++) {
+      const a = i64x8.extract_lane(a8, i), b = i64x8.extract_lane(b8, i);
+      expect<i64>(i64x8.extract_lane(add8, i)).toBe(a + b);
+      expect<i64>(i64x8.extract_lane(sub8, i)).toBe(a - b);
+      expect<i64>(i64x8.extract_lane(mul8, i)).toBe(a * b);
+      expect<i64>(i64x8.extract_lane(abs8, i)).toBe(a < 0 ? -a : a);
+      expect<i64>(i64x8.extract_lane(neg8, i)).toBe(-a);
+      expect<i64>(i64x8.extract_lane(shl8, i)).toBe(a << 127);
+      expect<i64>(i64x8.extract_lane(shrs8, i)).toBe(a >> 127);
+      expect<u64>(i64x8.extract_lane(shru8, i) as u64).toBe((a as u64) >> 127);
+      expect<i64>(i64x8.extract_lane(eq8, i)).toBe(a == b ? -1 : 0);
+      expect<i64>(i64x8.extract_lane(ne8, i)).toBe(a != b ? -1 : 0);
+      expect<i64>(i64x8.extract_lane(lt8, i)).toBe(a < b ? -1 : 0);
+      expect<i64>(i64x8.extract_lane(le8, i)).toBe(a <= b ? -1 : 0);
+      expect<i64>(i64x8.extract_lane(gt8, i)).toBe(a > b ? -1 : 0);
+      expect<i64>(i64x8.extract_lane(ge8, i)).toBe(a >= b ? -1 : 0);
+      expect<i64>(i64x8.extract_lane(sel8, i)).toBe((i & 1) == 0 ? a : b);
+    }
+    expect<bool>(i64x8.all_true(a8)).toBe(false);
+    expect<u64>(i64x8.bitmask(a8)).toBe(0x0f);
+    const shuffled8 = i64x8.shuffle(a8, b8, 15, 0, 13, 2, 11, 4, 9, 6);
+    for (let i: u8 = 0; i < 8; i++) {
+      const expected = (i & 1) == 0 ? i64x8.extract_lane(b8, 7 - i) : i64x8.extract_lane(a8, i - 1);
+      expect<i64>(i64x8.extract_lane(shuffled8, i)).toBe(expected);
+    }
+
+    let x16 = i32x16.splat(0), y16 = i32x16.splat(0);
+    for (let i: u8 = 0; i < 16; i++) {
+      x16 = i32x16.replace_lane(x16, i, i == 0 ? i32.MIN_VALUE : (i as i32 * 0x10000001) - 9);
+      y16 = i32x16.replace_lane(y16, i, i == 15 ? i32.MAX_VALUE : 13 - i as i32 * 19);
+    }
+    const exl8s = i64x8.extend_low_i32x16_s(x16), exl8u = i64x8.extend_low_i32x16_u(x16);
+    const exh8s = i64x8.extend_high_i32x16_s(x16), exh8u = i64x8.extend_high_i32x16_u(x16);
+    const ml8s = i64x8.extmul_low_i32x16_s(x16, y16), ml8u = i64x8.extmul_low_i32x16_u(x16, y16);
+    const mh8s = i64x8.extmul_high_i32x16_s(x16, y16), mh8u = i64x8.extmul_high_i32x16_u(x16, y16);
+    for (let i: u8 = 0; i < 8; i++) {
+      const xl = i32x16.extract_lane(x16, i), xh = i32x16.extract_lane(x16, i + 8);
+      const yl = i32x16.extract_lane(y16, i), yh = i32x16.extract_lane(y16, i + 8);
+      expect<i64>(i64x8.extract_lane(exl8s, i)).toBe(xl as i64);
+      expect<u64>(i64x8.extract_lane(exl8u, i) as u64).toBe(xl as u32 as u64);
+      expect<i64>(i64x8.extract_lane(exh8s, i)).toBe(xh as i64);
+      expect<u64>(i64x8.extract_lane(exh8u, i) as u64).toBe(xh as u32 as u64);
+      expect<i64>(i64x8.extract_lane(ml8s, i)).toBe((xl as i64) * yl);
+      expect<u64>(i64x8.extract_lane(ml8u, i) as u64).toBe((xl as u32 as u64) * (yl as u32 as u64));
+      expect<i64>(i64x8.extract_lane(mh8s, i)).toBe((xh as i64) * yh);
+      expect<u64>(i64x8.extract_lane(mh8u, i) as u64).toBe((xh as u32 as u64) * (yh as u32 as u64));
+    }
   });
 
   test("v32 uses the optimized low half of v64", () => {

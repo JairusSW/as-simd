@@ -125,6 +125,54 @@ Set `AS_SIMD_OPTIMIZE=0` to disable the extra pipeline for diagnostic builds.
 Set `AS_SIMD_OPTIMIZE_DEBUG=1` to print the number of inspected expressions and
 successful SWAR fusions.
 
+### Optional Wago native wide-SIMD lowering
+
+In SIMD builds, the transform recognizes adjacent 128-bit chunks of eligible
+`v256` and `v512` operations and replaces them with ordinary function imports
+from `as-simd`. Vector operations use standard `externref` parameters and
+results, bracketed by pointer-based `v256.load`/`v256.store` or
+`v512.load`/`v512.store` imports. Import names are dedicated, architecture-neutral
+Wasm-SIMD-style operations such as `i8x32.add`, `i16x32.mul`, and
+`v512.bitselect`; numeric Wasm opcodes and machine instruction names are never
+part of the guest ABI. A v512 group remains one 64-byte instruction instead of
+two independent v256 calls.
+
+With the separate `github.com/JairusSW/wide` Wago plugin installed, Wago
+selects the native backend internally: cost-selected AVX-512/ZMM or AVX2/YMM
+on amd64 and 128-bit NEON chunks on arm64. Simple operations stay on YMM when
+the host cracks ZMM into 256-bit halves; operations that collapse a longer
+sequence, such as `i64x8.mul`, use the full width. The imports remain unchanged.
+Wago erases the `externref` carriers into native register bundles, so an
+expression chain has one set of checked input loads and one final store instead
+of a linear-memory round trip per operation. No host reference is allocated or
+entered into the runtime reference store. Every backend retains validated call
+boundaries and checked loads/stores. No custom Wasm section, custom value type,
+digest, post-build rewrite, or architecture-specific import is involved.
+
+```go
+rt := wago.NewRuntime()
+if err := rt.Use(wide.New()); err != nil { panic(err) }
+mod, err := rt.Compile(wasmBytes)
+```
+
+The Wasm validator checks each physical signature: load is
+`(i32) -> externref`, vector operations are `(externref...) -> externref`, and
+store is `(externref, i32) -> ()`. These are carrier signatures rather than
+runtime object semantics;
+the plugin owns the semantic operation catalog while Wago owns target
+selection and lowering. Current
+automatic v512 recognition covers chunk-independent unary and binary SIMD
+operations. The plugin registers reviewed unary, binary, and ternary virtual
+kernels directly under the same import module. Automatic ternary grouping is
+deliberately left portable when Binaryen aliases prevent the transform from
+proving that all three sources are adjacent. Width-crossing operations likewise
+retain their portable implementation.
+
+Set `AS_SIMD_WIDE_INTRINSICS=0` to disable wide helper bundling while retaining
+the SWAR optimizer and ordinary SIMD dispatch. This is useful for code-shape
+comparison. `AS_SIMD_OPTIMIZE=0` disables the entire transform optimization
+pipeline, including custom-instruction call generation.
+
 CLI:
 
 ```bash
@@ -336,6 +384,15 @@ runtime metadata are also available in the
 
 ![Dedicated wide-kernel throughput on V8](https://raw.githubusercontent.com/JairusSW/as-simd/refs/heads/main/charts/chart-wide-v8.svg)
 
+The Wago microbenchmark isolates 128 dependent `i8x32.add` operations and
+compares the plugin's AVX2/YMM carrier with the paired-v128 and scalar SWAR
+implementations. On the measured Ryzen 7 7800X3D host, native lowering takes
+1.80× less time than paired v128 and 13.47× less time than SWAR, with zero
+allocations in every mode. Exact ten-round values are in the
+[Wago v256 benchmark table](charts/chart-wago-v256.md).
+
+![Native v256 byte-add throughput in Wago](https://raw.githubusercontent.com/JairusSW/as-simd/refs/heads/main/charts/chart-wago-v256.svg)
+
 The immutable-value benchmark isolates the documented lowercase facades from
 the retained nested compatibility classes. It runs the same splat/add/subtract/
 extract expression chain through both representations; the raw-width layout is
@@ -353,6 +410,14 @@ Here's some results comparing `i16x4 (SWAR)` versus the native `i16x8 (SIMD)` im
 ### Running Benchmarks Locally
 
 Benchmarks are run directly on top of `v8` for tighter control over the engine configuration.
+
+For the Wago native/paired/SWAR v256 comparison, keep the Wago checkout at
+`../../Wago/wago` or set `WAGO_DIR`, then run:
+
+```bash
+npm run bench:wago-v256
+npm run charts:wago-v256
+```
 
 1. Install the local benchmark prerequisites:
 
@@ -433,6 +498,16 @@ npm test
 npm run fuzz
 npm pack --dry-run
 ```
+
+The transform gate derives its coverage list from the public sources. It
+compiles and executes all 190 public `v256`/`v512` value methods and all 462
+functions in the twelve wide lane namespaces in both SWAR and SIMD modes; a new
+public method fails the gate until its invocation is covered. Deterministic
+scalar edge-value tests additionally oracle every `i64x4` and `i64x8`
+operation, including overflow, signed and unsigned shifts, comparisons,
+widening, extended multiplication, shuffle, and relaxed lane selection. The
+Wago plugin separately byte-compares portable and native execution for every
+catalogued unary, binary, and ternary wide kernel.
 
 Prefer narrowly scoped commits with Conventional Commit messages.
 

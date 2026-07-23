@@ -29,6 +29,16 @@ export namespace i16x8_swar {
     return ((v >> ((idx & 3) << 4)) as u16);
   }
   // @ts-expect-error: decorator
+  @inline function i8_lane_s(lo: u64, hi: u64, idx: i32): i16 {
+    const v = idx < 8 ? lo : hi;
+    return (((v >> ((idx & 7) << 3)) as u8) as i8) as i16;
+  }
+  // @ts-expect-error: decorator
+  @inline function i8_lane_u(lo: u64, hi: u64, idx: i32): u16 {
+    const v = idx < 8 ? lo : hi;
+    return ((v >> ((idx & 7) << 3)) as u8) as u16;
+  }
+  // @ts-expect-error: decorator
   @inline function pack4(a: i32, b: i32, c: i32, d: i32): u64 {
     return (a as u16 as u64) | ((b as u16 as u64) << 16) | ((c as u16 as u64) << 32) | ((d as u16 as u64) << 48);
   }
@@ -230,15 +240,17 @@ export namespace i16x8_swar {
   }
   // @ts-expect-error: decorator
   @inline export function extadd_pairwise_i8x16_s(aLo: u64, aHi: u64): u64 {
-    const ex = extend_low_i8x16_s(aLo, aHi);
-    const eh = take_hi();
-    return set_pair(i32x4_swar.extadd_pairwise_i16x8_s(ex, eh), i32x4_swar.take_hi());
+    return set_pair(
+      pack4(i8_lane_s(aLo,aHi,0)+i8_lane_s(aLo,aHi,1), i8_lane_s(aLo,aHi,2)+i8_lane_s(aLo,aHi,3), i8_lane_s(aLo,aHi,4)+i8_lane_s(aLo,aHi,5), i8_lane_s(aLo,aHi,6)+i8_lane_s(aLo,aHi,7)),
+      pack4(i8_lane_s(aLo,aHi,8)+i8_lane_s(aLo,aHi,9), i8_lane_s(aLo,aHi,10)+i8_lane_s(aLo,aHi,11), i8_lane_s(aLo,aHi,12)+i8_lane_s(aLo,aHi,13), i8_lane_s(aLo,aHi,14)+i8_lane_s(aLo,aHi,15)),
+    );
   }
   // @ts-expect-error: decorator
   @inline export function extadd_pairwise_i8x16_u(aLo: u64, aHi: u64): u64 {
-    const ex = extend_low_i8x16_u(aLo, aHi);
-    const eh = take_hi();
-    return set_pair(i32x4_swar.extadd_pairwise_i16x8_u(ex, eh), i32x4_swar.take_hi());
+    return set_pair(
+      pack4u(i8_lane_u(aLo,aHi,0)+i8_lane_u(aLo,aHi,1), i8_lane_u(aLo,aHi,2)+i8_lane_u(aLo,aHi,3), i8_lane_u(aLo,aHi,4)+i8_lane_u(aLo,aHi,5), i8_lane_u(aLo,aHi,6)+i8_lane_u(aLo,aHi,7)),
+      pack4u(i8_lane_u(aLo,aHi,8)+i8_lane_u(aLo,aHi,9), i8_lane_u(aLo,aHi,10)+i8_lane_u(aLo,aHi,11), i8_lane_u(aLo,aHi,12)+i8_lane_u(aLo,aHi,13), i8_lane_u(aLo,aHi,14)+i8_lane_u(aLo,aHi,15)),
+    );
   }
   // @ts-expect-error: decorator
   @inline export function q15mulr_sat_s(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {

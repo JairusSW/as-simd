@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="470" viewBox="0 0 1180 470">
+<rect width="1180" height="470" fill="transparent"/>
+<text x="590" y="42" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="25" font-weight="700" fill="#374151">Native v256 byte-add throughput</text>
+<text x="590" y="70" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="600" fill="#6b7280">Sat Jul 18 2026 - v0.0.0 - 68a34ac - main</text>
+<text x="590" y="96" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="13" fill="#6b7280">Wago Railshot · AMD Ryzen 7 7800X3D 8-Core Processor · 10 rounds · 128 dependent i8x32.add operations per invocation</text>
+<text x="245" y="126" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="600" fill="#374151">Million 32-byte operations/s — higher is better</text>
+<line x1="245" y1="150" x2="245" y2="384" stroke="#d1d5db" opacity="0.7"/>
+<text x="245" y="142" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="12" fill="#6b7280">0</text>
+<line x1="396" y1="150" x2="396" y2="384" stroke="#d1d5db" opacity="0.7"/>
+<text x="396" y="142" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="12" fill="#6b7280">1,000</text>
+<line x1="547" y1="150" x2="547" y2="384" stroke="#d1d5db" opacity="0.7"/>
+<text x="547" y="142" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="12" fill="#6b7280">2,000</text>
+<line x1="698" y1="150" x2="698" y2="384" stroke="#d1d5db" opacity="0.7"/>
+<text x="698" y="142" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="12" fill="#6b7280">3,000</text>
+<line x1="849" y1="150" x2="849" y2="384" stroke="#d1d5db" opacity="0.7"/>
+<text x="849" y="142" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="12" fill="#6b7280">4,000</text>
+<line x1="1000" y1="150" x2="1000" y2="384" stroke="#d1d5db" opacity="0.7"/>
+<text x="1000" y="142" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="12" fill="#6b7280">5,000</text>
+<text x="227" y="179" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="15" font-weight="700" fill="#374151">AVX2 / YMM</text>
+<text x="227" y="199" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="12" fill="#6b7280">plugin native lowering</text>
+<rect x="245" y="162" width="729.2572201294313" height="30" rx="3" fill="#2B9EB3"/>
+<text x="984.2572201294313" y="182" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">4830 M/s</text>
+<text x="1158" y="179" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#2B9EB3">1.00× native time</text>
+<text x="1158" y="199" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="12" fill="#6b7280">0.207 ns/op · 0.206–0.211</text>
+<text x="227" y="257" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="15" font-weight="700" fill="#374151">paired v128</text>
+<text x="227" y="277" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="12" fill="#6b7280">SIMD-backed fallback</text>
+<rect x="245" y="240" width="405.33648296781485" height="30" rx="3" fill="#6B7FD7"/>
+<text x="660.3364829678148" y="260" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">2684 M/s</text>
+<text x="1158" y="257" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#6B7FD7">1.80× native time</text>
+<text x="1158" y="277" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="12" fill="#6b7280">0.373 ns/op · 0.370–0.378</text>
+<text x="227" y="335" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="15" font-weight="700" fill="#374151">SWAR / i64</text>
+<text x="227" y="355" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="12" fill="#6b7280">portable scalar fallback</text>
+<rect x="245" y="318" width="54.150977227900285" height="30" rx="3" fill="#44AF69"/>
+<text x="309.1509772279003" y="338" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#374151">359 M/s</text>
+<text x="1158" y="335" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#44AF69">13.47× native time</text>
+<text x="1158" y="355" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="12" fill="#6b7280">2.789 ns/op · 2.782–2.797</text>
+<text x="245" y="448" font-family="Inter,Arial,sans-serif" font-size="12" fill="#6b7280">Bars show mean throughput; labels include min–max timing across measured rounds. Zero allocations in every mode.</text>
+</svg>

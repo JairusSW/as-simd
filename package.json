@@ -17,11 +17,12 @@
     "test:fuzz": "ast test --fuzz",
     "build:test": "rm -rf ./build/ && asc assembly/test.ts --config none --transform ./transform --enable simd -o ./build/test.wasm",
     "build:transform": "tsc -p ./transform",
-    "test:transform": "npm run build:transform && node ./transform/__tests__/api-parity.test.mjs && node ./transform/__tests__/import-paths.test.mjs && node ./transform/__tests__/code-shape.test.mjs && node ./transform/__tests__/wide-kernels.test.mjs && node ./transform/__tests__/v64-dispatch.test.mjs && node ./transform/__tests__/strict-benches.test.mjs && node ./transform/__tests__/v128-auto.test.mjs",
+    "test:transform": "npm run build:transform && node ./transform/__tests__/api-parity.test.mjs && node ./transform/__tests__/import-paths.test.mjs && node ./transform/__tests__/code-shape.test.mjs && node ./transform/__tests__/wide-kernels.test.mjs && node ./transform/__tests__/wide-lane-exhaustive.test.mjs && node ./transform/__tests__/wide-generic-exhaustive.test.mjs && node ./transform/__tests__/v64-dispatch.test.mjs && node ./transform/__tests__/strict-benches.test.mjs && node ./transform/__tests__/v128-auto.test.mjs",
     "test:wasmtime": "wasmtime ./build/test.wasm",
     "bench": "./scripts/run-bench.sh",
     "bench:wide": "sh ./bench/wide/run.sh",
     "bench:wide-values": "sh ./bench/wide-values/run.sh",
+    "bench:wago-v256": "node ./scripts/run-wago-v256-bench.mjs",
     "v8:score": "node ./scripts/v8-score.mjs",
     "format": "prettier -w .",
     "charts": "npm run charts:build && npm run charts:serve",
@@ -30,6 +31,7 @@
     "charts:register": "bun run ./scripts/register-v8.chart.ts",
     "charts:wide": "bun run ./scripts/wide-v8.chart.ts",
     "charts:wide-values": "bun run ./scripts/wide-values-v8.chart.ts",
+    "charts:wago-v256": "bun run ./scripts/wago-v256.chart.ts",
     "charts:serve": "serve ./charts"
   },
   "devDependencies": {

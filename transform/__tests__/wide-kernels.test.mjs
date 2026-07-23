@@ -7,9 +7,10 @@ mkdirSync(output, { recursive: true });
 
 function compile(mode) {
   const args = ["bench/wide/bench.ts", "--runtime", "stub", "--transform", "./transform", "-O3", "--converge", "-o", `${output}/wide-${mode}.wasm`, "--textFile", `${output}/wide-${mode}.wat`];
-  if (mode === "simd" || mode === "relaxed") args.push("--enable", "simd");
+  if (mode === "simd" || mode === "native" || mode === "relaxed") args.push("--enable", "simd");
   if (mode === "relaxed") args.push("--enable", "relaxed-simd");
-  execFileSync("node_modules/.bin/asc", args, { stdio: "inherit" });
+  const env = {...process.env, AS_SIMD_WIDE_INTRINSICS: mode === "native" ? "1" : "0"};
+  execFileSync("node_modules/.bin/asc", args, { env, stdio: "inherit" });
   return readFileSync(`${output}/wide-${mode}.wat`, "utf8");
 }
 
@@ -23,6 +24,22 @@ function body(wat, name) {
 const swar = compile("swar");
 const simd = compile("simd");
 const relaxed = compile("relaxed");
+const native = compile("native");
+assert.match(body(native, "v256AddI8"), /call \$__as_simd_instruction_v256_fd_110/);
+assert.match(native, /\(import "as-simd" "i8x32\.add"/);
+assert.match(native, /\(import "as-simd" "v256\.load" \(func \$[^ ]+ \(param i32\) \(result externref\)\)\)/);
+assert.match(native, /\(import "as-simd" "i8x32\.add" \(func \$[^ ]+ \(param externref externref\) \(result externref\)\)\)/);
+assert.match(native, /\(import "as-simd" "v256\.store" \(func \$[^ ]+ \(param externref i32\)\)\)/);
+assert.match(body(native, "v256AddI8"), /call \$__as_simd_instruction_v256_load[\s\S]*call \$__as_simd_instruction_v256_fd_110[\s\S]*call \$__as_simd_instruction_v256_store/);
+assert.match(body(native, "v512AddI8"), /call \$__as_simd_instruction_v512_fd_110/);
+assert.match(native, /\(import "as-simd" "i8x64\.add"/);
+assert.doesNotMatch(native, /\(import "as-simd" "[^"]+\.memory"/);
+assert.doesNotMatch(body(native, "v512AddI8"), /call \$__as_simd_instruction_v256_fd_110/);
+assert.match(body(native, "v512NegI32"), /call \$__as_simd_instruction_v512_fd_161/);
+assert.match(native, /\(import "as-simd" "i32x16\.neg"/);
+assert.doesNotMatch(native, /\(import "[^"]*" "v(?:256|512)\.fd\./);
+const nativeModule = new WebAssembly.Module(readFileSync(`${output}/wide-native.wasm`));
+assert.equal(WebAssembly.Module.customSections(nativeModule, "metadata.code.wago.intrinsics").length, 0);
 for (const wat of [swar, simd, relaxed]) {
   assert.doesNotMatch(wat, /\$assembly\/(?:wide|v128)\/regfile\/(?:w?rf)\._base/, "fixed register files must not reintroduce lazy base globals");
 }
