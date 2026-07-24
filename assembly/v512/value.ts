@@ -1,87 +1,873 @@
-import { v128_swar } from "../v128/v128_swar";
-import { V128Fallback } from "../v128/v128_fallback";
+import { V128Fallback, v128_swar } from "../v128/value";
 
 /** Allocation-lean immutable 512-bit value stored in one managed object. */
 export class v512 {
-  readonly w0: u64; readonly w1: u64; readonly w2: u64; readonly w3: u64;
-  readonly w4: u64; readonly w5: u64; readonly w6: u64; readonly w7: u64;
+  readonly w0: u64;
+  readonly w1: u64;
+  readonly w2: u64;
+  readonly w3: u64;
+  readonly w4: u64;
+  readonly w5: u64;
+  readonly w6: u64;
+  readonly w7: u64;
 
-  @inline constructor(w0: u64, w1: u64, w2: u64, w3: u64, w4: u64, w5: u64, w6: u64, w7: u64) {
-    this.w0 = w0; this.w1 = w1; this.w2 = w2; this.w3 = w3;
-    this.w4 = w4; this.w5 = w5; this.w6 = w6; this.w7 = w7;
+
+  @inline constructor(
+    w0: u64,
+    w1: u64,
+    w2: u64,
+    w3: u64,
+    w4: u64,
+    w5: u64,
+    w6: u64,
+    w7: u64,
+  ) {
+    this.w0 = w0;
+    this.w1 = w1;
+    this.w2 = w2;
+    this.w3 = w3;
+    this.w4 = w4;
+    this.w5 = w5;
+    this.w6 = w6;
+    this.w7 = w7;
   }
 
-  @inline static load(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v512 { const p = ptr + immOffset; return new v512(load<u64>(p), load<u64>(p, 8), load<u64>(p, 16), load<u64>(p, 24), load<u64>(p, 32), load<u64>(p, 40), load<u64>(p, 48), load<u64>(p, 56)); }
-  @inline static store(ptr: usize, a: v512, immOffset: usize = 0, immAlign: usize = 1): void { const p = ptr + immOffset; store<u64>(p, a.w0); store<u64>(p, a.w1, 8); store<u64>(p, a.w2, 16); store<u64>(p, a.w3, 24); store<u64>(p, a.w4, 32); store<u64>(p, a.w5, 40); store<u64>(p, a.w6, 48); store<u64>(p, a.w7, 56); }
-  @inline static splat<T>(x: T): v512 { const lo = v128_swar.splat<T>(x), hi = v128_swar.take_hi(); return new v512(lo, hi, lo, hi, lo, hi, lo, hi); }
 
-  @inline static add<T>(a: v512, b: v512): v512 { const r0=v128_swar.add<T>(a.w0,a.w1,b.w0,b.w1),r1=v128_swar.take_hi(); const r2=v128_swar.add<T>(a.w2,a.w3,b.w2,b.w3),r3=v128_swar.take_hi(); const r4=v128_swar.add<T>(a.w4,a.w5,b.w4,b.w5),r5=v128_swar.take_hi(); const r6=v128_swar.add<T>(a.w6,a.w7,b.w6,b.w7),r7=v128_swar.take_hi(); return new v512(r0,r1,r2,r3,r4,r5,r6,r7); }
-  @inline static sub<T>(a: v512, b: v512): v512 { const r0=v128_swar.sub<T>(a.w0,a.w1,b.w0,b.w1),r1=v128_swar.take_hi(); const r2=v128_swar.sub<T>(a.w2,a.w3,b.w2,b.w3),r3=v128_swar.take_hi(); const r4=v128_swar.sub<T>(a.w4,a.w5,b.w4,b.w5),r5=v128_swar.take_hi(); const r6=v128_swar.sub<T>(a.w6,a.w7,b.w6,b.w7),r7=v128_swar.take_hi(); return new v512(r0,r1,r2,r3,r4,r5,r6,r7); }
-  @inline static mul<T>(a: v512, b: v512): v512 { const r0=v128_swar.mul<T>(a.w0,a.w1,b.w0,b.w1),r1=v128_swar.take_hi(); const r2=v128_swar.mul<T>(a.w2,a.w3,b.w2,b.w3),r3=v128_swar.take_hi(); const r4=v128_swar.mul<T>(a.w4,a.w5,b.w4,b.w5),r5=v128_swar.take_hi(); const r6=v128_swar.mul<T>(a.w6,a.w7,b.w6,b.w7),r7=v128_swar.take_hi(); return new v512(r0,r1,r2,r3,r4,r5,r6,r7); }
-  @inline static min<T>(a: v512, b: v512): v512 { const r0=v128_swar.min<T>(a.w0,a.w1,b.w0,b.w1),r1=v128_swar.take_hi(); const r2=v128_swar.min<T>(a.w2,a.w3,b.w2,b.w3),r3=v128_swar.take_hi(); const r4=v128_swar.min<T>(a.w4,a.w5,b.w4,b.w5),r5=v128_swar.take_hi(); const r6=v128_swar.min<T>(a.w6,a.w7,b.w6,b.w7),r7=v128_swar.take_hi(); return new v512(r0,r1,r2,r3,r4,r5,r6,r7); }
-  @inline static max<T>(a: v512, b: v512): v512 { const r0=v128_swar.max<T>(a.w0,a.w1,b.w0,b.w1),r1=v128_swar.take_hi(); const r2=v128_swar.max<T>(a.w2,a.w3,b.w2,b.w3),r3=v128_swar.take_hi(); const r4=v128_swar.max<T>(a.w4,a.w5,b.w4,b.w5),r5=v128_swar.take_hi(); const r6=v128_swar.max<T>(a.w6,a.w7,b.w6,b.w7),r7=v128_swar.take_hi(); return new v512(r0,r1,r2,r3,r4,r5,r6,r7); }
-  @inline static add_sat<T>(a: v512, b: v512): v512 { const r0=v128_swar.add_sat<T>(a.w0,a.w1,b.w0,b.w1),r1=v128_swar.take_hi(); const r2=v128_swar.add_sat<T>(a.w2,a.w3,b.w2,b.w3),r3=v128_swar.take_hi(); const r4=v128_swar.add_sat<T>(a.w4,a.w5,b.w4,b.w5),r5=v128_swar.take_hi(); const r6=v128_swar.add_sat<T>(a.w6,a.w7,b.w6,b.w7),r7=v128_swar.take_hi(); return new v512(r0,r1,r2,r3,r4,r5,r6,r7); }
-  @inline static sub_sat<T>(a: v512, b: v512): v512 { const r0=v128_swar.sub_sat<T>(a.w0,a.w1,b.w0,b.w1),r1=v128_swar.take_hi(); const r2=v128_swar.sub_sat<T>(a.w2,a.w3,b.w2,b.w3),r3=v128_swar.take_hi(); const r4=v128_swar.sub_sat<T>(a.w4,a.w5,b.w4,b.w5),r5=v128_swar.take_hi(); const r6=v128_swar.sub_sat<T>(a.w6,a.w7,b.w6,b.w7),r7=v128_swar.take_hi(); return new v512(r0,r1,r2,r3,r4,r5,r6,r7); }
-  @inline static avgr<T>(a: v512, b: v512): v512 { const r0=v128_swar.avgr<T>(a.w0,a.w1,b.w0,b.w1),r1=v128_swar.take_hi(); const r2=v128_swar.avgr<T>(a.w2,a.w3,b.w2,b.w3),r3=v128_swar.take_hi(); const r4=v128_swar.avgr<T>(a.w4,a.w5,b.w4,b.w5),r5=v128_swar.take_hi(); const r6=v128_swar.avgr<T>(a.w6,a.w7,b.w6,b.w7),r7=v128_swar.take_hi(); return new v512(r0,r1,r2,r3,r4,r5,r6,r7); }
+  @inline static load(
+    ptr: usize,
+    immOffset: usize = 0,
+    immAlign: usize = 1,
+  ): v512 {
+    const p = ptr + immOffset;
+    return new v512(
+      load<u64>(p),
+      load<u64>(p, 8),
+      load<u64>(p, 16),
+      load<u64>(p, 24),
+      load<u64>(p, 32),
+      load<u64>(p, 40),
+      load<u64>(p, 48),
+      load<u64>(p, 56),
+    );
+  }
 
-  @inline static neg<T>(a: v512): v512 { const r0=v128_swar.neg<T>(a.w0,a.w1),r1=v128_swar.take_hi(); const r2=v128_swar.neg<T>(a.w2,a.w3),r3=v128_swar.take_hi(); const r4=v128_swar.neg<T>(a.w4,a.w5),r5=v128_swar.take_hi(); const r6=v128_swar.neg<T>(a.w6,a.w7),r7=v128_swar.take_hi(); return new v512(r0,r1,r2,r3,r4,r5,r6,r7); }
-  @inline static abs<T>(a: v512): v512 { const r0=v128_swar.abs<T>(a.w0,a.w1),r1=v128_swar.take_hi(); const r2=v128_swar.abs<T>(a.w2,a.w3),r3=v128_swar.take_hi(); const r4=v128_swar.abs<T>(a.w4,a.w5),r5=v128_swar.take_hi(); const r6=v128_swar.abs<T>(a.w6,a.w7),r7=v128_swar.take_hi(); return new v512(r0,r1,r2,r3,r4,r5,r6,r7); }
-  @inline static shl<T>(a: v512, s: i32): v512 { const r0=v128_swar.shl<T>(a.w0,a.w1,s),r1=v128_swar.take_hi(); const r2=v128_swar.shl<T>(a.w2,a.w3,s),r3=v128_swar.take_hi(); const r4=v128_swar.shl<T>(a.w4,a.w5,s),r5=v128_swar.take_hi(); const r6=v128_swar.shl<T>(a.w6,a.w7,s),r7=v128_swar.take_hi(); return new v512(r0,r1,r2,r3,r4,r5,r6,r7); }
-  @inline static shr<T>(a: v512, s: i32): v512 { const r0=v128_swar.shr<T>(a.w0,a.w1,s),r1=v128_swar.take_hi(); const r2=v128_swar.shr<T>(a.w2,a.w3,s),r3=v128_swar.take_hi(); const r4=v128_swar.shr<T>(a.w4,a.w5,s),r5=v128_swar.take_hi(); const r6=v128_swar.shr<T>(a.w6,a.w7,s),r7=v128_swar.take_hi(); return new v512(r0,r1,r2,r3,r4,r5,r6,r7); }
 
-  @inline static eq<T>(a: v512, b: v512): v512 { const r0=v128_swar.eq<T>(a.w0,a.w1,b.w0,b.w1),r1=v128_swar.take_hi(); const r2=v128_swar.eq<T>(a.w2,a.w3,b.w2,b.w3),r3=v128_swar.take_hi(); const r4=v128_swar.eq<T>(a.w4,a.w5,b.w4,b.w5),r5=v128_swar.take_hi(); const r6=v128_swar.eq<T>(a.w6,a.w7,b.w6,b.w7),r7=v128_swar.take_hi(); return new v512(r0,r1,r2,r3,r4,r5,r6,r7); }
-  @inline static ne<T>(a: v512, b: v512): v512 { const r0=v128_swar.ne<T>(a.w0,a.w1,b.w0,b.w1),r1=v128_swar.take_hi(); const r2=v128_swar.ne<T>(a.w2,a.w3,b.w2,b.w3),r3=v128_swar.take_hi(); const r4=v128_swar.ne<T>(a.w4,a.w5,b.w4,b.w5),r5=v128_swar.take_hi(); const r6=v128_swar.ne<T>(a.w6,a.w7,b.w6,b.w7),r7=v128_swar.take_hi(); return new v512(r0,r1,r2,r3,r4,r5,r6,r7); }
-  @inline static lt<T>(a: v512, b: v512): v512 { const r0=v128_swar.lt<T>(a.w0,a.w1,b.w0,b.w1),r1=v128_swar.take_hi(); const r2=v128_swar.lt<T>(a.w2,a.w3,b.w2,b.w3),r3=v128_swar.take_hi(); const r4=v128_swar.lt<T>(a.w4,a.w5,b.w4,b.w5),r5=v128_swar.take_hi(); const r6=v128_swar.lt<T>(a.w6,a.w7,b.w6,b.w7),r7=v128_swar.take_hi(); return new v512(r0,r1,r2,r3,r4,r5,r6,r7); }
-  @inline static le<T>(a: v512, b: v512): v512 { const r0=v128_swar.le<T>(a.w0,a.w1,b.w0,b.w1),r1=v128_swar.take_hi(); const r2=v128_swar.le<T>(a.w2,a.w3,b.w2,b.w3),r3=v128_swar.take_hi(); const r4=v128_swar.le<T>(a.w4,a.w5,b.w4,b.w5),r5=v128_swar.take_hi(); const r6=v128_swar.le<T>(a.w6,a.w7,b.w6,b.w7),r7=v128_swar.take_hi(); return new v512(r0,r1,r2,r3,r4,r5,r6,r7); }
-  @inline static gt<T>(a: v512, b: v512): v512 { return v512.lt<T>(b, a); }
-  @inline static ge<T>(a: v512, b: v512): v512 { return v512.le<T>(b, a); }
+  @inline static store(
+    ptr: usize,
+    a: v512,
+    immOffset: usize = 0,
+    immAlign: usize = 1,
+  ): void {
+    const p = ptr + immOffset;
+    store<u64>(p, a.w0);
+    store<u64>(p, a.w1, 8);
+    store<u64>(p, a.w2, 16);
+    store<u64>(p, a.w3, 24);
+    store<u64>(p, a.w4, 32);
+    store<u64>(p, a.w5, 40);
+    store<u64>(p, a.w6, 48);
+    store<u64>(p, a.w7, 56);
+  }
 
-  @inline static and(a:v512,b:v512):v512{return new v512(a.w0&b.w0,a.w1&b.w1,a.w2&b.w2,a.w3&b.w3,a.w4&b.w4,a.w5&b.w5,a.w6&b.w6,a.w7&b.w7);}
-  @inline static or(a:v512,b:v512):v512{return new v512(a.w0|b.w0,a.w1|b.w1,a.w2|b.w2,a.w3|b.w3,a.w4|b.w4,a.w5|b.w5,a.w6|b.w6,a.w7|b.w7);}
-  @inline static xor(a:v512,b:v512):v512{return new v512(a.w0^b.w0,a.w1^b.w1,a.w2^b.w2,a.w3^b.w3,a.w4^b.w4,a.w5^b.w5,a.w6^b.w6,a.w7^b.w7);}
-  @inline static andnot(a:v512,b:v512):v512{return new v512(a.w0&~b.w0,a.w1&~b.w1,a.w2&~b.w2,a.w3&~b.w3,a.w4&~b.w4,a.w5&~b.w5,a.w6&~b.w6,a.w7&~b.w7);}
-  @inline static not(a:v512):v512{return new v512(~a.w0,~a.w1,~a.w2,~a.w3,~a.w4,~a.w5,~a.w6,~a.w7);}
-  @inline static bitselect(a:v512,b:v512,m:v512):v512{return new v512(b.w0^((a.w0^b.w0)&m.w0),b.w1^((a.w1^b.w1)&m.w1),b.w2^((a.w2^b.w2)&m.w2),b.w3^((a.w3^b.w3)&m.w3),b.w4^((a.w4^b.w4)&m.w4),b.w5^((a.w5^b.w5)&m.w5),b.w6^((a.w6^b.w6)&m.w6),b.w7^((a.w7^b.w7)&m.w7));}
-  @inline static any_true(a:v512):bool{return (a.w0|a.w1|a.w2|a.w3|a.w4|a.w5|a.w6|a.w7)!=0;}
-  @inline static all_true<T>(a:v512):bool{return v128_swar.all_true<T>(a.w0,a.w1)&&v128_swar.all_true<T>(a.w2,a.w3)&&v128_swar.all_true<T>(a.w4,a.w5)&&v128_swar.all_true<T>(a.w6,a.w7);}
-  @inline static bitmask<T>(a:v512):u64{const n=16/sizeof<T>();return (v128_swar.bitmask<T>(a.w0,a.w1) as u32 as u64)|((v128_swar.bitmask<T>(a.w2,a.w3) as u32 as u64)<<n)|((v128_swar.bitmask<T>(a.w4,a.w5) as u32 as u64)<<(n*2))|((v128_swar.bitmask<T>(a.w6,a.w7) as u32 as u64)<<(n*3));}
-  @inline static extract_lane<T>(a:v512,idx:u8):T{const n=(16/sizeof<T>()) as u32,lane=(idx as u32)%(n<<2),chunk=lane/n,inner=(lane%n) as u8;if(chunk==0)return v128_swar.extract_lane<T>(a.w0,a.w1,inner);if(chunk==1)return v128_swar.extract_lane<T>(a.w2,a.w3,inner);if(chunk==2)return v128_swar.extract_lane<T>(a.w4,a.w5,inner);return v128_swar.extract_lane<T>(a.w6,a.w7,inner);}
-  @inline static replace_lane<T>(a:v512,idx:u8,value:T):v512{const n=(16/sizeof<T>()) as u32,lane=(idx as u32)%(n<<2),chunk=lane/n,inner=(lane%n) as u8;if(chunk==0){const lo=v128_swar.replace_lane<T>(a.w0,a.w1,inner,value);return new v512(lo,v128_swar.take_hi(),a.w2,a.w3,a.w4,a.w5,a.w6,a.w7);}if(chunk==1){const lo=v128_swar.replace_lane<T>(a.w2,a.w3,inner,value);return new v512(a.w0,a.w1,lo,v128_swar.take_hi(),a.w4,a.w5,a.w6,a.w7);}if(chunk==2){const lo=v128_swar.replace_lane<T>(a.w4,a.w5,inner,value);return new v512(a.w0,a.w1,a.w2,a.w3,lo,v128_swar.take_hi(),a.w6,a.w7);}const lo=v128_swar.replace_lane<T>(a.w6,a.w7,inner,value);return new v512(a.w0,a.w1,a.w2,a.w3,a.w4,a.w5,lo,v128_swar.take_hi());}
-  @inline private static chunk(a: v512, index: u32): V128Fallback { if (index == 0) return new V128Fallback(a.w0,a.w1); if (index == 1) return new V128Fallback(a.w2,a.w3); if (index == 2) return new V128Fallback(a.w4,a.w5); return new V128Fallback(a.w6,a.w7); }
-  @inline private static fromChunks(c0: V128Fallback, c1: V128Fallback, c2: V128Fallback, c3: V128Fallback): v512 { return new v512(c0.lo, c0.hi, c1.lo, c1.hi, c2.lo, c2.hi, c3.lo, c3.hi); }
-  @inline static loadPartial(ptr: usize, len: i32, immOffset: usize = 0, immAlign: usize = 1, fill: i8 = 0): v512 { const n0 = len <= 0 ? 0 : len >= 16 ? 16 : len - 0; const c0 = V128Fallback.loadPartial(ptr, n0, immOffset + 0, immAlign, fill); const n1 = len <= 16 ? 0 : len >= 32 ? 16 : len - 16; const c1 = V128Fallback.loadPartial(ptr, n1, immOffset + 16, immAlign, fill); const n2 = len <= 32 ? 0 : len >= 48 ? 16 : len - 32; const c2 = V128Fallback.loadPartial(ptr, n2, immOffset + 32, immAlign, fill); const n3 = len <= 48 ? 0 : len >= 64 ? 16 : len - 48; const c3 = V128Fallback.loadPartial(ptr, n3, immOffset + 48, immAlign, fill); return v512.fromChunks(c0, c1, c2, c3); }
-  @inline static storePartial(ptr: usize, value: v512, len: i32, immOffset: usize = 0, immAlign: usize = 1): void { const n0 = len <= 0 ? 0 : len >= 16 ? 16 : len - 0; if (n0 > 0) V128Fallback.storePartial(ptr, v512.chunk(value, 0), n0, immOffset + 0, immAlign); const n1 = len <= 16 ? 0 : len >= 32 ? 16 : len - 16; if (n1 > 0) V128Fallback.storePartial(ptr, v512.chunk(value, 1), n1, immOffset + 16, immAlign); const n2 = len <= 32 ? 0 : len >= 48 ? 16 : len - 32; if (n2 > 0) V128Fallback.storePartial(ptr, v512.chunk(value, 2), n2, immOffset + 32, immAlign); const n3 = len <= 48 ? 0 : len >= 64 ? 16 : len - 48; if (n3 > 0) V128Fallback.storePartial(ptr, v512.chunk(value, 3), n3, immOffset + 48, immAlign); }
-  @inline static load_ext<TFrom>(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v512 { return v512.fromChunks(V128Fallback.load_ext<TFrom>(ptr, immOffset + 0, immAlign), V128Fallback.load_ext<TFrom>(ptr, immOffset + 8, immAlign), V128Fallback.load_ext<TFrom>(ptr, immOffset + 16, immAlign), V128Fallback.load_ext<TFrom>(ptr, immOffset + 24, immAlign)); }
-  @inline static load_zero<TFrom>(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v512 { const c0 = V128Fallback.load_zero<TFrom>(ptr, immOffset, immAlign); return v512.fromChunks(c0, new V128Fallback(0, 0), new V128Fallback(0, 0), new V128Fallback(0, 0)); }
-  @inline static load_splat<T>(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v512 { const c = V128Fallback.load_splat<T>(ptr, immOffset, immAlign); return v512.fromChunks(c, c, c, c); }
-  @inline static load8_splat(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v512 { return v512.load_splat<i8>(ptr, immOffset, immAlign); }
-  @inline static load16_splat(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v512 { return v512.load_splat<i16>(ptr, immOffset, immAlign); }
-  @inline static load32_splat(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v512 { return v512.load_splat<i32>(ptr, immOffset, immAlign); }
-  @inline static load64_splat(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v512 { return v512.load_splat<i64>(ptr, immOffset, immAlign); }
-  @inline static load8x8_s(ptr: usize, immOffset: u32 = 0, immAlign: u32 = 1): v512 { return v512.fromChunks(V128Fallback.load8x8_s(ptr, immOffset + 0, immAlign), V128Fallback.load8x8_s(ptr, immOffset + 8, immAlign), V128Fallback.load8x8_s(ptr, immOffset + 16, immAlign), V128Fallback.load8x8_s(ptr, immOffset + 24, immAlign)); }
-  @inline static load8x8_u(ptr: usize, immOffset: u32 = 0, immAlign: u32 = 1): v512 { return v512.fromChunks(V128Fallback.load8x8_u(ptr, immOffset + 0, immAlign), V128Fallback.load8x8_u(ptr, immOffset + 8, immAlign), V128Fallback.load8x8_u(ptr, immOffset + 16, immAlign), V128Fallback.load8x8_u(ptr, immOffset + 24, immAlign)); }
-  @inline static load16x4_s(ptr: usize, immOffset: u32 = 0, immAlign: u32 = 1): v512 { return v512.fromChunks(V128Fallback.load16x4_s(ptr, immOffset + 0, immAlign), V128Fallback.load16x4_s(ptr, immOffset + 8, immAlign), V128Fallback.load16x4_s(ptr, immOffset + 16, immAlign), V128Fallback.load16x4_s(ptr, immOffset + 24, immAlign)); }
-  @inline static load16x4_u(ptr: usize, immOffset: u32 = 0, immAlign: u32 = 1): v512 { return v512.fromChunks(V128Fallback.load16x4_u(ptr, immOffset + 0, immAlign), V128Fallback.load16x4_u(ptr, immOffset + 8, immAlign), V128Fallback.load16x4_u(ptr, immOffset + 16, immAlign), V128Fallback.load16x4_u(ptr, immOffset + 24, immAlign)); }
-  @inline static load32x2_s(ptr: usize, immOffset: u32 = 0, immAlign: u32 = 1): v512 { return v512.fromChunks(V128Fallback.load32x2_s(ptr, immOffset + 0, immAlign), V128Fallback.load32x2_s(ptr, immOffset + 8, immAlign), V128Fallback.load32x2_s(ptr, immOffset + 16, immAlign), V128Fallback.load32x2_s(ptr, immOffset + 24, immAlign)); }
-  @inline static load32x2_u(ptr: usize, immOffset: u32 = 0, immAlign: u32 = 1): v512 { return v512.fromChunks(V128Fallback.load32x2_u(ptr, immOffset + 0, immAlign), V128Fallback.load32x2_u(ptr, immOffset + 8, immAlign), V128Fallback.load32x2_u(ptr, immOffset + 16, immAlign), V128Fallback.load32x2_u(ptr, immOffset + 24, immAlign)); }
-  @inline static load32_zero(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v512 { return v512.load_zero<i32>(ptr, immOffset, immAlign); }
-  @inline static load64_zero(ptr: usize, immOffset: usize = 0, immAlign: usize = 1): v512 { return v512.load_zero<i64>(ptr, immOffset, immAlign); }
-  @inline static load_lane<T>(ptr: usize, vec: v512, idx: u8, immOffset: usize = 0, immAlign: usize = 1): v512 { return v512.replace_lane<T>(vec, idx, load<T>(ptr + immOffset)); }
-  @inline static store_lane<T>(ptr: usize, vec: v512, idx: u8, immOffset: usize = 0, immAlign: usize = 1): void { store<T>(ptr + immOffset, v512.extract_lane<T>(vec, idx)); }
-  @inline static load8_lane(ptr: usize, vec: v512, idx: u8, immOffset: usize = 0, immAlign: usize = 1): v512 { return v512.load_lane<i8>(ptr, vec, idx, immOffset, immAlign); }
-  @inline static store8_lane(ptr: usize, vec: v512, idx: u8, immOffset: usize = 0, immAlign: usize = 1): void { v512.store_lane<i8>(ptr, vec, idx, immOffset, immAlign); }
-  @inline static load16_lane(ptr: usize, vec: v512, idx: u8, immOffset: usize = 0, immAlign: usize = 1): v512 { return v512.load_lane<i16>(ptr, vec, idx, immOffset, immAlign); }
-  @inline static store16_lane(ptr: usize, vec: v512, idx: u8, immOffset: usize = 0, immAlign: usize = 1): void { v512.store_lane<i16>(ptr, vec, idx, immOffset, immAlign); }
-  @inline static load32_lane(ptr: usize, vec: v512, idx: u8, immOffset: usize = 0, immAlign: usize = 1): v512 { return v512.load_lane<i32>(ptr, vec, idx, immOffset, immAlign); }
-  @inline static store32_lane(ptr: usize, vec: v512, idx: u8, immOffset: usize = 0, immAlign: usize = 1): void { v512.store_lane<i32>(ptr, vec, idx, immOffset, immAlign); }
-  @inline static load64_lane(ptr: usize, vec: v512, idx: u8, immOffset: usize = 0, immAlign: usize = 1): v512 { return v512.load_lane<i64>(ptr, vec, idx, immOffset, immAlign); }
-  @inline static store64_lane(ptr: usize, vec: v512, idx: u8, immOffset: usize = 0, immAlign: usize = 1): void { v512.store_lane<i64>(ptr, vec, idx, immOffset, immAlign); }
+
+  @inline static splat<T>(x: T): v512 {
+    const lo = v128_swar.splat<T>(x),
+      hi = v128_swar.take_hi();
+    return new v512(lo, hi, lo, hi, lo, hi, lo, hi);
+  }
+
+
+  @inline static add<T>(a: v512, b: v512): v512 {
+    const r0 = v128_swar.add<T>(a.w0, a.w1, b.w0, b.w1),
+      r1 = v128_swar.take_hi();
+    const r2 = v128_swar.add<T>(a.w2, a.w3, b.w2, b.w3),
+      r3 = v128_swar.take_hi();
+    const r4 = v128_swar.add<T>(a.w4, a.w5, b.w4, b.w5),
+      r5 = v128_swar.take_hi();
+    const r6 = v128_swar.add<T>(a.w6, a.w7, b.w6, b.w7),
+      r7 = v128_swar.take_hi();
+    return new v512(r0, r1, r2, r3, r4, r5, r6, r7);
+  }
+
+
+  @inline static sub<T>(a: v512, b: v512): v512 {
+    const r0 = v128_swar.sub<T>(a.w0, a.w1, b.w0, b.w1),
+      r1 = v128_swar.take_hi();
+    const r2 = v128_swar.sub<T>(a.w2, a.w3, b.w2, b.w3),
+      r3 = v128_swar.take_hi();
+    const r4 = v128_swar.sub<T>(a.w4, a.w5, b.w4, b.w5),
+      r5 = v128_swar.take_hi();
+    const r6 = v128_swar.sub<T>(a.w6, a.w7, b.w6, b.w7),
+      r7 = v128_swar.take_hi();
+    return new v512(r0, r1, r2, r3, r4, r5, r6, r7);
+  }
+
+
+  @inline static mul<T>(a: v512, b: v512): v512 {
+    const r0 = v128_swar.mul<T>(a.w0, a.w1, b.w0, b.w1),
+      r1 = v128_swar.take_hi();
+    const r2 = v128_swar.mul<T>(a.w2, a.w3, b.w2, b.w3),
+      r3 = v128_swar.take_hi();
+    const r4 = v128_swar.mul<T>(a.w4, a.w5, b.w4, b.w5),
+      r5 = v128_swar.take_hi();
+    const r6 = v128_swar.mul<T>(a.w6, a.w7, b.w6, b.w7),
+      r7 = v128_swar.take_hi();
+    return new v512(r0, r1, r2, r3, r4, r5, r6, r7);
+  }
+
+
+  @inline static min<T>(a: v512, b: v512): v512 {
+    const r0 = v128_swar.min<T>(a.w0, a.w1, b.w0, b.w1),
+      r1 = v128_swar.take_hi();
+    const r2 = v128_swar.min<T>(a.w2, a.w3, b.w2, b.w3),
+      r3 = v128_swar.take_hi();
+    const r4 = v128_swar.min<T>(a.w4, a.w5, b.w4, b.w5),
+      r5 = v128_swar.take_hi();
+    const r6 = v128_swar.min<T>(a.w6, a.w7, b.w6, b.w7),
+      r7 = v128_swar.take_hi();
+    return new v512(r0, r1, r2, r3, r4, r5, r6, r7);
+  }
+
+
+  @inline static max<T>(a: v512, b: v512): v512 {
+    const r0 = v128_swar.max<T>(a.w0, a.w1, b.w0, b.w1),
+      r1 = v128_swar.take_hi();
+    const r2 = v128_swar.max<T>(a.w2, a.w3, b.w2, b.w3),
+      r3 = v128_swar.take_hi();
+    const r4 = v128_swar.max<T>(a.w4, a.w5, b.w4, b.w5),
+      r5 = v128_swar.take_hi();
+    const r6 = v128_swar.max<T>(a.w6, a.w7, b.w6, b.w7),
+      r7 = v128_swar.take_hi();
+    return new v512(r0, r1, r2, r3, r4, r5, r6, r7);
+  }
+
+
+  @inline static add_sat<T>(a: v512, b: v512): v512 {
+    const r0 = v128_swar.add_sat<T>(a.w0, a.w1, b.w0, b.w1),
+      r1 = v128_swar.take_hi();
+    const r2 = v128_swar.add_sat<T>(a.w2, a.w3, b.w2, b.w3),
+      r3 = v128_swar.take_hi();
+    const r4 = v128_swar.add_sat<T>(a.w4, a.w5, b.w4, b.w5),
+      r5 = v128_swar.take_hi();
+    const r6 = v128_swar.add_sat<T>(a.w6, a.w7, b.w6, b.w7),
+      r7 = v128_swar.take_hi();
+    return new v512(r0, r1, r2, r3, r4, r5, r6, r7);
+  }
+
+
+  @inline static sub_sat<T>(a: v512, b: v512): v512 {
+    const r0 = v128_swar.sub_sat<T>(a.w0, a.w1, b.w0, b.w1),
+      r1 = v128_swar.take_hi();
+    const r2 = v128_swar.sub_sat<T>(a.w2, a.w3, b.w2, b.w3),
+      r3 = v128_swar.take_hi();
+    const r4 = v128_swar.sub_sat<T>(a.w4, a.w5, b.w4, b.w5),
+      r5 = v128_swar.take_hi();
+    const r6 = v128_swar.sub_sat<T>(a.w6, a.w7, b.w6, b.w7),
+      r7 = v128_swar.take_hi();
+    return new v512(r0, r1, r2, r3, r4, r5, r6, r7);
+  }
+
+
+  @inline static avgr<T>(a: v512, b: v512): v512 {
+    const r0 = v128_swar.avgr<T>(a.w0, a.w1, b.w0, b.w1),
+      r1 = v128_swar.take_hi();
+    const r2 = v128_swar.avgr<T>(a.w2, a.w3, b.w2, b.w3),
+      r3 = v128_swar.take_hi();
+    const r4 = v128_swar.avgr<T>(a.w4, a.w5, b.w4, b.w5),
+      r5 = v128_swar.take_hi();
+    const r6 = v128_swar.avgr<T>(a.w6, a.w7, b.w6, b.w7),
+      r7 = v128_swar.take_hi();
+    return new v512(r0, r1, r2, r3, r4, r5, r6, r7);
+  }
+
+
+  @inline static neg<T>(a: v512): v512 {
+    const r0 = v128_swar.neg<T>(a.w0, a.w1),
+      r1 = v128_swar.take_hi();
+    const r2 = v128_swar.neg<T>(a.w2, a.w3),
+      r3 = v128_swar.take_hi();
+    const r4 = v128_swar.neg<T>(a.w4, a.w5),
+      r5 = v128_swar.take_hi();
+    const r6 = v128_swar.neg<T>(a.w6, a.w7),
+      r7 = v128_swar.take_hi();
+    return new v512(r0, r1, r2, r3, r4, r5, r6, r7);
+  }
+
+
+  @inline static abs<T>(a: v512): v512 {
+    const r0 = v128_swar.abs<T>(a.w0, a.w1),
+      r1 = v128_swar.take_hi();
+    const r2 = v128_swar.abs<T>(a.w2, a.w3),
+      r3 = v128_swar.take_hi();
+    const r4 = v128_swar.abs<T>(a.w4, a.w5),
+      r5 = v128_swar.take_hi();
+    const r6 = v128_swar.abs<T>(a.w6, a.w7),
+      r7 = v128_swar.take_hi();
+    return new v512(r0, r1, r2, r3, r4, r5, r6, r7);
+  }
+
+
+  @inline static shl<T>(a: v512, s: i32): v512 {
+    const r0 = v128_swar.shl<T>(a.w0, a.w1, s),
+      r1 = v128_swar.take_hi();
+    const r2 = v128_swar.shl<T>(a.w2, a.w3, s),
+      r3 = v128_swar.take_hi();
+    const r4 = v128_swar.shl<T>(a.w4, a.w5, s),
+      r5 = v128_swar.take_hi();
+    const r6 = v128_swar.shl<T>(a.w6, a.w7, s),
+      r7 = v128_swar.take_hi();
+    return new v512(r0, r1, r2, r3, r4, r5, r6, r7);
+  }
+
+
+  @inline static shr<T>(a: v512, s: i32): v512 {
+    const r0 = v128_swar.shr<T>(a.w0, a.w1, s),
+      r1 = v128_swar.take_hi();
+    const r2 = v128_swar.shr<T>(a.w2, a.w3, s),
+      r3 = v128_swar.take_hi();
+    const r4 = v128_swar.shr<T>(a.w4, a.w5, s),
+      r5 = v128_swar.take_hi();
+    const r6 = v128_swar.shr<T>(a.w6, a.w7, s),
+      r7 = v128_swar.take_hi();
+    return new v512(r0, r1, r2, r3, r4, r5, r6, r7);
+  }
+
+
+  @inline static eq<T>(a: v512, b: v512): v512 {
+    const r0 = v128_swar.eq<T>(a.w0, a.w1, b.w0, b.w1),
+      r1 = v128_swar.take_hi();
+    const r2 = v128_swar.eq<T>(a.w2, a.w3, b.w2, b.w3),
+      r3 = v128_swar.take_hi();
+    const r4 = v128_swar.eq<T>(a.w4, a.w5, b.w4, b.w5),
+      r5 = v128_swar.take_hi();
+    const r6 = v128_swar.eq<T>(a.w6, a.w7, b.w6, b.w7),
+      r7 = v128_swar.take_hi();
+    return new v512(r0, r1, r2, r3, r4, r5, r6, r7);
+  }
+
+
+  @inline static ne<T>(a: v512, b: v512): v512 {
+    const r0 = v128_swar.ne<T>(a.w0, a.w1, b.w0, b.w1),
+      r1 = v128_swar.take_hi();
+    const r2 = v128_swar.ne<T>(a.w2, a.w3, b.w2, b.w3),
+      r3 = v128_swar.take_hi();
+    const r4 = v128_swar.ne<T>(a.w4, a.w5, b.w4, b.w5),
+      r5 = v128_swar.take_hi();
+    const r6 = v128_swar.ne<T>(a.w6, a.w7, b.w6, b.w7),
+      r7 = v128_swar.take_hi();
+    return new v512(r0, r1, r2, r3, r4, r5, r6, r7);
+  }
+
+
+  @inline static lt<T>(a: v512, b: v512): v512 {
+    const r0 = v128_swar.lt<T>(a.w0, a.w1, b.w0, b.w1),
+      r1 = v128_swar.take_hi();
+    const r2 = v128_swar.lt<T>(a.w2, a.w3, b.w2, b.w3),
+      r3 = v128_swar.take_hi();
+    const r4 = v128_swar.lt<T>(a.w4, a.w5, b.w4, b.w5),
+      r5 = v128_swar.take_hi();
+    const r6 = v128_swar.lt<T>(a.w6, a.w7, b.w6, b.w7),
+      r7 = v128_swar.take_hi();
+    return new v512(r0, r1, r2, r3, r4, r5, r6, r7);
+  }
+
+
+  @inline static le<T>(a: v512, b: v512): v512 {
+    const r0 = v128_swar.le<T>(a.w0, a.w1, b.w0, b.w1),
+      r1 = v128_swar.take_hi();
+    const r2 = v128_swar.le<T>(a.w2, a.w3, b.w2, b.w3),
+      r3 = v128_swar.take_hi();
+    const r4 = v128_swar.le<T>(a.w4, a.w5, b.w4, b.w5),
+      r5 = v128_swar.take_hi();
+    const r6 = v128_swar.le<T>(a.w6, a.w7, b.w6, b.w7),
+      r7 = v128_swar.take_hi();
+    return new v512(r0, r1, r2, r3, r4, r5, r6, r7);
+  }
+
+
+  @inline static gt<T>(a: v512, b: v512): v512 {
+    return v512.lt<T>(b, a);
+  }
+
+
+  @inline static ge<T>(a: v512, b: v512): v512 {
+    return v512.le<T>(b, a);
+  }
+
+
+  @inline static and(a: v512, b: v512): v512 {
+    return new v512(
+      a.w0 & b.w0,
+      a.w1 & b.w1,
+      a.w2 & b.w2,
+      a.w3 & b.w3,
+      a.w4 & b.w4,
+      a.w5 & b.w5,
+      a.w6 & b.w6,
+      a.w7 & b.w7,
+    );
+  }
+
+
+  @inline static or(a: v512, b: v512): v512 {
+    return new v512(
+      a.w0 | b.w0,
+      a.w1 | b.w1,
+      a.w2 | b.w2,
+      a.w3 | b.w3,
+      a.w4 | b.w4,
+      a.w5 | b.w5,
+      a.w6 | b.w6,
+      a.w7 | b.w7,
+    );
+  }
+
+
+  @inline static xor(a: v512, b: v512): v512 {
+    return new v512(
+      a.w0 ^ b.w0,
+      a.w1 ^ b.w1,
+      a.w2 ^ b.w2,
+      a.w3 ^ b.w3,
+      a.w4 ^ b.w4,
+      a.w5 ^ b.w5,
+      a.w6 ^ b.w6,
+      a.w7 ^ b.w7,
+    );
+  }
+
+
+  @inline static andnot(a: v512, b: v512): v512 {
+    return new v512(
+      a.w0 & ~b.w0,
+      a.w1 & ~b.w1,
+      a.w2 & ~b.w2,
+      a.w3 & ~b.w3,
+      a.w4 & ~b.w4,
+      a.w5 & ~b.w5,
+      a.w6 & ~b.w6,
+      a.w7 & ~b.w7,
+    );
+  }
+
+
+  @inline static not(a: v512): v512 {
+    return new v512(~a.w0, ~a.w1, ~a.w2, ~a.w3, ~a.w4, ~a.w5, ~a.w6, ~a.w7);
+  }
+
+
+  @inline static bitselect(a: v512, b: v512, m: v512): v512 {
+    return new v512(
+      b.w0 ^ ((a.w0 ^ b.w0) & m.w0),
+      b.w1 ^ ((a.w1 ^ b.w1) & m.w1),
+      b.w2 ^ ((a.w2 ^ b.w2) & m.w2),
+      b.w3 ^ ((a.w3 ^ b.w3) & m.w3),
+      b.w4 ^ ((a.w4 ^ b.w4) & m.w4),
+      b.w5 ^ ((a.w5 ^ b.w5) & m.w5),
+      b.w6 ^ ((a.w6 ^ b.w6) & m.w6),
+      b.w7 ^ ((a.w7 ^ b.w7) & m.w7),
+    );
+  }
+
+
+  @inline static any_true(a: v512): bool {
+    return (a.w0 | a.w1 | a.w2 | a.w3 | a.w4 | a.w5 | a.w6 | a.w7) != 0;
+  }
+
+
+  @inline static all_true<T>(a: v512): bool {
+    return (
+      v128_swar.all_true<T>(a.w0, a.w1) &&
+      v128_swar.all_true<T>(a.w2, a.w3) &&
+      v128_swar.all_true<T>(a.w4, a.w5) &&
+      v128_swar.all_true<T>(a.w6, a.w7)
+    );
+  }
+
+
+  @inline static bitmask<T>(a: v512): u64 {
+    const n = 16 / sizeof<T>();
+    return (
+      (v128_swar.bitmask<T>(a.w0, a.w1) as u32 as u64) |
+      ((v128_swar.bitmask<T>(a.w2, a.w3) as u32 as u64) << n) |
+      ((v128_swar.bitmask<T>(a.w4, a.w5) as u32 as u64) << (n * 2)) |
+      ((v128_swar.bitmask<T>(a.w6, a.w7) as u32 as u64) << (n * 3))
+    );
+  }
+
+
+  @inline static extract_lane<T>(a: v512, idx: u8): T {
+    const n = (16 / sizeof<T>()) as u32,
+      lane = (idx as u32) % (n << 2),
+      chunk = lane / n,
+      inner = (lane % n) as u8;
+    if (chunk == 0) return v128_swar.extract_lane<T>(a.w0, a.w1, inner);
+    if (chunk == 1) return v128_swar.extract_lane<T>(a.w2, a.w3, inner);
+    if (chunk == 2) return v128_swar.extract_lane<T>(a.w4, a.w5, inner);
+    return v128_swar.extract_lane<T>(a.w6, a.w7, inner);
+  }
+
+
+  @inline static replace_lane<T>(a: v512, idx: u8, value: T): v512 {
+    const n = (16 / sizeof<T>()) as u32,
+      lane = (idx as u32) % (n << 2),
+      chunk = lane / n,
+      inner = (lane % n) as u8;
+    if (chunk == 0) {
+      const lo = v128_swar.replace_lane<T>(a.w0, a.w1, inner, value);
+      return new v512(
+        lo,
+        v128_swar.take_hi(),
+        a.w2,
+        a.w3,
+        a.w4,
+        a.w5,
+        a.w6,
+        a.w7,
+      );
+    }
+    if (chunk == 1) {
+      const lo = v128_swar.replace_lane<T>(a.w2, a.w3, inner, value);
+      return new v512(
+        a.w0,
+        a.w1,
+        lo,
+        v128_swar.take_hi(),
+        a.w4,
+        a.w5,
+        a.w6,
+        a.w7,
+      );
+    }
+    if (chunk == 2) {
+      const lo = v128_swar.replace_lane<T>(a.w4, a.w5, inner, value);
+      return new v512(
+        a.w0,
+        a.w1,
+        a.w2,
+        a.w3,
+        lo,
+        v128_swar.take_hi(),
+        a.w6,
+        a.w7,
+      );
+    }
+    const lo = v128_swar.replace_lane<T>(a.w6, a.w7, inner, value);
+    return new v512(
+      a.w0,
+      a.w1,
+      a.w2,
+      a.w3,
+      a.w4,
+      a.w5,
+      lo,
+      v128_swar.take_hi(),
+    );
+  }
+
+
+  @inline private static chunk(a: v512, index: u32): V128Fallback {
+    if (index == 0) return new V128Fallback(a.w0, a.w1);
+    if (index == 1) return new V128Fallback(a.w2, a.w3);
+    if (index == 2) return new V128Fallback(a.w4, a.w5);
+    return new V128Fallback(a.w6, a.w7);
+  }
+
+
+  @inline private static fromChunks(
+    c0: V128Fallback,
+    c1: V128Fallback,
+    c2: V128Fallback,
+    c3: V128Fallback,
+  ): v512 {
+    return new v512(c0.lo, c0.hi, c1.lo, c1.hi, c2.lo, c2.hi, c3.lo, c3.hi);
+  }
+
+
+  @inline static loadPartial(
+    ptr: usize,
+    len: i32,
+    immOffset: usize = 0,
+    immAlign: usize = 1,
+    fill: i8 = 0,
+  ): v512 {
+    const n0 = len <= 0 ? 0 : len >= 16 ? 16 : len - 0;
+    const c0 = V128Fallback.loadPartial(ptr, n0, immOffset + 0, immAlign, fill);
+    const n1 = len <= 16 ? 0 : len >= 32 ? 16 : len - 16;
+    const c1 = V128Fallback.loadPartial(
+      ptr,
+      n1,
+      immOffset + 16,
+      immAlign,
+      fill,
+    );
+    const n2 = len <= 32 ? 0 : len >= 48 ? 16 : len - 32;
+    const c2 = V128Fallback.loadPartial(
+      ptr,
+      n2,
+      immOffset + 32,
+      immAlign,
+      fill,
+    );
+    const n3 = len <= 48 ? 0 : len >= 64 ? 16 : len - 48;
+    const c3 = V128Fallback.loadPartial(
+      ptr,
+      n3,
+      immOffset + 48,
+      immAlign,
+      fill,
+    );
+    return v512.fromChunks(c0, c1, c2, c3);
+  }
+
+
+  @inline static storePartial(
+    ptr: usize,
+    value: v512,
+    len: i32,
+    immOffset: usize = 0,
+    immAlign: usize = 1,
+  ): void {
+    const n0 = len <= 0 ? 0 : len >= 16 ? 16 : len - 0;
+    if (n0 > 0)
+      V128Fallback.storePartial(
+        ptr,
+        v512.chunk(value, 0),
+        n0,
+        immOffset + 0,
+        immAlign,
+      );
+    const n1 = len <= 16 ? 0 : len >= 32 ? 16 : len - 16;
+    if (n1 > 0)
+      V128Fallback.storePartial(
+        ptr,
+        v512.chunk(value, 1),
+        n1,
+        immOffset + 16,
+        immAlign,
+      );
+    const n2 = len <= 32 ? 0 : len >= 48 ? 16 : len - 32;
+    if (n2 > 0)
+      V128Fallback.storePartial(
+        ptr,
+        v512.chunk(value, 2),
+        n2,
+        immOffset + 32,
+        immAlign,
+      );
+    const n3 = len <= 48 ? 0 : len >= 64 ? 16 : len - 48;
+    if (n3 > 0)
+      V128Fallback.storePartial(
+        ptr,
+        v512.chunk(value, 3),
+        n3,
+        immOffset + 48,
+        immAlign,
+      );
+  }
+
+
+  @inline static load_ext<TFrom>(
+    ptr: usize,
+    immOffset: usize = 0,
+    immAlign: usize = 1,
+  ): v512 {
+    return v512.fromChunks(
+      V128Fallback.load_ext<TFrom>(ptr, immOffset + 0, immAlign),
+      V128Fallback.load_ext<TFrom>(ptr, immOffset + 8, immAlign),
+      V128Fallback.load_ext<TFrom>(ptr, immOffset + 16, immAlign),
+      V128Fallback.load_ext<TFrom>(ptr, immOffset + 24, immAlign),
+    );
+  }
+
+
+  @inline static load_zero<TFrom>(
+    ptr: usize,
+    immOffset: usize = 0,
+    immAlign: usize = 1,
+  ): v512 {
+    const c0 = V128Fallback.load_zero<TFrom>(ptr, immOffset, immAlign);
+    return v512.fromChunks(
+      c0,
+      new V128Fallback(0, 0),
+      new V128Fallback(0, 0),
+      new V128Fallback(0, 0),
+    );
+  }
+
+
+  @inline static load_splat<T>(
+    ptr: usize,
+    immOffset: usize = 0,
+    immAlign: usize = 1,
+  ): v512 {
+    const c = V128Fallback.load_splat<T>(ptr, immOffset, immAlign);
+    return v512.fromChunks(c, c, c, c);
+  }
+
+
+  @inline static load8_splat(
+    ptr: usize,
+    immOffset: usize = 0,
+    immAlign: usize = 1,
+  ): v512 {
+    return v512.load_splat<i8>(ptr, immOffset, immAlign);
+  }
+
+
+  @inline static load16_splat(
+    ptr: usize,
+    immOffset: usize = 0,
+    immAlign: usize = 1,
+  ): v512 {
+    return v512.load_splat<i16>(ptr, immOffset, immAlign);
+  }
+
+
+  @inline static load32_splat(
+    ptr: usize,
+    immOffset: usize = 0,
+    immAlign: usize = 1,
+  ): v512 {
+    return v512.load_splat<i32>(ptr, immOffset, immAlign);
+  }
+
+
+  @inline static load64_splat(
+    ptr: usize,
+    immOffset: usize = 0,
+    immAlign: usize = 1,
+  ): v512 {
+    return v512.load_splat<i64>(ptr, immOffset, immAlign);
+  }
+
+
+  @inline static load8x8_s(
+    ptr: usize,
+    immOffset: u32 = 0,
+    immAlign: u32 = 1,
+  ): v512 {
+    return v512.fromChunks(
+      V128Fallback.load8x8_s(ptr, immOffset + 0, immAlign),
+      V128Fallback.load8x8_s(ptr, immOffset + 8, immAlign),
+      V128Fallback.load8x8_s(ptr, immOffset + 16, immAlign),
+      V128Fallback.load8x8_s(ptr, immOffset + 24, immAlign),
+    );
+  }
+
+
+  @inline static load8x8_u(
+    ptr: usize,
+    immOffset: u32 = 0,
+    immAlign: u32 = 1,
+  ): v512 {
+    return v512.fromChunks(
+      V128Fallback.load8x8_u(ptr, immOffset + 0, immAlign),
+      V128Fallback.load8x8_u(ptr, immOffset + 8, immAlign),
+      V128Fallback.load8x8_u(ptr, immOffset + 16, immAlign),
+      V128Fallback.load8x8_u(ptr, immOffset + 24, immAlign),
+    );
+  }
+
+
+  @inline static load16x4_s(
+    ptr: usize,
+    immOffset: u32 = 0,
+    immAlign: u32 = 1,
+  ): v512 {
+    return v512.fromChunks(
+      V128Fallback.load16x4_s(ptr, immOffset + 0, immAlign),
+      V128Fallback.load16x4_s(ptr, immOffset + 8, immAlign),
+      V128Fallback.load16x4_s(ptr, immOffset + 16, immAlign),
+      V128Fallback.load16x4_s(ptr, immOffset + 24, immAlign),
+    );
+  }
+
+
+  @inline static load16x4_u(
+    ptr: usize,
+    immOffset: u32 = 0,
+    immAlign: u32 = 1,
+  ): v512 {
+    return v512.fromChunks(
+      V128Fallback.load16x4_u(ptr, immOffset + 0, immAlign),
+      V128Fallback.load16x4_u(ptr, immOffset + 8, immAlign),
+      V128Fallback.load16x4_u(ptr, immOffset + 16, immAlign),
+      V128Fallback.load16x4_u(ptr, immOffset + 24, immAlign),
+    );
+  }
+
+
+  @inline static load32x2_s(
+    ptr: usize,
+    immOffset: u32 = 0,
+    immAlign: u32 = 1,
+  ): v512 {
+    return v512.fromChunks(
+      V128Fallback.load32x2_s(ptr, immOffset + 0, immAlign),
+      V128Fallback.load32x2_s(ptr, immOffset + 8, immAlign),
+      V128Fallback.load32x2_s(ptr, immOffset + 16, immAlign),
+      V128Fallback.load32x2_s(ptr, immOffset + 24, immAlign),
+    );
+  }
+
+
+  @inline static load32x2_u(
+    ptr: usize,
+    immOffset: u32 = 0,
+    immAlign: u32 = 1,
+  ): v512 {
+    return v512.fromChunks(
+      V128Fallback.load32x2_u(ptr, immOffset + 0, immAlign),
+      V128Fallback.load32x2_u(ptr, immOffset + 8, immAlign),
+      V128Fallback.load32x2_u(ptr, immOffset + 16, immAlign),
+      V128Fallback.load32x2_u(ptr, immOffset + 24, immAlign),
+    );
+  }
+
+
+  @inline static load32_zero(
+    ptr: usize,
+    immOffset: usize = 0,
+    immAlign: usize = 1,
+  ): v512 {
+    return v512.load_zero<i32>(ptr, immOffset, immAlign);
+  }
+
+
+  @inline static load64_zero(
+    ptr: usize,
+    immOffset: usize = 0,
+    immAlign: usize = 1,
+  ): v512 {
+    return v512.load_zero<i64>(ptr, immOffset, immAlign);
+  }
+
+
+  @inline static load_lane<T>(
+    ptr: usize,
+    vec: v512,
+    idx: u8,
+    immOffset: usize = 0,
+    immAlign: usize = 1,
+  ): v512 {
+    return v512.replace_lane<T>(vec, idx, load<T>(ptr + immOffset));
+  }
+
+
+  @inline static store_lane<T>(
+    ptr: usize,
+    vec: v512,
+    idx: u8,
+    immOffset: usize = 0,
+    immAlign: usize = 1,
+  ): void {
+    store<T>(ptr + immOffset, v512.extract_lane<T>(vec, idx));
+  }
+
+
+  @inline static load8_lane(
+    ptr: usize,
+    vec: v512,
+    idx: u8,
+    immOffset: usize = 0,
+    immAlign: usize = 1,
+  ): v512 {
+    return v512.load_lane<i8>(ptr, vec, idx, immOffset, immAlign);
+  }
+
+
+  @inline static store8_lane(
+    ptr: usize,
+    vec: v512,
+    idx: u8,
+    immOffset: usize = 0,
+    immAlign: usize = 1,
+  ): void {
+    v512.store_lane<i8>(ptr, vec, idx, immOffset, immAlign);
+  }
+
+
+  @inline static load16_lane(
+    ptr: usize,
+    vec: v512,
+    idx: u8,
+    immOffset: usize = 0,
+    immAlign: usize = 1,
+  ): v512 {
+    return v512.load_lane<i16>(ptr, vec, idx, immOffset, immAlign);
+  }
+
+
+  @inline static store16_lane(
+    ptr: usize,
+    vec: v512,
+    idx: u8,
+    immOffset: usize = 0,
+    immAlign: usize = 1,
+  ): void {
+    v512.store_lane<i16>(ptr, vec, idx, immOffset, immAlign);
+  }
+
+
+  @inline static load32_lane(
+    ptr: usize,
+    vec: v512,
+    idx: u8,
+    immOffset: usize = 0,
+    immAlign: usize = 1,
+  ): v512 {
+    return v512.load_lane<i32>(ptr, vec, idx, immOffset, immAlign);
+  }
+
+
+  @inline static store32_lane(
+    ptr: usize,
+    vec: v512,
+    idx: u8,
+    immOffset: usize = 0,
+    immAlign: usize = 1,
+  ): void {
+    v512.store_lane<i32>(ptr, vec, idx, immOffset, immAlign);
+  }
+
+
+  @inline static load64_lane(
+    ptr: usize,
+    vec: v512,
+    idx: u8,
+    immOffset: usize = 0,
+    immAlign: usize = 1,
+  ): v512 {
+    return v512.load_lane<i64>(ptr, vec, idx, immOffset, immAlign);
+  }
+
+
+  @inline static store64_lane(
+    ptr: usize,
+    vec: v512,
+    idx: u8,
+    immOffset: usize = 0,
+    immAlign: usize = 1,
+  ): void {
+    v512.store_lane<i64>(ptr, vec, idx, immOffset, immAlign);
+  }
   static shuffle<T>(a: v512, b: v512, ...lanes: u8[]): v512 {
     let out = v512.splat<T>(0 as T);
     const count = (64 / sizeof<T>()) as i32;
-    for (let i = 0, n = lanes.length < count ? lanes.length : count; i < n; i++) {
+    for (
+      let i = 0, n = lanes.length < count ? lanes.length : count;
+      i < n;
+      i++
+    ) {
       const lane = lanes[i] as i32;
-      out = v512.replace_lane<T>(out, i as u8, lane < count ? v512.extract_lane<T>(a, lane as u8) : v512.extract_lane<T>(b, (lane - count) as u8));
+      out = v512.replace_lane<T>(
+        out,
+        i as u8,
+        lane < count
+          ? v512.extract_lane<T>(a, lane as u8)
+          : v512.extract_lane<T>(b, (lane - count) as u8),
+      );
     }
     return out;
   }
@@ -89,43 +875,418 @@ export class v512 {
     let out = v512.splat<u8>(0);
     for (let i: u8 = 0; i < 64; i++) {
       const lane = v512.extract_lane<u8>(mask, i);
-      if (lane < 64) out = v512.replace_lane<u8>(out, i, v512.extract_lane<u8>(a, lane));
+      if (lane < 64)
+        out = v512.replace_lane<u8>(out, i, v512.extract_lane<u8>(a, lane));
     }
     return out;
   }
-  @inline static sqrt<T>(a: v512): v512 { return v512.fromChunks(V128Fallback.sqrt<T>(v512.chunk(a, 0)), V128Fallback.sqrt<T>(v512.chunk(a, 1)), V128Fallback.sqrt<T>(v512.chunk(a, 2)), V128Fallback.sqrt<T>(v512.chunk(a, 3))); }
-  @inline static ceil<T>(a: v512): v512 { return v512.fromChunks(V128Fallback.ceil<T>(v512.chunk(a, 0)), V128Fallback.ceil<T>(v512.chunk(a, 1)), V128Fallback.ceil<T>(v512.chunk(a, 2)), V128Fallback.ceil<T>(v512.chunk(a, 3))); }
-  @inline static floor<T>(a: v512): v512 { return v512.fromChunks(V128Fallback.floor<T>(v512.chunk(a, 0)), V128Fallback.floor<T>(v512.chunk(a, 1)), V128Fallback.floor<T>(v512.chunk(a, 2)), V128Fallback.floor<T>(v512.chunk(a, 3))); }
-  @inline static trunc<T>(a: v512): v512 { return v512.fromChunks(V128Fallback.trunc<T>(v512.chunk(a, 0)), V128Fallback.trunc<T>(v512.chunk(a, 1)), V128Fallback.trunc<T>(v512.chunk(a, 2)), V128Fallback.trunc<T>(v512.chunk(a, 3))); }
-  @inline static nearest<T>(a: v512): v512 { return v512.fromChunks(V128Fallback.nearest<T>(v512.chunk(a, 0)), V128Fallback.nearest<T>(v512.chunk(a, 1)), V128Fallback.nearest<T>(v512.chunk(a, 2)), V128Fallback.nearest<T>(v512.chunk(a, 3))); }
-  @inline static popcnt<T>(a: v512): v512 { return v512.fromChunks(V128Fallback.popcnt<T>(v512.chunk(a, 0)), V128Fallback.popcnt<T>(v512.chunk(a, 1)), V128Fallback.popcnt<T>(v512.chunk(a, 2)), V128Fallback.popcnt<T>(v512.chunk(a, 3))); }
-  @inline static convert<TFrom>(a: v512): v512 { return v512.fromChunks(V128Fallback.convert<TFrom>(v512.chunk(a, 0)), V128Fallback.convert<TFrom>(v512.chunk(a, 1)), V128Fallback.convert<TFrom>(v512.chunk(a, 2)), V128Fallback.convert<TFrom>(v512.chunk(a, 3))); }
-  @inline static convert_low<TFrom>(a: v512): v512 { return v512.fromChunks(V128Fallback.convert_low<TFrom>(new V128Fallback(a.w0,a.w1)), V128Fallback.convert_low<TFrom>(new V128Fallback(a.w1,0)), V128Fallback.convert_low<TFrom>(new V128Fallback(a.w2,a.w3)), V128Fallback.convert_low<TFrom>(new V128Fallback(a.w3,0))); }
-  @inline static trunc_sat<TTo>(a: v512): v512 { return v512.fromChunks(V128Fallback.trunc_sat<TTo>(v512.chunk(a, 0)), V128Fallback.trunc_sat<TTo>(v512.chunk(a, 1)), V128Fallback.trunc_sat<TTo>(v512.chunk(a, 2)), V128Fallback.trunc_sat<TTo>(v512.chunk(a, 3))); }
-  @inline static trunc_sat_zero<TTo>(a: v512): v512 { const c0=V128Fallback.trunc_sat_zero<TTo>(v512.chunk(a,0)),c1=V128Fallback.trunc_sat_zero<TTo>(v512.chunk(a,1)),c2=V128Fallback.trunc_sat_zero<TTo>(v512.chunk(a,2)),c3=V128Fallback.trunc_sat_zero<TTo>(v512.chunk(a,3)); return new v512(c0.lo,c1.lo,c2.lo,c3.lo,0,0,0,0); }
-  @inline static extend_low<TFrom>(a: v512): v512 { const c0=v512.chunk(a,0),c1=v512.chunk(a,1); return v512.fromChunks(V128Fallback.extend_low<TFrom>(c0),V128Fallback.extend_high<TFrom>(c0),V128Fallback.extend_low<TFrom>(c1),V128Fallback.extend_high<TFrom>(c1)); }
-  @inline static extend_high<TFrom>(a: v512): v512 { const c0=v512.chunk(a,2),c1=v512.chunk(a,3); return v512.fromChunks(V128Fallback.extend_low<TFrom>(c0),V128Fallback.extend_high<TFrom>(c0),V128Fallback.extend_low<TFrom>(c1),V128Fallback.extend_high<TFrom>(c1)); }
-  @inline static extadd_pairwise<TFrom>(a: v512): v512 { return v512.fromChunks(V128Fallback.extadd_pairwise<TFrom>(v512.chunk(a, 0)), V128Fallback.extadd_pairwise<TFrom>(v512.chunk(a, 1)), V128Fallback.extadd_pairwise<TFrom>(v512.chunk(a, 2)), V128Fallback.extadd_pairwise<TFrom>(v512.chunk(a, 3))); }
-  @inline static demote_zero<T extends f64 = f64>(a: v512): v512 { const c0=V128Fallback.demote_zero<T>(v512.chunk(a,0)),c1=V128Fallback.demote_zero<T>(v512.chunk(a,1)),c2=V128Fallback.demote_zero<T>(v512.chunk(a,2)),c3=V128Fallback.demote_zero<T>(v512.chunk(a,3)); return new v512(c0.lo,c1.lo,c2.lo,c3.lo,0,0,0,0); }
-  @inline static promote_low<T extends f32 = f32>(a: v512): v512 { return v512.fromChunks(V128Fallback.promote_low<T>(new V128Fallback(a.w0,a.w1)),V128Fallback.promote_low<T>(new V128Fallback(a.w1,0)),V128Fallback.promote_low<T>(new V128Fallback(a.w2,a.w3)),V128Fallback.promote_low<T>(new V128Fallback(a.w3,0))); }
-  @inline static relaxed_trunc<T>(a: v512): v512 { return v512.fromChunks(V128Fallback.relaxed_trunc<T>(v512.chunk(a, 0)), V128Fallback.relaxed_trunc<T>(v512.chunk(a, 1)), V128Fallback.relaxed_trunc<T>(v512.chunk(a, 2)), V128Fallback.relaxed_trunc<T>(v512.chunk(a, 3))); }
-  @inline static relaxed_trunc_zero<T>(a: v512): v512 { return v512.fromChunks(V128Fallback.relaxed_trunc_zero<T>(v512.chunk(a, 0)), V128Fallback.relaxed_trunc_zero<T>(v512.chunk(a, 1)), V128Fallback.relaxed_trunc_zero<T>(v512.chunk(a, 2)), V128Fallback.relaxed_trunc_zero<T>(v512.chunk(a, 3))); }
-  @inline static div<T>(a: v512, b: v512): v512 { return v512.fromChunks(V128Fallback.div<T>(v512.chunk(a, 0), v512.chunk(b, 0)), V128Fallback.div<T>(v512.chunk(a, 1), v512.chunk(b, 1)), V128Fallback.div<T>(v512.chunk(a, 2), v512.chunk(b, 2)), V128Fallback.div<T>(v512.chunk(a, 3), v512.chunk(b, 3))); }
-  @inline static pmin<T>(a: v512, b: v512): v512 { return v512.fromChunks(V128Fallback.pmin<T>(v512.chunk(a, 0), v512.chunk(b, 0)), V128Fallback.pmin<T>(v512.chunk(a, 1), v512.chunk(b, 1)), V128Fallback.pmin<T>(v512.chunk(a, 2), v512.chunk(b, 2)), V128Fallback.pmin<T>(v512.chunk(a, 3), v512.chunk(b, 3))); }
-  @inline static pmax<T>(a: v512, b: v512): v512 { return v512.fromChunks(V128Fallback.pmax<T>(v512.chunk(a, 0), v512.chunk(b, 0)), V128Fallback.pmax<T>(v512.chunk(a, 1), v512.chunk(b, 1)), V128Fallback.pmax<T>(v512.chunk(a, 2), v512.chunk(b, 2)), V128Fallback.pmax<T>(v512.chunk(a, 3), v512.chunk(b, 3))); }
-  @inline static dot<T extends i16>(a: v512, b: v512): v512 { return v512.fromChunks(V128Fallback.dot<T>(v512.chunk(a, 0), v512.chunk(b, 0)), V128Fallback.dot<T>(v512.chunk(a, 1), v512.chunk(b, 1)), V128Fallback.dot<T>(v512.chunk(a, 2), v512.chunk(b, 2)), V128Fallback.dot<T>(v512.chunk(a, 3), v512.chunk(b, 3))); }
-  @inline static narrow<TFrom>(a: v512, b: v512): v512 { return v512.fromChunks(V128Fallback.narrow<TFrom>(v512.chunk(a,0),v512.chunk(a,1)),V128Fallback.narrow<TFrom>(v512.chunk(a,2),v512.chunk(a,3)),V128Fallback.narrow<TFrom>(v512.chunk(b,0),v512.chunk(b,1)),V128Fallback.narrow<TFrom>(v512.chunk(b,2),v512.chunk(b,3))); }
-  @inline static extmul_low<T>(a: v512, b: v512): v512 { const a0=v512.chunk(a,0),a1=v512.chunk(a,1),b0=v512.chunk(b,0),b1=v512.chunk(b,1); return v512.fromChunks(V128Fallback.extmul_low<T>(a0,b0),V128Fallback.extmul_high<T>(a0,b0),V128Fallback.extmul_low<T>(a1,b1),V128Fallback.extmul_high<T>(a1,b1)); }
-  @inline static extmul_high<T>(a: v512, b: v512): v512 { const a0=v512.chunk(a,2),a1=v512.chunk(a,3),b0=v512.chunk(b,2),b1=v512.chunk(b,3); return v512.fromChunks(V128Fallback.extmul_low<T>(a0,b0),V128Fallback.extmul_high<T>(a0,b0),V128Fallback.extmul_low<T>(a1,b1),V128Fallback.extmul_high<T>(a1,b1)); }
-  @inline static q15mulr_sat<T extends i16>(a: v512, b: v512): v512 { return v512.fromChunks(V128Fallback.q15mulr_sat<T>(v512.chunk(a, 0), v512.chunk(b, 0)), V128Fallback.q15mulr_sat<T>(v512.chunk(a, 1), v512.chunk(b, 1)), V128Fallback.q15mulr_sat<T>(v512.chunk(a, 2), v512.chunk(b, 2)), V128Fallback.q15mulr_sat<T>(v512.chunk(a, 3), v512.chunk(b, 3))); }
-  @inline static relaxed_min<T>(a: v512, b: v512): v512 { return v512.fromChunks(V128Fallback.relaxed_min<T>(v512.chunk(a, 0), v512.chunk(b, 0)), V128Fallback.relaxed_min<T>(v512.chunk(a, 1), v512.chunk(b, 1)), V128Fallback.relaxed_min<T>(v512.chunk(a, 2), v512.chunk(b, 2)), V128Fallback.relaxed_min<T>(v512.chunk(a, 3), v512.chunk(b, 3))); }
-  @inline static relaxed_max<T>(a: v512, b: v512): v512 { return v512.fromChunks(V128Fallback.relaxed_max<T>(v512.chunk(a, 0), v512.chunk(b, 0)), V128Fallback.relaxed_max<T>(v512.chunk(a, 1), v512.chunk(b, 1)), V128Fallback.relaxed_max<T>(v512.chunk(a, 2), v512.chunk(b, 2)), V128Fallback.relaxed_max<T>(v512.chunk(a, 3), v512.chunk(b, 3))); }
-  @inline static relaxed_q15mulr<T>(a: v512, b: v512): v512 { return v512.fromChunks(V128Fallback.relaxed_q15mulr<T>(v512.chunk(a, 0), v512.chunk(b, 0)), V128Fallback.relaxed_q15mulr<T>(v512.chunk(a, 1), v512.chunk(b, 1)), V128Fallback.relaxed_q15mulr<T>(v512.chunk(a, 2), v512.chunk(b, 2)), V128Fallback.relaxed_q15mulr<T>(v512.chunk(a, 3), v512.chunk(b, 3))); }
-  @inline static relaxed_dot<T>(a: v512, b: v512): v512 { return v512.fromChunks(V128Fallback.relaxed_dot<T>(v512.chunk(a, 0), v512.chunk(b, 0)), V128Fallback.relaxed_dot<T>(v512.chunk(a, 1), v512.chunk(b, 1)), V128Fallback.relaxed_dot<T>(v512.chunk(a, 2), v512.chunk(b, 2)), V128Fallback.relaxed_dot<T>(v512.chunk(a, 3), v512.chunk(b, 3))); }
-  @inline static relaxed_madd<T>(a: v512, b: v512, c: v512): v512 { return v512.fromChunks(V128Fallback.relaxed_madd<T>(v512.chunk(a, 0), v512.chunk(b, 0), v512.chunk(c, 0)), V128Fallback.relaxed_madd<T>(v512.chunk(a, 1), v512.chunk(b, 1), v512.chunk(c, 1)), V128Fallback.relaxed_madd<T>(v512.chunk(a, 2), v512.chunk(b, 2), v512.chunk(c, 2)), V128Fallback.relaxed_madd<T>(v512.chunk(a, 3), v512.chunk(b, 3), v512.chunk(c, 3))); }
-  @inline static relaxed_nmadd<T>(a: v512, b: v512, c: v512): v512 { return v512.fromChunks(V128Fallback.relaxed_nmadd<T>(v512.chunk(a, 0), v512.chunk(b, 0), v512.chunk(c, 0)), V128Fallback.relaxed_nmadd<T>(v512.chunk(a, 1), v512.chunk(b, 1), v512.chunk(c, 1)), V128Fallback.relaxed_nmadd<T>(v512.chunk(a, 2), v512.chunk(b, 2), v512.chunk(c, 2)), V128Fallback.relaxed_nmadd<T>(v512.chunk(a, 3), v512.chunk(b, 3), v512.chunk(c, 3))); }
-  @inline static relaxed_laneselect<T>(a: v512, b: v512, c: v512): v512 { return v512.fromChunks(V128Fallback.relaxed_laneselect<T>(v512.chunk(a, 0), v512.chunk(b, 0), v512.chunk(c, 0)), V128Fallback.relaxed_laneselect<T>(v512.chunk(a, 1), v512.chunk(b, 1), v512.chunk(c, 1)), V128Fallback.relaxed_laneselect<T>(v512.chunk(a, 2), v512.chunk(b, 2), v512.chunk(c, 2)), V128Fallback.relaxed_laneselect<T>(v512.chunk(a, 3), v512.chunk(b, 3), v512.chunk(c, 3))); }
-  @inline static relaxed_dot_add<T>(a: v512, b: v512, c: v512): v512 { return v512.fromChunks(V128Fallback.relaxed_dot_add<T>(v512.chunk(a, 0), v512.chunk(b, 0), v512.chunk(c, 0)), V128Fallback.relaxed_dot_add<T>(v512.chunk(a, 1), v512.chunk(b, 1), v512.chunk(c, 1)), V128Fallback.relaxed_dot_add<T>(v512.chunk(a, 2), v512.chunk(b, 2), v512.chunk(c, 2)), V128Fallback.relaxed_dot_add<T>(v512.chunk(a, 3), v512.chunk(b, 3), v512.chunk(c, 3))); }
-  @inline static relaxed_swizzle(a: v512, mask: v512): v512 { return v512.swizzle(a, mask); }
 
+
+  @inline static sqrt<T>(a: v512): v512 {
+    return v512.fromChunks(
+      V128Fallback.sqrt<T>(v512.chunk(a, 0)),
+      V128Fallback.sqrt<T>(v512.chunk(a, 1)),
+      V128Fallback.sqrt<T>(v512.chunk(a, 2)),
+      V128Fallback.sqrt<T>(v512.chunk(a, 3)),
+    );
+  }
+
+
+  @inline static ceil<T>(a: v512): v512 {
+    return v512.fromChunks(
+      V128Fallback.ceil<T>(v512.chunk(a, 0)),
+      V128Fallback.ceil<T>(v512.chunk(a, 1)),
+      V128Fallback.ceil<T>(v512.chunk(a, 2)),
+      V128Fallback.ceil<T>(v512.chunk(a, 3)),
+    );
+  }
+
+
+  @inline static floor<T>(a: v512): v512 {
+    return v512.fromChunks(
+      V128Fallback.floor<T>(v512.chunk(a, 0)),
+      V128Fallback.floor<T>(v512.chunk(a, 1)),
+      V128Fallback.floor<T>(v512.chunk(a, 2)),
+      V128Fallback.floor<T>(v512.chunk(a, 3)),
+    );
+  }
+
+
+  @inline static trunc<T>(a: v512): v512 {
+    return v512.fromChunks(
+      V128Fallback.trunc<T>(v512.chunk(a, 0)),
+      V128Fallback.trunc<T>(v512.chunk(a, 1)),
+      V128Fallback.trunc<T>(v512.chunk(a, 2)),
+      V128Fallback.trunc<T>(v512.chunk(a, 3)),
+    );
+  }
+
+
+  @inline static nearest<T>(a: v512): v512 {
+    return v512.fromChunks(
+      V128Fallback.nearest<T>(v512.chunk(a, 0)),
+      V128Fallback.nearest<T>(v512.chunk(a, 1)),
+      V128Fallback.nearest<T>(v512.chunk(a, 2)),
+      V128Fallback.nearest<T>(v512.chunk(a, 3)),
+    );
+  }
+
+
+  @inline static popcnt<T>(a: v512): v512 {
+    return v512.fromChunks(
+      V128Fallback.popcnt<T>(v512.chunk(a, 0)),
+      V128Fallback.popcnt<T>(v512.chunk(a, 1)),
+      V128Fallback.popcnt<T>(v512.chunk(a, 2)),
+      V128Fallback.popcnt<T>(v512.chunk(a, 3)),
+    );
+  }
+
+
+  @inline static convert<TFrom>(a: v512): v512 {
+    return v512.fromChunks(
+      V128Fallback.convert<TFrom>(v512.chunk(a, 0)),
+      V128Fallback.convert<TFrom>(v512.chunk(a, 1)),
+      V128Fallback.convert<TFrom>(v512.chunk(a, 2)),
+      V128Fallback.convert<TFrom>(v512.chunk(a, 3)),
+    );
+  }
+
+
+  @inline static convert_low<TFrom>(a: v512): v512 {
+    return v512.fromChunks(
+      V128Fallback.convert_low<TFrom>(new V128Fallback(a.w0, a.w1)),
+      V128Fallback.convert_low<TFrom>(new V128Fallback(a.w1, 0)),
+      V128Fallback.convert_low<TFrom>(new V128Fallback(a.w2, a.w3)),
+      V128Fallback.convert_low<TFrom>(new V128Fallback(a.w3, 0)),
+    );
+  }
+
+
+  @inline static trunc_sat<TTo>(a: v512): v512 {
+    return v512.fromChunks(
+      V128Fallback.trunc_sat<TTo>(v512.chunk(a, 0)),
+      V128Fallback.trunc_sat<TTo>(v512.chunk(a, 1)),
+      V128Fallback.trunc_sat<TTo>(v512.chunk(a, 2)),
+      V128Fallback.trunc_sat<TTo>(v512.chunk(a, 3)),
+    );
+  }
+
+
+  @inline static trunc_sat_zero<TTo>(a: v512): v512 {
+    const c0 = V128Fallback.trunc_sat_zero<TTo>(v512.chunk(a, 0)),
+      c1 = V128Fallback.trunc_sat_zero<TTo>(v512.chunk(a, 1)),
+      c2 = V128Fallback.trunc_sat_zero<TTo>(v512.chunk(a, 2)),
+      c3 = V128Fallback.trunc_sat_zero<TTo>(v512.chunk(a, 3));
+    return new v512(c0.lo, c1.lo, c2.lo, c3.lo, 0, 0, 0, 0);
+  }
+
+
+  @inline static extend_low<TFrom>(a: v512): v512 {
+    const c0 = v512.chunk(a, 0),
+      c1 = v512.chunk(a, 1);
+    return v512.fromChunks(
+      V128Fallback.extend_low<TFrom>(c0),
+      V128Fallback.extend_high<TFrom>(c0),
+      V128Fallback.extend_low<TFrom>(c1),
+      V128Fallback.extend_high<TFrom>(c1),
+    );
+  }
+
+
+  @inline static extend_high<TFrom>(a: v512): v512 {
+    const c0 = v512.chunk(a, 2),
+      c1 = v512.chunk(a, 3);
+    return v512.fromChunks(
+      V128Fallback.extend_low<TFrom>(c0),
+      V128Fallback.extend_high<TFrom>(c0),
+      V128Fallback.extend_low<TFrom>(c1),
+      V128Fallback.extend_high<TFrom>(c1),
+    );
+  }
+
+
+  @inline static extadd_pairwise<TFrom>(a: v512): v512 {
+    return v512.fromChunks(
+      V128Fallback.extadd_pairwise<TFrom>(v512.chunk(a, 0)),
+      V128Fallback.extadd_pairwise<TFrom>(v512.chunk(a, 1)),
+      V128Fallback.extadd_pairwise<TFrom>(v512.chunk(a, 2)),
+      V128Fallback.extadd_pairwise<TFrom>(v512.chunk(a, 3)),
+    );
+  }
+
+
+  @inline static demote_zero<T extends f64 = f64>(a: v512): v512 {
+    const c0 = V128Fallback.demote_zero<T>(v512.chunk(a, 0)),
+      c1 = V128Fallback.demote_zero<T>(v512.chunk(a, 1)),
+      c2 = V128Fallback.demote_zero<T>(v512.chunk(a, 2)),
+      c3 = V128Fallback.demote_zero<T>(v512.chunk(a, 3));
+    return new v512(c0.lo, c1.lo, c2.lo, c3.lo, 0, 0, 0, 0);
+  }
+
+
+  @inline static promote_low<T extends f32 = f32>(a: v512): v512 {
+    return v512.fromChunks(
+      V128Fallback.promote_low<T>(new V128Fallback(a.w0, a.w1)),
+      V128Fallback.promote_low<T>(new V128Fallback(a.w1, 0)),
+      V128Fallback.promote_low<T>(new V128Fallback(a.w2, a.w3)),
+      V128Fallback.promote_low<T>(new V128Fallback(a.w3, 0)),
+    );
+  }
+
+
+  @inline static relaxed_trunc<T>(a: v512): v512 {
+    return v512.fromChunks(
+      V128Fallback.relaxed_trunc<T>(v512.chunk(a, 0)),
+      V128Fallback.relaxed_trunc<T>(v512.chunk(a, 1)),
+      V128Fallback.relaxed_trunc<T>(v512.chunk(a, 2)),
+      V128Fallback.relaxed_trunc<T>(v512.chunk(a, 3)),
+    );
+  }
+
+
+  @inline static relaxed_trunc_zero<T>(a: v512): v512 {
+    return v512.fromChunks(
+      V128Fallback.relaxed_trunc_zero<T>(v512.chunk(a, 0)),
+      V128Fallback.relaxed_trunc_zero<T>(v512.chunk(a, 1)),
+      V128Fallback.relaxed_trunc_zero<T>(v512.chunk(a, 2)),
+      V128Fallback.relaxed_trunc_zero<T>(v512.chunk(a, 3)),
+    );
+  }
+
+
+  @inline static div<T>(a: v512, b: v512): v512 {
+    return v512.fromChunks(
+      V128Fallback.div<T>(v512.chunk(a, 0), v512.chunk(b, 0)),
+      V128Fallback.div<T>(v512.chunk(a, 1), v512.chunk(b, 1)),
+      V128Fallback.div<T>(v512.chunk(a, 2), v512.chunk(b, 2)),
+      V128Fallback.div<T>(v512.chunk(a, 3), v512.chunk(b, 3)),
+    );
+  }
+
+
+  @inline static pmin<T>(a: v512, b: v512): v512 {
+    return v512.fromChunks(
+      V128Fallback.pmin<T>(v512.chunk(a, 0), v512.chunk(b, 0)),
+      V128Fallback.pmin<T>(v512.chunk(a, 1), v512.chunk(b, 1)),
+      V128Fallback.pmin<T>(v512.chunk(a, 2), v512.chunk(b, 2)),
+      V128Fallback.pmin<T>(v512.chunk(a, 3), v512.chunk(b, 3)),
+    );
+  }
+
+
+  @inline static pmax<T>(a: v512, b: v512): v512 {
+    return v512.fromChunks(
+      V128Fallback.pmax<T>(v512.chunk(a, 0), v512.chunk(b, 0)),
+      V128Fallback.pmax<T>(v512.chunk(a, 1), v512.chunk(b, 1)),
+      V128Fallback.pmax<T>(v512.chunk(a, 2), v512.chunk(b, 2)),
+      V128Fallback.pmax<T>(v512.chunk(a, 3), v512.chunk(b, 3)),
+    );
+  }
+
+
+  @inline static dot<T extends i16>(a: v512, b: v512): v512 {
+    return v512.fromChunks(
+      V128Fallback.dot<T>(v512.chunk(a, 0), v512.chunk(b, 0)),
+      V128Fallback.dot<T>(v512.chunk(a, 1), v512.chunk(b, 1)),
+      V128Fallback.dot<T>(v512.chunk(a, 2), v512.chunk(b, 2)),
+      V128Fallback.dot<T>(v512.chunk(a, 3), v512.chunk(b, 3)),
+    );
+  }
+
+
+  @inline static narrow<TFrom>(a: v512, b: v512): v512 {
+    return v512.fromChunks(
+      V128Fallback.narrow<TFrom>(v512.chunk(a, 0), v512.chunk(a, 1)),
+      V128Fallback.narrow<TFrom>(v512.chunk(a, 2), v512.chunk(a, 3)),
+      V128Fallback.narrow<TFrom>(v512.chunk(b, 0), v512.chunk(b, 1)),
+      V128Fallback.narrow<TFrom>(v512.chunk(b, 2), v512.chunk(b, 3)),
+    );
+  }
+
+
+  @inline static extmul_low<T>(a: v512, b: v512): v512 {
+    const a0 = v512.chunk(a, 0),
+      a1 = v512.chunk(a, 1),
+      b0 = v512.chunk(b, 0),
+      b1 = v512.chunk(b, 1);
+    return v512.fromChunks(
+      V128Fallback.extmul_low<T>(a0, b0),
+      V128Fallback.extmul_high<T>(a0, b0),
+      V128Fallback.extmul_low<T>(a1, b1),
+      V128Fallback.extmul_high<T>(a1, b1),
+    );
+  }
+
+
+  @inline static extmul_high<T>(a: v512, b: v512): v512 {
+    const a0 = v512.chunk(a, 2),
+      a1 = v512.chunk(a, 3),
+      b0 = v512.chunk(b, 2),
+      b1 = v512.chunk(b, 3);
+    return v512.fromChunks(
+      V128Fallback.extmul_low<T>(a0, b0),
+      V128Fallback.extmul_high<T>(a0, b0),
+      V128Fallback.extmul_low<T>(a1, b1),
+      V128Fallback.extmul_high<T>(a1, b1),
+    );
+  }
+
+
+  @inline static q15mulr_sat<T extends i16>(a: v512, b: v512): v512 {
+    return v512.fromChunks(
+      V128Fallback.q15mulr_sat<T>(v512.chunk(a, 0), v512.chunk(b, 0)),
+      V128Fallback.q15mulr_sat<T>(v512.chunk(a, 1), v512.chunk(b, 1)),
+      V128Fallback.q15mulr_sat<T>(v512.chunk(a, 2), v512.chunk(b, 2)),
+      V128Fallback.q15mulr_sat<T>(v512.chunk(a, 3), v512.chunk(b, 3)),
+    );
+  }
+
+
+  @inline static relaxed_min<T>(a: v512, b: v512): v512 {
+    return v512.fromChunks(
+      V128Fallback.relaxed_min<T>(v512.chunk(a, 0), v512.chunk(b, 0)),
+      V128Fallback.relaxed_min<T>(v512.chunk(a, 1), v512.chunk(b, 1)),
+      V128Fallback.relaxed_min<T>(v512.chunk(a, 2), v512.chunk(b, 2)),
+      V128Fallback.relaxed_min<T>(v512.chunk(a, 3), v512.chunk(b, 3)),
+    );
+  }
+
+
+  @inline static relaxed_max<T>(a: v512, b: v512): v512 {
+    return v512.fromChunks(
+      V128Fallback.relaxed_max<T>(v512.chunk(a, 0), v512.chunk(b, 0)),
+      V128Fallback.relaxed_max<T>(v512.chunk(a, 1), v512.chunk(b, 1)),
+      V128Fallback.relaxed_max<T>(v512.chunk(a, 2), v512.chunk(b, 2)),
+      V128Fallback.relaxed_max<T>(v512.chunk(a, 3), v512.chunk(b, 3)),
+    );
+  }
+
+
+  @inline static relaxed_q15mulr<T>(a: v512, b: v512): v512 {
+    return v512.fromChunks(
+      V128Fallback.relaxed_q15mulr<T>(v512.chunk(a, 0), v512.chunk(b, 0)),
+      V128Fallback.relaxed_q15mulr<T>(v512.chunk(a, 1), v512.chunk(b, 1)),
+      V128Fallback.relaxed_q15mulr<T>(v512.chunk(a, 2), v512.chunk(b, 2)),
+      V128Fallback.relaxed_q15mulr<T>(v512.chunk(a, 3), v512.chunk(b, 3)),
+    );
+  }
+
+
+  @inline static relaxed_dot<T>(a: v512, b: v512): v512 {
+    return v512.fromChunks(
+      V128Fallback.relaxed_dot<T>(v512.chunk(a, 0), v512.chunk(b, 0)),
+      V128Fallback.relaxed_dot<T>(v512.chunk(a, 1), v512.chunk(b, 1)),
+      V128Fallback.relaxed_dot<T>(v512.chunk(a, 2), v512.chunk(b, 2)),
+      V128Fallback.relaxed_dot<T>(v512.chunk(a, 3), v512.chunk(b, 3)),
+    );
+  }
+
+
+  @inline static relaxed_madd<T>(a: v512, b: v512, c: v512): v512 {
+    return v512.fromChunks(
+      V128Fallback.relaxed_madd<T>(
+        v512.chunk(a, 0),
+        v512.chunk(b, 0),
+        v512.chunk(c, 0),
+      ),
+      V128Fallback.relaxed_madd<T>(
+        v512.chunk(a, 1),
+        v512.chunk(b, 1),
+        v512.chunk(c, 1),
+      ),
+      V128Fallback.relaxed_madd<T>(
+        v512.chunk(a, 2),
+        v512.chunk(b, 2),
+        v512.chunk(c, 2),
+      ),
+      V128Fallback.relaxed_madd<T>(
+        v512.chunk(a, 3),
+        v512.chunk(b, 3),
+        v512.chunk(c, 3),
+      ),
+    );
+  }
+
+
+  @inline static relaxed_nmadd<T>(a: v512, b: v512, c: v512): v512 {
+    return v512.fromChunks(
+      V128Fallback.relaxed_nmadd<T>(
+        v512.chunk(a, 0),
+        v512.chunk(b, 0),
+        v512.chunk(c, 0),
+      ),
+      V128Fallback.relaxed_nmadd<T>(
+        v512.chunk(a, 1),
+        v512.chunk(b, 1),
+        v512.chunk(c, 1),
+      ),
+      V128Fallback.relaxed_nmadd<T>(
+        v512.chunk(a, 2),
+        v512.chunk(b, 2),
+        v512.chunk(c, 2),
+      ),
+      V128Fallback.relaxed_nmadd<T>(
+        v512.chunk(a, 3),
+        v512.chunk(b, 3),
+        v512.chunk(c, 3),
+      ),
+    );
+  }
+
+
+  @inline static relaxed_laneselect<T>(a: v512, b: v512, c: v512): v512 {
+    return v512.fromChunks(
+      V128Fallback.relaxed_laneselect<T>(
+        v512.chunk(a, 0),
+        v512.chunk(b, 0),
+        v512.chunk(c, 0),
+      ),
+      V128Fallback.relaxed_laneselect<T>(
+        v512.chunk(a, 1),
+        v512.chunk(b, 1),
+        v512.chunk(c, 1),
+      ),
+      V128Fallback.relaxed_laneselect<T>(
+        v512.chunk(a, 2),
+        v512.chunk(b, 2),
+        v512.chunk(c, 2),
+      ),
+      V128Fallback.relaxed_laneselect<T>(
+        v512.chunk(a, 3),
+        v512.chunk(b, 3),
+        v512.chunk(c, 3),
+      ),
+    );
+  }
+
+
+  @inline static relaxed_dot_add<T>(a: v512, b: v512, c: v512): v512 {
+    return v512.fromChunks(
+      V128Fallback.relaxed_dot_add<T>(
+        v512.chunk(a, 0),
+        v512.chunk(b, 0),
+        v512.chunk(c, 0),
+      ),
+      V128Fallback.relaxed_dot_add<T>(
+        v512.chunk(a, 1),
+        v512.chunk(b, 1),
+        v512.chunk(c, 1),
+      ),
+      V128Fallback.relaxed_dot_add<T>(
+        v512.chunk(a, 2),
+        v512.chunk(b, 2),
+        v512.chunk(c, 2),
+      ),
+      V128Fallback.relaxed_dot_add<T>(
+        v512.chunk(a, 3),
+        v512.chunk(b, 3),
+        v512.chunk(c, 3),
+      ),
+    );
+  }
+
+
+  @inline static relaxed_swizzle(a: v512, mask: v512): v512 {
+    return v512.swizzle(a, mask);
+  }
 }

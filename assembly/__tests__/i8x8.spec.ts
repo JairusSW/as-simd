@@ -1,5 +1,5 @@
 import { describe, expect, test } from "as-test";
-import { i8x8 } from "../v64/i8x8";
+import { i8x8 } from "../v64/lanes";
 import { i8x8_scalar } from "../scalar/i8x8";
 
 type FnSplat = (x: i8) => u64;
@@ -12,36 +12,135 @@ type FnUnaryI32 = (a: u64) => i32;
 type FnBinaryVec = (a: u64, b: u64) => u64;
 type FnShift = (a: u64, b: i32) => u64;
 type FnNarrow = (a: u64, b: u64) => u64;
-type FnShuffle = (a: u64, b: u64, l0: u8, l1: u8, l2: u8, l3: u8, l4: u8, l5: u8, l6: u8, l7: u8) => u64;
+type FnShuffle = (
+  a: u64,
+  b: u64,
+  l0: u8,
+  l1: u8,
+  l2: u8,
+  l3: u8,
+  l4: u8,
+  l5: u8,
+  l6: u8,
+  l7: u8,
+) => u64;
 type FnSwizzle = (a: u64, s: u64) => u64;
 type FnLaneSelect = (a: u64, b: u64, m: u64) => u64;
 
 function assertApiSync(): void {
   const splatFns: FnSplat[] = [i8x8.splat, i8x8_scalar.splat];
-  const extractSFns: FnExtractS[] = [i8x8.extract_lane_s, i8x8_scalar.extract_lane_s];
-  const extractUFns: FnExtractU[] = [i8x8.extract_lane_u, i8x8_scalar.extract_lane_u];
+  const extractSFns: FnExtractS[] = [
+    i8x8.extract_lane_s,
+    i8x8_scalar.extract_lane_s,
+  ];
+  const extractUFns: FnExtractU[] = [
+    i8x8.extract_lane_u,
+    i8x8_scalar.extract_lane_u,
+  ];
   const replaceFns: FnReplace[] = [i8x8.replace_lane, i8x8_scalar.replace_lane];
-  const unaryVecFns: FnUnaryVec[] = [i8x8.abs, i8x8_scalar.abs, i8x8.neg, i8x8_scalar.neg, i8x8.popcnt, i8x8_scalar.popcnt, i8x8.bitmask_lane, i8x8_scalar.bitmask_lane];
-  const unaryBoolFns: FnUnaryBool[] = [i8x8.any_true, i8x8_scalar.any_true, i8x8.all_true, i8x8_scalar.all_true];
+  const unaryVecFns: FnUnaryVec[] = [
+    i8x8.abs,
+    i8x8_scalar.abs,
+    i8x8.neg,
+    i8x8_scalar.neg,
+    i8x8.popcnt,
+    i8x8_scalar.popcnt,
+    i8x8.bitmask_lane,
+    i8x8_scalar.bitmask_lane,
+  ];
+  const unaryBoolFns: FnUnaryBool[] = [
+    i8x8.any_true,
+    i8x8_scalar.any_true,
+    i8x8.all_true,
+    i8x8_scalar.all_true,
+  ];
   const unaryI32Fns: FnUnaryI32[] = [i8x8.bitmask, i8x8_scalar.bitmask];
   const binaryVecFns: FnBinaryVec[] = [
-    i8x8.add, i8x8_scalar.add, i8x8.sub, i8x8_scalar.sub, i8x8.mul, i8x8_scalar.mul,
-    i8x8.min_s, i8x8_scalar.min_s, i8x8.min_u, i8x8_scalar.min_u, i8x8.max_s, i8x8_scalar.max_s, i8x8.max_u, i8x8_scalar.max_u,
-    i8x8.avgr_u, i8x8_scalar.avgr_u, i8x8.add_sat_s, i8x8_scalar.add_sat_s, i8x8.add_sat_u, i8x8_scalar.add_sat_u,
-    i8x8.sub_sat_s, i8x8_scalar.sub_sat_s, i8x8.sub_sat_u, i8x8_scalar.sub_sat_u,
-    i8x8.eq, i8x8_scalar.eq, i8x8.ne, i8x8_scalar.ne,
-    i8x8.lt_s, i8x8_scalar.lt_s, i8x8.lt_u, i8x8_scalar.lt_u, i8x8.le_s, i8x8_scalar.le_s, i8x8.le_u, i8x8_scalar.le_u,
-    i8x8.gt_s, i8x8_scalar.gt_s, i8x8.gt_u, i8x8_scalar.gt_u, i8x8.ge_s, i8x8_scalar.ge_s, i8x8.ge_u, i8x8_scalar.ge_u,
-    i8x8.narrow_i16x4_s, i8x8_scalar.narrow_i16x4_s, i8x8.narrow_i16x4_u, i8x8_scalar.narrow_i16x4_u,
+    i8x8.add,
+    i8x8_scalar.add,
+    i8x8.sub,
+    i8x8_scalar.sub,
+    i8x8.mul,
+    i8x8_scalar.mul,
+    i8x8.min_s,
+    i8x8_scalar.min_s,
+    i8x8.min_u,
+    i8x8_scalar.min_u,
+    i8x8.max_s,
+    i8x8_scalar.max_s,
+    i8x8.max_u,
+    i8x8_scalar.max_u,
+    i8x8.avgr_u,
+    i8x8_scalar.avgr_u,
+    i8x8.add_sat_s,
+    i8x8_scalar.add_sat_s,
+    i8x8.add_sat_u,
+    i8x8_scalar.add_sat_u,
+    i8x8.sub_sat_s,
+    i8x8_scalar.sub_sat_s,
+    i8x8.sub_sat_u,
+    i8x8_scalar.sub_sat_u,
+    i8x8.eq,
+    i8x8_scalar.eq,
+    i8x8.ne,
+    i8x8_scalar.ne,
+    i8x8.lt_s,
+    i8x8_scalar.lt_s,
+    i8x8.lt_u,
+    i8x8_scalar.lt_u,
+    i8x8.le_s,
+    i8x8_scalar.le_s,
+    i8x8.le_u,
+    i8x8_scalar.le_u,
+    i8x8.gt_s,
+    i8x8_scalar.gt_s,
+    i8x8.gt_u,
+    i8x8_scalar.gt_u,
+    i8x8.ge_s,
+    i8x8_scalar.ge_s,
+    i8x8.ge_u,
+    i8x8_scalar.ge_u,
+    i8x8.narrow_i16x4_s,
+    i8x8_scalar.narrow_i16x4_s,
+    i8x8.narrow_i16x4_u,
+    i8x8_scalar.narrow_i16x4_u,
   ];
-  const shiftFns: FnShift[] = [i8x8.shl, i8x8_scalar.shl, i8x8.shr_s, i8x8_scalar.shr_s, i8x8.shr_u, i8x8_scalar.shr_u];
+  const shiftFns: FnShift[] = [
+    i8x8.shl,
+    i8x8_scalar.shl,
+    i8x8.shr_s,
+    i8x8_scalar.shr_s,
+    i8x8.shr_u,
+    i8x8_scalar.shr_u,
+  ];
   const shuffleFns: FnShuffle[] = [i8x8.shuffle, i8x8_scalar.shuffle];
-  const swizzleFns: FnSwizzle[] = [i8x8.swizzle, i8x8_scalar.swizzle, i8x8.relaxed_swizzle, i8x8_scalar.relaxed_swizzle];
-  const laneSelectFns: FnLaneSelect[] = [i8x8.relaxed_laneselect, i8x8_scalar.relaxed_laneselect];
+  const swizzleFns: FnSwizzle[] = [
+    i8x8.swizzle,
+    i8x8_scalar.swizzle,
+    i8x8.relaxed_swizzle,
+    i8x8_scalar.relaxed_swizzle,
+  ];
+  const laneSelectFns: FnLaneSelect[] = [
+    i8x8.relaxed_laneselect,
+    i8x8_scalar.relaxed_laneselect,
+  ];
 
-  expect<i32>(splatFns.length + extractSFns.length + extractUFns.length + replaceFns.length).toBe(8);
-  expect<i32>(unaryVecFns.length + unaryBoolFns.length + unaryI32Fns.length).toBe(14);
-  expect<i32>(binaryVecFns.length + shiftFns.length + shuffleFns.length + swizzleFns.length + laneSelectFns.length).toBe(62);
+  expect<i32>(
+    splatFns.length +
+      extractSFns.length +
+      extractUFns.length +
+      replaceFns.length,
+  ).toBe(8);
+  expect<i32>(
+    unaryVecFns.length + unaryBoolFns.length + unaryI32Fns.length,
+  ).toBe(14);
+  expect<i32>(
+    binaryVecFns.length +
+      shiftFns.length +
+      shuffleFns.length +
+      swizzleFns.length +
+      laneSelectFns.length,
+  ).toBe(62);
 }
 
 let state: u64 = 0;
@@ -58,7 +157,7 @@ let checkId: i32 = 0;
 
 // @ts-expect-error: decorator
 @inline function nextU64(): u64 {
-  return (<u64>nextU32() << 32) | <u64>nextU32();
+  return ((<u64>nextU32()) << 32) | (<u64>nextU32());
 }
 
 // @ts-expect-error: decorator
@@ -119,7 +218,13 @@ describe("i8x8", () => {
   test("partial load/store", () => {
     const src = new Uint8Array(12);
     for (let i = 0; i < src.length; i++) src[i] = <u8>(10 + i);
-    const loaded = i8x8.loadPartial(changetype<usize>(src.dataStart), 5, 2, 1, -1);
+    const loaded = i8x8.loadPartial(
+      changetype<usize>(src.dataStart),
+      5,
+      2,
+      1,
+      -1,
+    );
     expect<i32>(i8x8.extract_lane_s(loaded, 0)).toBe(12);
     expect<i32>(i8x8.extract_lane_s(loaded, 1)).toBe(13);
     expect<i32>(i8x8.extract_lane_s(loaded, 2)).toBe(14);
@@ -131,7 +236,13 @@ describe("i8x8", () => {
 
     const dst = new Uint8Array(12);
     for (let i = 0; i < dst.length; i++) dst[i] = 0xaa;
-    i8x8.storePartial(changetype<usize>(dst.dataStart), i8x8(1, 2, 3, 4, 5, 6, 7, 8), 3, 4, 1);
+    i8x8.storePartial(
+      changetype<usize>(dst.dataStart),
+      i8x8(1, 2, 3, 4, 5, 6, 7, 8),
+      3,
+      4,
+      1,
+    );
     expect<i32>(dst[3]).toBe(0xaa);
     expect<i32>(dst[4]).toBe(1);
     expect<i32>(dst[5]).toBe(2);
@@ -173,9 +284,27 @@ describe("i8x8", () => {
       checkId = 1;
 
       if (!check64(i8x8.splat(laneVal), i8x8_scalar.splat(laneVal))) return;
-      if (!check32(i8x8.extract_lane_s(a, idx), i8x8_scalar.extract_lane_s(a, idx))) return;
-      if (!check32(i8x8.extract_lane_u(a, idx), i8x8_scalar.extract_lane_u(a, idx))) return;
-      if (!check64(i8x8.replace_lane(a, idx, laneVal), i8x8_scalar.replace_lane(a, idx, laneVal))) return;
+      if (
+        !check32(
+          i8x8.extract_lane_s(a, idx),
+          i8x8_scalar.extract_lane_s(a, idx),
+        )
+      )
+        return;
+      if (
+        !check32(
+          i8x8.extract_lane_u(a, idx),
+          i8x8_scalar.extract_lane_u(a, idx),
+        )
+      )
+        return;
+      if (
+        !check64(
+          i8x8.replace_lane(a, idx, laneVal),
+          i8x8_scalar.replace_lane(a, idx, laneVal),
+        )
+      )
+        return;
       if (!check64(i8x8.add(a, b), i8x8_scalar.add(a, b))) return;
       if (!check64(i8x8.sub(a, b), i8x8_scalar.sub(a, b))) return;
       if (!check64(i8x8.mul(a, b), i8x8_scalar.mul(a, b))) return;
@@ -208,12 +337,29 @@ describe("i8x8", () => {
       if (!check64(i8x8.gt_u(a, b), i8x8_scalar.gt_u(a, b))) return;
       if (!check64(i8x8.ge_s(a, b), i8x8_scalar.ge_s(a, b))) return;
       if (!check64(i8x8.ge_u(a, b), i8x8_scalar.ge_u(a, b))) return;
-      if (!check64(i8x8.narrow_i16x4_s(c, d), i8x8_scalar.narrow_i16x4_s(c, d))) return;
-      if (!check64(i8x8.narrow_i16x4_u(c, d), i8x8_scalar.narrow_i16x4_u(c, d))) return;
-      if (!check64(i8x8.shuffle(a, b, l0, l1, l2, l3, l4, l5, l6, l7), i8x8_scalar.shuffle(a, b, l0, l1, l2, l3, l4, l5, l6, l7))) return;
+      if (!check64(i8x8.narrow_i16x4_s(c, d), i8x8_scalar.narrow_i16x4_s(c, d)))
+        return;
+      if (!check64(i8x8.narrow_i16x4_u(c, d), i8x8_scalar.narrow_i16x4_u(c, d)))
+        return;
+      if (
+        !check64(
+          i8x8.shuffle(a, b, l0, l1, l2, l3, l4, l5, l6, l7),
+          i8x8_scalar.shuffle(a, b, l0, l1, l2, l3, l4, l5, l6, l7),
+        )
+      )
+        return;
       if (!check64(i8x8.swizzle(a, s), i8x8_scalar.swizzle(a, s))) return;
-      if (!check64(i8x8.relaxed_swizzle(a, s), i8x8_scalar.relaxed_swizzle(a, s))) return;
-      if (!check64(i8x8.relaxed_laneselect(a, b, m), i8x8_scalar.relaxed_laneselect(a, b, m))) return;
+      if (
+        !check64(i8x8.relaxed_swizzle(a, s), i8x8_scalar.relaxed_swizzle(a, s))
+      )
+        return;
+      if (
+        !check64(
+          i8x8.relaxed_laneselect(a, b, m),
+          i8x8_scalar.relaxed_laneselect(a, b, m),
+        )
+      )
+        return;
       completedRuns++;
     }
 

@@ -1,6 +1,12 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import path from "node:path";
 import process from "node:process";
 
@@ -36,15 +42,27 @@ if (mode !== "swar" && mode !== "simd") usage("--mode must be swar or simd");
 const benchPath = resolveBench(benchName);
 const source = readFileSync(benchPath, "utf8");
 const labels = [...source.matchAll(/bench\("([^"]+)"/g)].map((m) => m[1]);
-const selected = filter ? labels.filter((label) => new RegExp(filter).test(label)) : labels;
+const selected = filter
+  ? labels.filter((label) => new RegExp(filter).test(label))
+  : labels;
 
 if (!labels.length) fail(`No bench(...) calls found in ${benchPath}`);
 if (!selected.length) fail(`No benchmark labels matched ${filter}`);
 
-const v8Bin = findBin(process.env.D8_BIN || "", ["d8", "v8", path.join(process.env.HOME || "", ".jsvu/bin/v8")]);
+const v8Bin = findBin(process.env.D8_BIN || "", [
+  "d8",
+  "v8",
+  path.join(process.env.HOME || "", ".jsvu/bin/v8"),
+]);
 if (!v8Bin) fail("Could not find d8 or v8. Set D8_BIN=/path/to/d8.");
 
-const outDir = path.join(root, "build", "v8-score", safe(path.basename(benchPath, ".bench.ts")), mode);
+const outDir = path.join(
+  root,
+  "build",
+  "v8-score",
+  safe(path.basename(benchPath, ".bench.ts")),
+  mode,
+);
 mkdirSync(outDir, { recursive: true });
 
 const rows = [];
@@ -53,7 +71,10 @@ for (const label of selected) {
   const base = safe(label);
   const filteredSource = filterSourceToBench(source, label);
   // Keep the temporary source next to the original so relative imports remain valid.
-  const srcPath = path.join(path.dirname(benchPath), `.v8-score-${base}.bench.ts`);
+  const srcPath = path.join(
+    path.dirname(benchPath),
+    `.v8-score-${base}.bench.ts`,
+  );
   const wasmPath = path.join(outDir, `${base}.wasm`);
   const logPath = path.join(outDir, `${base}.v8.log`);
   writeFileSync(srcPath, filteredSource);
@@ -81,7 +102,16 @@ for (const label of selected) {
     "bulk-memory",
     "--enable",
     "sign-extension",
-    ...(mode === "simd" ? ["--use", "AS_BENCH_FORCE_SIMD=1", "--enable", "simd", "--enable", "relaxed-simd"] : ["--use", "AS_BENCH_FORCE_SWAR=1"]),
+    ...(mode === "simd"
+      ? [
+          "--use",
+          "AS_BENCH_FORCE_SIMD=1",
+          "--enable",
+          "simd",
+          "--enable",
+          "relaxed-simd",
+        ]
+      : ["--use", "AS_BENCH_FORCE_SWAR=1"]),
     "--exportStart",
     "start",
     "--exportRuntime",
@@ -120,7 +150,12 @@ for (const label of selected) {
 for (const row of rows) {
   // This is intentionally V8-biased. Stack traffic dominates tiny SWAR kernels,
   // while native code size catches register-pressure and lowering differences.
-  row.score = row.instructionBytes + row.stackLoads * 2 + row.stackStores * 4 + row.staticStores * 16 + row.staticLoads * 8;
+  row.score =
+    row.instructionBytes +
+    row.stackLoads * 2 +
+    row.stackStores * 4 +
+    row.staticStores * 16 +
+    row.staticLoads * 8;
 }
 
 rows.sort((a, b) => a.score - b.score);
@@ -131,12 +166,14 @@ for (let i = 0; i < rows.length; i++) {
 }
 
 if (jsonOutput) {
-  process.stdout.write(JSON.stringify({
-    bench: path.relative(root, benchPath),
-    mode,
-    v8Bin,
-    rows,
-  }));
+  process.stdout.write(
+    JSON.stringify({
+      bench: path.relative(root, benchPath),
+      mode,
+      v8Bin,
+      rows,
+    }),
+  );
 } else {
   console.log(`V8 score for ${path.relative(root, benchPath)} (${mode})`);
   console.log(`d8/v8: ${v8Bin}`);
@@ -153,7 +190,7 @@ if (jsonOutput) {
     ["stackS", (r) => fmt(r.stackStores)],
     ["wasmL", (r) => fmt(r.staticLoads)],
     ["wasmS", (r) => fmt(r.staticStores)],
-    ["ops/s", (r) => r.opsPerSecond ? fmt(r.opsPerSecond) : "-"],
+    ["ops/s", (r) => (r.opsPerSecond ? fmt(r.opsPerSecond) : "-")],
   ]);
 }
 
@@ -179,29 +216,38 @@ function resolveBench(name) {
   const candidates = [
     path.join(root, normalized),
     path.join(root, "assembly", "__benches__", normalized),
-    path.join(root, "assembly", "__benches__", "custom", normalized.replace(/^custom\//, "")),
+    path.join(
+      root,
+      "assembly",
+      "__benches__",
+      "custom",
+      normalized.replace(/^custom\//, ""),
+    ),
   ];
-  for (const candidate of candidates) if (existsSync(candidate)) return candidate;
+  for (const candidate of candidates)
+    if (existsSync(candidate)) return candidate;
   fail(`Benchmark not found: ${name}`);
 }
 
 function filterSourceToBench(src, wanted) {
   const lines = src.split(/\r?\n/);
   let skippingBench = false;
-  return lines.map((line) => {
-    const match = line.match(/bench\("([^"]+)"/);
-    if (match) {
-      const keep = match[1] === wanted;
-      skippingBench = !keep;
-      if (!keep) return `// skipped by scripts/v8-score.mjs: ${line}`;
-    } else if (skippingBench) {
-      if (line.includes("dumpToFile(")) {
-        skippingBench = false;
+  return lines
+    .map((line) => {
+      const match = line.match(/bench\("([^"]+)"/);
+      if (match) {
+        const keep = match[1] === wanted;
+        skippingBench = !keep;
+        if (!keep) return `// skipped by scripts/v8-score.mjs: ${line}`;
+      } else if (skippingBench) {
+        if (line.includes("dumpToFile(")) {
+          skippingBench = false;
+        }
+        return `// skipped by scripts/v8-score.mjs: ${line}`;
       }
-      return `// skipped by scripts/v8-score.mjs: ${line}`;
-    }
-    return line;
-  }).join("\n");
+      return line;
+    })
+    .join("\n");
 }
 
 function parseV8Log(log) {
@@ -215,7 +261,9 @@ function parseV8Log(log) {
   let stackStores = 0;
 
   for (const line of log.split(/\r?\n/)) {
-    const compiled = line.match(/Compiled function .* took (\d+) μs .* bodysize (\d+) codesize (\d+)/);
+    const compiled = line.match(
+      /Compiled function .* took (\d+) μs .* bodysize (\d+) codesize (\d+)/,
+    );
     if (compiled) {
       compiledFunctions++;
       compileMicros += Number(compiled[1]);
@@ -240,25 +288,46 @@ function parseV8Log(log) {
     }
   }
 
-  return { compiledFunctions, compileMicros, wasmBodyBytes, codeBytes, instructionBytes, opsPerSecond, stackLoads, stackStores };
+  return {
+    compiledFunctions,
+    compileMicros,
+    wasmBodyBytes,
+    codeBytes,
+    instructionBytes,
+    opsPerSecond,
+    stackLoads,
+    stackStores,
+  };
 }
 
 function parseWasmObjdump(wasmPath) {
-  const result = spawnSync("wasm-objdump", ["-d", wasmPath], { cwd: root, encoding: "utf8" });
+  const result = spawnSync("wasm-objdump", ["-d", wasmPath], {
+    cwd: root,
+    encoding: "utf8",
+  });
   if (result.status !== 0) return { staticLoads: 0, staticStores: 0 };
   const out = result.stdout || "";
   return {
-    staticLoads: (out.match(/\b(?:i32|i64|f32|f64)\.load(?:8|16|32)?(?:_[su])?\b/g) || []).length,
-    staticStores: (out.match(/\b(?:i32|i64|f32|f64)\.store(?:8|16|32)?\b/g) || []).length,
+    staticLoads: (
+      out.match(/\b(?:i32|i64|f32|f64)\.load(?:8|16|32)?(?:_[su])?\b/g) || []
+    ).length,
+    staticStores: (
+      out.match(/\b(?:i32|i64|f32|f64)\.store(?:8|16|32)?\b/g) || []
+    ).length,
   };
 }
 
 function printTable(rows, columns) {
-  const data = rows.map((row, index) => columns.map(([, getter]) => getter(row, index)));
-  const widths = columns.map(([name], i) => Math.max(name.length, ...data.map((row) => row[i].length)));
+  const data = rows.map((row, index) =>
+    columns.map(([, getter]) => getter(row, index)),
+  );
+  const widths = columns.map(([name], i) =>
+    Math.max(name.length, ...data.map((row) => row[i].length)),
+  );
   console.log(columns.map(([name], i) => name.padEnd(widths[i])).join("  "));
   console.log(widths.map((w) => "-".repeat(w)).join("  "));
-  for (const row of data) console.log(row.map((cell, i) => cell.padEnd(widths[i])).join("  "));
+  for (const row of data)
+    console.log(row.map((cell, i) => cell.padEnd(widths[i])).join("  "));
 }
 
 function run(cmd, argv) {
@@ -282,7 +351,9 @@ function findBin(preferred, names) {
 }
 
 function safe(value) {
-  return value.replace(/[^a-zA-Z0-9_.-]+/g, "-").replace(/^-+|-+$/g, "") || "bench";
+  return (
+    value.replace(/[^a-zA-Z0-9_.-]+/g, "-").replace(/^-+|-+$/g, "") || "bench"
+  );
 }
 
 function fmt(value) {
@@ -291,7 +362,9 @@ function fmt(value) {
 
 function usage(message) {
   if (message) console.error(message);
-  console.error("Usage: node scripts/v8-score.mjs <bench|custom/bench> [--mode swar|simd] [--filter regex] [--keep-logs] [--json]");
+  console.error(
+    "Usage: node scripts/v8-score.mjs <bench|custom/bench> [--mode swar|simd] [--filter regex] [--keep-logs] [--json]",
+  );
   process.exit(2);
 }
 

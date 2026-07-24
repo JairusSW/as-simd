@@ -6,7 +6,6 @@
     "target": "wasi",
     "args": ["--enable", "sign-extension"]
   },
-  "runOptions": { "reporter": "default" },
   "modes": {
     "swar": {
       "coverage": false,
@@ -21,19 +20,45 @@
     "simd": {
       "fuzz": {
         "runs": 1000000,
-        "input": ["./assembly/__fuzz__/*.fuzz.ts", "!./assembly/__fuzz__/*-swar.fuzz.ts"]
+        "input": [
+          "./assembly/__fuzz__/*.fuzz.ts",
+          "!./assembly/__fuzz__/*-swar.fuzz.ts"
+        ]
       },
       "buildOptions": {
-        "args": ["--enable", "sign-extension", "--enable simd", "--enable relaxed-simd"]
+        "args": [
+          "--enable",
+          "sign-extension",
+          "--enable simd",
+          "--enable relaxed-simd"
+        ]
       }
     },
     "simd-parity": {
       "fuzz": {
         "runs": 1000000,
-        "input": ["./assembly/__fuzz__/i8x8.fuzz.ts", "./assembly/__fuzz__/i8x16.fuzz.ts", "./assembly/__fuzz__/i8x16-swar.fuzz.ts", "./assembly/__fuzz__/i16x4.fuzz.ts", "./assembly/__fuzz__/i16x8.fuzz.ts", "./assembly/__fuzz__/i16x8-swar.fuzz.ts", "./assembly/__fuzz__/i32x2.fuzz.ts", "./assembly/__fuzz__/i32x4.fuzz.ts", "./assembly/__fuzz__/i32x4-swar.fuzz.ts", "./assembly/__fuzz__/i64x2-swar.fuzz.ts", "./assembly/__fuzz__/v64.fuzz.ts", "./assembly/__fuzz__/widths-swar.fuzz.ts"]
+        "input": [
+          "./assembly/__fuzz__/i8x8.fuzz.ts",
+          "./assembly/__fuzz__/i8x16.fuzz.ts",
+          "./assembly/__fuzz__/i8x16-swar.fuzz.ts",
+          "./assembly/__fuzz__/i16x4.fuzz.ts",
+          "./assembly/__fuzz__/i16x8.fuzz.ts",
+          "./assembly/__fuzz__/i16x8-swar.fuzz.ts",
+          "./assembly/__fuzz__/i32x2.fuzz.ts",
+          "./assembly/__fuzz__/i32x4.fuzz.ts",
+          "./assembly/__fuzz__/i32x4-swar.fuzz.ts",
+          "./assembly/__fuzz__/i64x2-swar.fuzz.ts",
+          "./assembly/__fuzz__/v64.fuzz.ts",
+          "./assembly/__fuzz__/widths-swar.fuzz.ts"
+        ]
       },
       "buildOptions": {
-        "args": ["--enable", "sign-extension", "--enable simd", "--enable relaxed-simd"]
+        "args": [
+          "--enable",
+          "sign-extension",
+          "--enable simd",
+          "--enable relaxed-simd"
+        ]
       }
     }
   }

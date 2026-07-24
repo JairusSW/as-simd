@@ -1,0 +1,17 @@
+# Build artifacts
+build/
+transform/lib/
+
+# Generated benchmark artifacts
+charts/
+*.wasm
+*.wat
+
+# Large benchmark fixtures
+assembly/__benches__/payloads/
+
+# Generated tables
+assembly/globals/tables.ts
+
+# Prose is intentionally wrapped by hand
+*.md

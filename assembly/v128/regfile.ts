@@ -29,19 +29,27 @@ export namespace rf {
 
   /** Base address of the register file (lazily allocated, 16-byte aligned). */
   // @ts-expect-error: decorator
-  @inline export function base(): usize { return _base; }
+  @inline export function base(): usize {
+    return _base;
+  }
 
   /** Byte address of register `reg`'s low half. `reg` may be a runtime value. */
   // @ts-expect-error: decorator
-  @inline export function addr(reg: u32): usize { return _base + ((reg as usize) << 4); }
+  @inline export function addr(reg: u32): usize {
+    return _base + ((reg as usize) << 4);
+  }
 
   /** Reads the low 64 bits of register `reg`. */
   // @ts-expect-error: decorator
-  @inline export function lo(reg: u32): u64 { return load<u64>(_base + ((reg as usize) << 4)); }
+  @inline export function lo(reg: u32): u64 {
+    return load<u64>(_base + ((reg as usize) << 4));
+  }
 
   /** Reads the high 64 bits of register `reg`. */
   // @ts-expect-error: decorator
-  @inline export function hi(reg: u32): u64 { return load<u64>(_base + ((reg as usize) << 4), 8); }
+  @inline export function hi(reg: u32): u64 {
+    return load<u64>(_base + ((reg as usize) << 4), 8);
+  }
 
   /** Writes both halves of register `reg`. */
   // @ts-expect-error: decorator
@@ -53,21 +61,39 @@ export namespace rf {
 
   /** Writes only the low half of register `reg`. */
   // @ts-expect-error: decorator
-  @inline export function setLo(reg: u32, lo: u64): void { store<u64>(_base + ((reg as usize) << 4), lo); }
+  @inline export function setLo(reg: u32, lo: u64): void {
+    store<u64>(_base + ((reg as usize) << 4), lo);
+  }
 
   /** Writes only the high half of register `reg`. */
   // @ts-expect-error: decorator
-  @inline export function setHi(reg: u32, hi: u64): void { store<u64>(_base + ((reg as usize) << 4), hi, 8); }
+  @inline export function setHi(reg: u32, hi: u64): void {
+    store<u64>(_base + ((reg as usize) << 4), hi, 8);
+  }
 
   /** Loads a 128-bit value from memory into register `reg`. */
   // @ts-expect-error: decorator
-  @inline export function load128(reg: u32, ptr: usize, immOffset: usize = 0, immAlign: usize = 1): void {
-    set(reg, load<u64>(ptr, immOffset, immAlign), load<u64>(ptr, immOffset + 8, immAlign));
+  @inline export function load128(
+    reg: u32,
+    ptr: usize,
+    immOffset: usize = 0,
+    immAlign: usize = 1,
+  ): void {
+    set(
+      reg,
+      load<u64>(ptr, immOffset, immAlign),
+      load<u64>(ptr, immOffset + 8, immAlign),
+    );
   }
 
   /** Stores register `reg` to memory as a 128-bit value. */
   // @ts-expect-error: decorator
-  @inline export function store128(reg: u32, ptr: usize, immOffset: usize = 0, immAlign: usize = 1): void {
+  @inline export function store128(
+    reg: u32,
+    ptr: usize,
+    immOffset: usize = 0,
+    immAlign: usize = 1,
+  ): void {
     const p = _base + ((reg as usize) << 4);
     store<u64>(ptr, load<u64>(p), immOffset, immAlign);
     store<u64>(ptr, load<u64>(p, 8), immOffset + 8, immAlign);
@@ -75,5 +101,7 @@ export namespace rf {
 
   /** Zeroes every register. Primarily for tests/determinism. */
   // @ts-expect-error: decorator
-  @inline export function clear(): void { memory.fill(_base, 0, RF_BYTES); }
+  @inline export function clear(): void {
+    memory.fill(_base, 0, RF_BYTES);
+  }
 }

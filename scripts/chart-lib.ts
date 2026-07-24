@@ -44,7 +44,11 @@ export type ComparisonChartConfig = {
 };
 
 type RowValue = { ok: boolean; ops: number };
-type Row = { op: string; values: [RowValue, RowValue, RowValue, RowValue]; dV8: number | null };
+type Row = {
+  op: string;
+  values: [RowValue, RowValue, RowValue, RowValue];
+  dV8: number | null;
+};
 
 const DEFAULT_LAYOUT: ChartLayout = {
   rowH: 40,
@@ -73,17 +77,26 @@ function fmtMops(n: number): string {
 }
 
 function esc(s: string): string {
-  return s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+  return s
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
 }
 
-function loadSuite(logsDir: string, mode: Mode, suite: string, runtime: Runtime): Record<string, BenchResult> {
+function loadSuite(
+  logsDir: string,
+  mode: Mode,
+  suite: string,
+  runtime: Runtime,
+): Record<string, BenchResult> {
   const dir = path.join(logsDir, mode);
   if (!fs.existsSync(dir)) return {};
 
   const out: Record<string, BenchResult> = {};
   for (const file of fs.readdirSync(dir)) {
-    if (!file.startsWith(`${suite}.`) || !file.endsWith(`.${runtime}.json`)) continue;
-    const key = file.slice(suite.length + 1, -(`.${runtime}.json`.length));
+    if (!file.startsWith(`${suite}.`) || !file.endsWith(`.${runtime}.json`))
+      continue;
+    const key = file.slice(suite.length + 1, -`.${runtime}.json`.length);
     out[key] = JSON.parse(fs.readFileSync(path.join(dir, file), "utf8"));
   }
   return out;
@@ -109,7 +122,10 @@ export function createComparisonChart(config: ComparisonChartConfig): void {
   const layout = { ...DEFAULT_LAYOUT, ...config.layout };
 
   const loaded = Object.fromEntries(
-    config.variants.map((v) => [v.key, loadSuite(logsDir, v.mode, v.suite, v.runtime)]),
+    config.variants.map((v) => [
+      v.key,
+      loadSuite(logsDir, v.mode, v.suite, v.runtime),
+    ]),
   ) as Record<string, Record<string, BenchResult>>;
 
   const excludedOps = new Set(config.excludeOps ?? []);
@@ -122,11 +138,16 @@ export function createComparisonChart(config: ComparisonChartConfig): void {
     }
   }
 
-  const orderedOps = config.order.filter((op) => !excludedOps.has(op)).concat([...extras].sort((a, b) => a.localeCompare(b)));
+  const orderedOps = config.order
+    .filter((op) => !excludedOps.has(op))
+    .concat([...extras].sort((a, b) => a.localeCompare(b)));
   const rank = new Map<string, number>();
   config.order.forEach((name, i) => rank.set(name, i));
 
-  const overlapGroups = config.overlapGroups ?? [[0, 1], [2, 3]];
+  const overlapGroups = config.overlapGroups ?? [
+    [0, 1],
+    [2, 3],
+  ];
   const rows = orderedOps
     .map((op) => {
       const values = config.variants.map((v) => {
@@ -141,7 +162,10 @@ export function createComparisonChart(config: ComparisonChartConfig): void {
       const rightPresent = hasAny(values, overlapGroups[1]);
       if (!leftPresent || !rightPresent) return null;
 
-      const dV8 = values[0].ok && values[2].ok ? pctDelta(values[0].ops, values[2].ops) : null;
+      const dV8 =
+        values[0].ok && values[2].ok
+          ? pctDelta(values[0].ops, values[2].ops)
+          : null;
       return { op, values, dV8 } satisfies Row;
     })
     .filter((x): x is Row => x != null)
@@ -155,7 +179,10 @@ export function createComparisonChart(config: ComparisonChartConfig): void {
     });
 
   if (!rows.length) {
-    console.error(config.missingRowsMessage ?? `No overlapping benchmark methods found for ${config.id} in build/logs/as`);
+    console.error(
+      config.missingRowsMessage ??
+        `No overlapping benchmark methods found for ${config.id} in build/logs/as`,
+    );
     process.exit(1);
   }
 
@@ -164,40 +191,67 @@ export function createComparisonChart(config: ComparisonChartConfig): void {
   const md: string[] = [];
   md.push(`# ${config.title}`);
   md.push("");
-  md.push(`| op | ${variantLabel(config.variants[0])} | ${variantLabel(config.variants[1])} | ${variantLabel(config.variants[2])} | ${variantLabel(config.variants[3])} | ${config.deltaLabel ?? "simd-v8 vs swar-v8"} |`);
+  md.push(
+    `| op | ${variantLabel(config.variants[0])} | ${variantLabel(config.variants[1])} | ${variantLabel(config.variants[2])} | ${variantLabel(config.variants[3])} | ${config.deltaLabel ?? "simd-v8 vs swar-v8"} |`,
+  );
   md.push("|---|---:|---:|---:|---:|---:|");
   for (const r of rows) {
     const delta = r.dV8 == null ? "—" : `${fmt(r.dV8)}%`;
-    md.push(`| \`${r.op}\` | ${r.values[0].ok ? fmt(r.values[0].ops) : "—"} | ${r.values[1].ok ? fmt(r.values[1].ops) : "—"} | ${r.values[2].ok ? fmt(r.values[2].ops) : "—"} | ${r.values[3].ok ? fmt(r.values[3].ops) : "—"} | ${delta} |`);
+    md.push(
+      `| \`${r.op}\` | ${r.values[0].ok ? fmt(r.values[0].ops) : "—"} | ${r.values[1].ok ? fmt(r.values[1].ops) : "—"} | ${r.values[2].ok ? fmt(r.values[2].ops) : "—"} | ${r.values[3].ok ? fmt(r.values[3].ops) : "—"} | ${delta} |`,
+    );
   }
   fs.writeFileSync(mdOut, `${md.join("\n")}\n`);
 
-  const maxVal = Math.max(1, ...rows.flatMap((r) => r.values.map((v) => v.ops)));
+  const maxVal = Math.max(
+    1,
+    ...rows.flatMap((r) => r.values.map((v) => v.ops)),
+  );
   const width = layout.leftW + layout.barW + layout.rightW;
   const height = layout.headerH + rows.length * layout.rowH + 20;
 
   const svg: string[] = [];
-  svg.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`);
-  svg.push(`<rect x="0" y="0" width="${width}" height="${height}" fill="transparent"/>`);
-  svg.push(`<text x="${Math.round(width / 2)}" y="44" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="600" fill="#666666">${esc(config.title)}</text>`);
-  svg.push(`<text x="${Math.round(width / 2)}" y="66" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="500" fill="#666666">${esc(config.subtitle)}</text>`);
+  svg.push(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
+  );
+  svg.push(
+    `<rect x="0" y="0" width="${width}" height="${height}" fill="transparent"/>`,
+  );
+  svg.push(
+    `<text x="${Math.round(width / 2)}" y="44" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="600" fill="#666666">${esc(config.title)}</text>`,
+  );
+  svg.push(
+    `<text x="${Math.round(width / 2)}" y="66" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="500" fill="#666666">${esc(config.subtitle)}</text>`,
+  );
 
   const summaryX = layout.leftW + layout.barW + layout.barMargin;
   const summaryHeaderY = layout.headerH + 3;
   const summaryHeader = config.variants
-    .map((v, j) => `<tspan x="${summaryX + j * layout.colGap}" fill="#666666">${esc(variantLabel(v))}</tspan>`)
+    .map(
+      (v, j) =>
+        `<tspan x="${summaryX + j * layout.colGap}" fill="#666666">${esc(variantLabel(v))}</tspan>`,
+    )
     .join("");
-  svg.push(`<text y="${summaryHeaderY}" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="600">${summaryHeader}</text>`);
+  svg.push(
+    `<text y="${summaryHeaderY}" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="600">${summaryHeader}</text>`,
+  );
 
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i];
     const y = layout.headerH + i * layout.rowH;
-    svg.push(`<text x="${layout.leftW - layout.barMargin}" y="${y + 21}" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="600" fill="#666666">${esc(r.op)}</text>`);
+    svg.push(
+      `<text x="${layout.leftW - layout.barMargin}" y="${y + 21}" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="600" fill="#666666">${esc(r.op)}</text>`,
+    );
 
     for (let j = 0; j < config.variants.length; j++) {
       if (!r.values[j].ok) continue;
-      const w = Math.max(1, Math.round((r.values[j].ops / maxVal) * layout.barW));
-      svg.push(`<rect x="${layout.leftW}" y="${y + 2 + j * 7}" width="${w}" height="6" fill="${config.variants[j].color}" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>`);
+      const w = Math.max(
+        1,
+        Math.round((r.values[j].ops / maxVal) * layout.barW),
+      );
+      svg.push(
+        `<rect x="${layout.leftW}" y="${y + 2 + j * 7}" width="${w}" height="6" fill="${config.variants[j].color}" opacity="0.95" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1"/>`,
+      );
     }
 
     const summary = config.variants
@@ -206,7 +260,9 @@ export function createComparisonChart(config: ComparisonChartConfig): void {
         return `<tspan x="${x}" fill="${v.color}">■</tspan><tspan x="${x + 14}" fill="#666666">${fmtMops(r.values[j].ops)}</tspan>`;
       })
       .join("");
-    svg.push(`<text y="${y + 21}" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="600">${summary}</text>`);
+    svg.push(
+      `<text y="${y + 21}" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="600">${summary}</text>`,
+    );
   }
 
   svg.push("</svg>");

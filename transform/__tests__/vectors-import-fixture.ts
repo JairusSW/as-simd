@@ -5,10 +5,12 @@ export function vectorChecksum(a: i32, b: i32): i64 {
   const x128: v128 = v128.sub<i32>(v128.splat<i32>(a), v128.splat<i32>(b));
   const x256: v256 = v256.mul<i32>(v256.splat<i32>(a), v256.splat<i32>(b));
   const x512: v512 = v512.add<i32>(v512.splat<i32>(a), v512.splat<i32>(b));
-  return v64.extract_lane<i32>(x64, 1)
-    + v128.extract_lane<i32>(x128, 3)
-    + v256.extract_lane<i32>(x256, 7)
-    + v512.extract_lane<i32>(x512, 15);
+  return (
+    v64.extract_lane<i32>(x64, 1) +
+    v128.extract_lane<i32>(x128, 3) +
+    v256.extract_lane<i32>(x256, 7) +
+    v512.extract_lane<i32>(x512, 15)
+  );
 }
 
 export function laneNamespaceChecksum(a: i32, b: i32): i64 {

@@ -11,9 +11,13 @@ const M: u64 = 0x8080808080808080;
 // ---- (a) heap register file ------------------------------------------------
 const RF: usize = memory.data(64 * 16);
 // @ts-expect-error: decorator
-@inline function rfLo(r: u32): u64 { return load<u64>(RF + ((r as usize) << 4)); }
+@inline function rfLo(r: u32): u64 {
+  return load<u64>(RF + ((r as usize) << 4));
+}
 // @ts-expect-error: decorator
-@inline function rfHi(r: u32): u64 { return load<u64>(RF + ((r as usize) << 4), 8); }
+@inline function rfHi(r: u32): u64 {
+  return load<u64>(RF + ((r as usize) << 4), 8);
+}
 // @ts-expect-error: decorator
 @inline function rfSet(r: u32, lo: u64, hi: u64): void {
   const p = RF + ((r as usize) << 4);
@@ -22,21 +26,33 @@ const RF: usize = memory.data(64 * 16);
 }
 // @ts-expect-error: decorator
 @inline function addHeap(dst: u32, a: u32, b: u32): void {
-  const aLo = rfLo(a), aHi = rfHi(a), bLo = rfLo(b), bHi = rfHi(b);
-  rfSet(dst,
+  const aLo = rfLo(a),
+    aHi = rfHi(a),
+    bLo = rfLo(b),
+    bHi = rfHi(b);
+  rfSet(
+    dst,
     ((aLo & ~M) + (bLo & ~M)) ^ ((aLo ^ bLo) & M),
-    ((aHi & ~M) + (bHi & ~M)) ^ ((aHi ^ bHi) & M));
+    ((aHi & ~M) + (bHi & ~M)) ^ ((aHi ^ bHi) & M),
+  );
 }
 // @ts-expect-error: decorator
 @inline function ltSHeap(dst: u32, a: u32, b: u32): void {
-  const aLo = rfLo(a), aHi = rfHi(a), bLo = rfLo(b), bHi = rfHi(b);
-  const axLo = aLo ^ M, bxLo = bLo ^ M;
+  const aLo = rfLo(a),
+    aHi = rfHi(a),
+    bLo = rfLo(b),
+    bHi = rfHi(b);
+  const axLo = aLo ^ M,
+    bxLo = bLo ^ M;
   const dLo = ((axLo | M) - (bxLo & ~M)) ^ ((axLo ^ ~bxLo) & M);
-  const axHi = aHi ^ M, bxHi = bHi ^ M;
+  const axHi = aHi ^ M,
+    bxHi = bHi ^ M;
   const dHi = ((axHi | M) - (bxHi & ~M)) ^ ((axHi ^ ~bxHi) & M);
-  rfSet(dst,
+  rfSet(
+    dst,
     ((((~axLo & bxLo) | (~(axLo ^ bxLo) & dLo)) & M) >> 7) * 0xff,
-    ((((~axHi & bxHi) | (~(axHi ^ bxHi) & dHi)) & M) >> 7) * 0xff);
+    ((((~axHi & bxHi) | (~(axHi ^ bxHi) & dHi)) & M) >> 7) * 0xff,
+  );
 }
 
 // ---- (b) global hot-path ---------------------------------------------------
@@ -48,9 +64,11 @@ let gHi: u64 = 0;
 }
 // @ts-expect-error: decorator
 @inline function ltSGlobal(aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-  const axLo = aLo ^ M, bxLo = bLo ^ M;
+  const axLo = aLo ^ M,
+    bxLo = bLo ^ M;
   const dLo = ((axLo | M) - (bxLo & ~M)) ^ ((axLo ^ ~bxLo) & M);
-  const axHi = aHi ^ M, bxHi = bHi ^ M;
+  const axHi = aHi ^ M,
+    bxHi = bHi ^ M;
   const dHi = ((axHi | M) - (bxHi & ~M)) ^ ((axHi ^ ~bxHi) & M);
   gHi = ((((~axHi & bxHi) | (~(axHi ^ bxHi) & dHi)) & M) >> 7) * 0xff;
   return ((((~axLo & bxLo) | (~(axLo ^ bxLo) & dLo)) & M) >> 7) * 0xff;
@@ -65,18 +83,32 @@ let gHi: u64 = 0;
 }
 
 // ===== add loops ============================================================
-export function addHeapConst(iters: u32, aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-  rfSet(0, aLo, aHi); rfSet(1, bLo, bHi);
+export function addHeapConst(
+  iters: u32,
+  aLo: u64,
+  aHi: u64,
+  bLo: u64,
+  bHi: u64,
+): u64 {
+  rfSet(0, aLo, aHi);
+  rfSet(1, bLo, bHi);
   for (let i: u32 = 0; i < iters; ++i) {
-    addHeap(0, 0, 1);                 // constant register indices
+    addHeap(0, 0, 1); // constant register indices
     rfSet(1, mixStep(rfLo(1) ^ rfLo(0)), mixStep(rfHi(1) ^ rfHi(0)));
   }
   return rfLo(0) ^ rfHi(0) ^ rfLo(1) ^ rfHi(1);
 }
-export function addHeapDyn(iters: u32, aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-  rfSet(0, aLo, aHi); rfSet(1, bLo, bHi);
+export function addHeapDyn(
+  iters: u32,
+  aLo: u64,
+  aHi: u64,
+  bLo: u64,
+  bHi: u64,
+): u64 {
+  rfSet(0, aLo, aHi);
+  rfSet(1, bLo, bHi);
   for (let i: u32 = 0; i < iters; ++i) {
-    const d = (i & 7);                // runtime-varying indices the optimizer can't fold
+    const d = i & 7; // runtime-varying indices the optimizer can't fold
     const s = 8 + (i & 7);
     rfSet(s, rfLo(0), rfHi(0));
     addHeap(d, s, 1);
@@ -85,36 +117,73 @@ export function addHeapDyn(iters: u32, aLo: u64, aHi: u64, bLo: u64, bHi: u64): 
   }
   return rfLo(0) ^ rfHi(0) ^ rfLo(1) ^ rfHi(1);
 }
-export function addGlobalLoop(iters: u32, aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-  let lo = aLo, hi = aHi, xLo = bLo, xHi = bHi;
+export function addGlobalLoop(
+  iters: u32,
+  aLo: u64,
+  aHi: u64,
+  bLo: u64,
+  bHi: u64,
+): u64 {
+  let lo = aLo,
+    hi = aHi,
+    xLo = bLo,
+    xHi = bHi;
   for (let i: u32 = 0; i < iters; ++i) {
-    lo = addGlobal(lo, hi, xLo, xHi); hi = gHi;
-    xLo = mixStep(xLo ^ lo); xHi = mixStep(xHi ^ hi);
+    lo = addGlobal(lo, hi, xLo, xHi);
+    hi = gHi;
+    xLo = mixStep(xLo ^ lo);
+    xHi = mixStep(xHi ^ hi);
   }
   return lo ^ hi ^ xLo ^ xHi;
 }
 
 // ===== lt_s loops ===========================================================
-export function ltSHeapConst(iters: u32, aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-  rfSet(0, aLo, aHi); rfSet(1, bLo, bHi);
+export function ltSHeapConst(
+  iters: u32,
+  aLo: u64,
+  aHi: u64,
+  bLo: u64,
+  bHi: u64,
+): u64 {
+  rfSet(0, aLo, aHi);
+  rfSet(1, bLo, bHi);
   for (let i: u32 = 0; i < iters; ++i) {
     ltSHeap(0, 0, 1);
     rfSet(1, mixStep(rfLo(1) ^ rfLo(0)), mixStep(rfHi(1) ^ rfHi(0)));
   }
   return rfLo(0) ^ rfHi(0) ^ rfLo(1) ^ rfHi(1);
 }
-export function ltSGlobalLoop(iters: u32, aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-  let lo = aLo, hi = aHi, xLo = bLo, xHi = bHi;
+export function ltSGlobalLoop(
+  iters: u32,
+  aLo: u64,
+  aHi: u64,
+  bLo: u64,
+  bHi: u64,
+): u64 {
+  let lo = aLo,
+    hi = aHi,
+    xLo = bLo,
+    xHi = bHi;
   for (let i: u32 = 0; i < iters; ++i) {
-    lo = ltSGlobal(lo, hi, xLo, xHi); hi = gHi;
-    xLo = mixStep(xLo ^ lo); xHi = mixStep(xHi ^ hi);
+    lo = ltSGlobal(lo, hi, xLo, xHi);
+    hi = gHi;
+    xLo = mixStep(xLo ^ lo);
+    xHi = mixStep(xHi ^ hi);
   }
   return lo ^ hi ^ xLo ^ xHi;
 }
 
 // ===== chained madd: t = (a+b) ; t = (t<x) ; mixes multiple live values =====
-export function maddHeapConst(iters: u32, aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-  rfSet(0, aLo, aHi); rfSet(1, bLo, bHi); rfSet(2, aHi, bLo);
+export function maddHeapConst(
+  iters: u32,
+  aLo: u64,
+  aHi: u64,
+  bLo: u64,
+  bHi: u64,
+): u64 {
+  rfSet(0, aLo, aHi);
+  rfSet(1, bLo, bHi);
+  rfSet(2, aHi, bLo);
   for (let i: u32 = 0; i < iters; ++i) {
     addHeap(3, 0, 1);
     ltSHeap(0, 3, 2);
@@ -122,12 +191,26 @@ export function maddHeapConst(iters: u32, aLo: u64, aHi: u64, bLo: u64, bHi: u64
   }
   return rfLo(0) ^ rfHi(0) ^ rfLo(2) ^ rfHi(2);
 }
-export function maddGlobalLoop(iters: u32, aLo: u64, aHi: u64, bLo: u64, bHi: u64): u64 {
-  let lo = aLo, hi = aHi, xLo = bLo, xHi = bHi, cLo = aHi, cHi = bLo;
+export function maddGlobalLoop(
+  iters: u32,
+  aLo: u64,
+  aHi: u64,
+  bLo: u64,
+  bHi: u64,
+): u64 {
+  let lo = aLo,
+    hi = aHi,
+    xLo = bLo,
+    xHi = bHi,
+    cLo = aHi,
+    cHi = bLo;
   for (let i: u32 = 0; i < iters; ++i) {
-    let tLo = addGlobal(lo, hi, xLo, xHi); let tHi = gHi;
-    lo = ltSGlobal(tLo, tHi, cLo, cHi); hi = gHi;
-    cLo = mixStep(cLo ^ lo); cHi = mixStep(cHi ^ tHi);
+    let tLo = addGlobal(lo, hi, xLo, xHi);
+    let tHi = gHi;
+    lo = ltSGlobal(tLo, tHi, cLo, cHi);
+    hi = gHi;
+    cLo = mixStep(cLo ^ lo);
+    cHi = mixStep(cHi ^ tHi);
   }
   return lo ^ hi ^ cLo ^ cHi;
 }

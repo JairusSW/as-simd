@@ -7,8 +7,14 @@ class SwarRewriter extends ExpressionRewriter {
         const nodeInfo = info(expr);
         if (nodeInfo.id === binaryen.UnaryId) {
             const node = nodeInfo;
-            const width = node.op === binaryen.EqZInt32 ? 32 : node.op === binaryen.EqZInt64 ? 64 : null;
-            return width ? this.fuseZeroLaneReduction(node.value, width) || expr : expr;
+            const width = node.op === binaryen.EqZInt32
+                ? 32
+                : node.op === binaryen.EqZInt64
+                    ? 64
+                    : null;
+            return width
+                ? this.fuseZeroLaneReduction(node.value, width) || expr
+                : expr;
         }
         if (nodeInfo.id !== binaryen.BinaryId)
             return expr;
@@ -16,28 +22,47 @@ class SwarRewriter extends ExpressionRewriter {
         const width = widthOf(op);
         if (!width)
             return expr;
-        return this.fuseZeroLaneComparison(expr, op, width) || this.fuseExpandedLaneReduction(expr, op, width) || this.fuseExpandedLaneMask(expr, op, width) || this.mergeConstantMasks(expr, op, width) || this.factorCommonMask(expr, op, width) || this.fuseShiftMasks(expr, op, width) || this.fuseBitselect(expr, op, width) || expr;
+        return (this.fuseZeroLaneComparison(expr, op, width) ||
+            this.fuseExpandedLaneReduction(expr, op, width) ||
+            this.fuseExpandedLaneMask(expr, op, width) ||
+            this.mergeConstantMasks(expr, op, width) ||
+            this.factorCommonMask(expr, op, width) ||
+            this.fuseShiftMasks(expr, op, width) ||
+            this.fuseBitselect(expr, op, width) ||
+            expr);
     }
     fuseZeroLaneComparison(expr, op, width) {
         if (op !== eqOp(width))
             return null;
         const pair = valueAndConstantOp(expr, width, op);
-        return pair?.constant === 0n ? this.fuseZeroLaneReduction(pair.value, width) : null;
+        return pair?.constant === 0n
+            ? this.fuseZeroLaneReduction(pair.value, width)
+            : null;
     }
     fuseZeroLaneReduction(expr, width) {
         const outer = valueAndConstant(expr, width);
-        if (!outer || info(outer.value).id !== binaryen.BinaryId || binary(outer.value).op !== andOp(width))
+        if (!outer ||
+            info(outer.value).id !== binaryen.BinaryId ||
+            binary(outer.value).op !== andOp(width))
             return null;
         const { left, right } = binary(outer.value);
-        for (const [difference, inverse] of [[left, right], [right, left]]) {
-            if (info(difference).id !== binaryen.BinaryId || binary(difference).op !== subOp(width) || !isComplement(inverse, width))
+        for (const [difference, inverse] of [
+            [left, right],
+            [right, left],
+        ]) {
+            if (info(difference).id !== binaryen.BinaryId ||
+                binary(difference).op !== subOp(width) ||
+                !isComplement(inverse, width))
                 continue;
             const differenceNode = binary(difference);
             const ones = integerConstantValue(differenceNode.right, width);
-            if (ones === null || !sameValueReference(differenceNode.left, complementValue(inverse)))
+            if (ones === null ||
+                !sameValueReference(differenceNode.left, complementValue(inverse)))
                 continue;
             const broadcast = laneBroadcast(differenceNode.left, width);
-            if (!broadcast || outer.constant !== broadcast.highMask || ones !== (broadcast.highMask >> BigInt(broadcast.shift)))
+            if (!broadcast ||
+                outer.constant !== broadcast.highMask ||
+                ones !== broadcast.highMask >> BigInt(broadcast.shift))
                 continue;
             const target = broadcast.complemented ? 0n : broadcast.highMask;
             if (target === 0n) {
@@ -71,11 +96,17 @@ class SwarRewriter extends ExpressionRewriter {
         if (!broadcast)
             return null;
         const target = pair.constant === 0n
-            ? (broadcast.complemented ? broadcast.highMask : 0n)
-            : (broadcast.complemented ? 0n : broadcast.highMask);
+            ? broadcast.complemented
+                ? broadcast.highMask
+                : 0n
+            : broadcast.complemented
+                ? 0n
+                : broadcast.highMask;
         if (target === broadcast.highMask) {
             const source = laneNonzeroSource(broadcast.highBits, width);
-            const hasZero = source ? makeHasZero(this.module, source, broadcast.highMask, broadcast.shift, width) : null;
+            const hasZero = source
+                ? makeHasZero(this.module, source, broadcast.highMask, broadcast.shift, width)
+                : null;
             if (hasZero)
                 return this.changed(makeBinary(this.module, op, hasZero, integerConstant(this.module, width, 0n)));
         }
@@ -98,7 +129,8 @@ class SwarRewriter extends ExpressionRewriter {
             expanded = complementValue(expanded);
             complemented = true;
         }
-        if (info(expanded).id !== binaryen.BinaryId || binary(expanded).op !== mulOp(width))
+        if (info(expanded).id !== binaryen.BinaryId ||
+            binary(expanded).op !== mulOp(width))
             return null;
         const product = valueAndConstantOp(expanded, width, mulOp(width));
         if (!product || info(product.value).id !== binaryen.BinaryId)
@@ -113,7 +145,8 @@ class SwarRewriter extends ExpressionRewriter {
         const high = valueAndConstant(shiftNode.left, width);
         if (!high || high.constant !== outer.constant)
             return null;
-        if (shift === 0 || !isLaneBroadcast(outer.constant, shift, product.constant, width))
+        if (shift === 0 ||
+            !isLaneBroadcast(outer.constant, shift, product.constant, width))
             return null;
         if (!complemented)
             return this.changed(shiftNode.left);
@@ -125,11 +158,15 @@ class SwarRewriter extends ExpressionRewriter {
     }
     mergeConstantMasks(expr, op, width) {
         const isAdd = op === addOp(width);
-        if (op !== orOp(width) && op !== xorOp(width) && op !== andOp(width) && !isAdd)
+        if (op !== orOp(width) &&
+            op !== xorOp(width) &&
+            op !== andOp(width) &&
+            !isAdd)
             return null;
         const left = binary(expr).left;
         const right = binary(expr).right;
-        if (info(left).id !== binaryen.BinaryId || info(right).id !== binaryen.BinaryId)
+        if (info(left).id !== binaryen.BinaryId ||
+            info(right).id !== binaryen.BinaryId)
             return null;
         const childOp = binary(left).op;
         if (childOp !== andOp(width) || binary(right).op !== childOp)
@@ -157,10 +194,12 @@ class SwarRewriter extends ExpressionRewriter {
             return null;
         const left = binary(expr).left;
         const right = binary(expr).right;
-        if (info(left).id !== binaryen.BinaryId || info(right).id !== binaryen.BinaryId)
+        if (info(left).id !== binaryen.BinaryId ||
+            info(right).id !== binaryen.BinaryId)
             return null;
         const childOp = binary(left).op;
-        if ((childOp !== andOp(width) && childOp !== orOp(width)) || binary(right).op !== childOp)
+        if ((childOp !== andOp(width) && childOp !== orOp(width)) ||
+            binary(right).op !== childOp)
             return null;
         const l = valueAndConstantOp(left, width, childOp);
         const r = valueAndConstantOp(right, width, childOp);
@@ -197,12 +236,16 @@ class SwarRewriter extends ExpressionRewriter {
         if (binary(inner).op !== inverse)
             return null;
         const innerAmount = integerConstantValue(binary(inner).right, width);
-        if (innerAmount === null || Number(innerAmount & BigInt(width - 1)) !== shift)
+        if (innerAmount === null ||
+            Number(innerAmount & BigInt(width - 1)) !== shift)
             return null;
         const all = (1n << BigInt(width)) - 1n;
         let fused = op === shlOp(width) ? (all << BigInt(shift)) & all : all >> BigInt(shift);
         if (mask !== null) {
-            fused = op === shlOp(width) ? (mask << BigInt(shift)) & all : mask >> BigInt(shift);
+            fused =
+                op === shlOp(width)
+                    ? (mask << BigInt(shift)) & all
+                    : mask >> BigInt(shift);
         }
         const value = binary(inner).left;
         if (shift === 0 || fused === all)
@@ -218,7 +261,9 @@ class SwarRewriter extends ExpressionRewriter {
             return null;
         const plain = left.complemented ? right : left;
         const inverse = left.complemented ? left : right;
-        if (!sameSimpleValue(plain.mask, inverse.mask) || !isCheapLeaf(plain.value) || !isCheapLeaf(inverse.value))
+        if (!sameSimpleValue(plain.mask, inverse.mask) ||
+            !isCheapLeaf(plain.value) ||
+            !isCheapLeaf(inverse.value))
             return null;
         const inverseCopy = this.module.copyExpression(inverse.value);
         return this.changed(makeBinary(this.module, xorOp(width), inverse.value, makeBinary(this.module, andOp(width), makeBinary(this.module, xorOp(width), plain.value, inverseCopy), plain.mask)));
@@ -227,7 +272,8 @@ class SwarRewriter extends ExpressionRewriter {
 function makeHasZero(module, source, highMask, shift, width) {
     let second;
     const sourceInfo = info(source);
-    if (sourceInfo.id === binaryen.LocalSetId && sourceInfo.isTee) {
+    if (sourceInfo.id === binaryen.LocalSetId &&
+        sourceInfo.isTee) {
         const local = sourceInfo;
         second = module.local.get(local.index, sourceInfo.type);
     }
@@ -272,7 +318,11 @@ export function optimizeSwarExpressions(module) {
     return { expressions, rewrites };
 }
 function widthOf(op) {
-    return op >= binaryen.AddInt32 && op <= binaryen.GeUInt32 ? 32 : op >= binaryen.AddInt64 && op <= binaryen.GeUInt64 ? 64 : null;
+    return op >= binaryen.AddInt32 && op <= binaryen.GeUInt32
+        ? 32
+        : op >= binaryen.AddInt64 && op <= binaryen.GeUInt64
+            ? 64
+            : null;
 }
 function andOp(width) {
     return width === 32 ? binaryen.AndInt32 : binaryen.AndInt64;
@@ -307,7 +357,8 @@ function neOp(width) {
 function laneBroadcast(expr, width) {
     let expanded = expr;
     const expandedInfo = info(expanded);
-    if (expandedInfo.id === binaryen.LocalSetId && expandedInfo.isTee) {
+    if (expandedInfo.id === binaryen.LocalSetId &&
+        expandedInfo.isTee) {
         expanded = expandedInfo.value;
     }
     let complemented = false;
@@ -326,16 +377,25 @@ function laneBroadcast(expr, width) {
         return null;
     const shift = Number(shiftValue & BigInt(width - 1));
     const high = valueAndConstant(shiftNode.left, width);
-    if (!high || shift === 0 || !isLaneBroadcast(high.constant, shift, product.constant, width))
+    if (!high ||
+        shift === 0 ||
+        !isLaneBroadcast(high.constant, shift, product.constant, width))
         return null;
-    return { highBits: shiftNode.left, highMask: high.constant, shift, complemented };
+    return {
+        highBits: shiftNode.left,
+        highMask: high.constant,
+        shift,
+        complemented,
+    };
 }
 function laneNonzeroSource(expr, width) {
     return laneNonzeroDetector(expr, width)?.source ?? null;
 }
 function laneNonzeroDetector(expr, width) {
     const outer = valueAndConstant(expr, width);
-    if (!outer || info(outer.value).id !== binaryen.BinaryId || binary(outer.value).op !== orOp(width))
+    if (!outer ||
+        info(outer.value).id !== binaryen.BinaryId ||
+        binary(outer.value).op !== orOp(width))
         return null;
     const all = (1n << BigInt(width)) - 1n;
     const lowMask = all ^ outer.constant;
@@ -344,12 +404,17 @@ function laneNonzeroDetector(expr, width) {
     if (shift === 0 || !isLaneBroadcast(outer.constant, shift, laneMask, width))
         return null;
     const { left, right } = binary(outer.value);
-    for (const [sumExpr, source] of [[left, right], [right, left]]) {
+    for (const [sumExpr, source] of [
+        [left, right],
+        [right, left],
+    ]) {
         const sum = valueAndConstantOp(sumExpr, width, width === 32 ? binaryen.AddInt32 : binaryen.AddInt64);
         if (!sum || sum.constant !== lowMask)
             continue;
         const masked = valueAndConstant(sum.value, width);
-        if (masked && masked.constant === lowMask && sameValueReference(masked.value, source)) {
+        if (masked &&
+            masked.constant === lowMask &&
+            sameValueReference(masked.value, source)) {
             return {
                 source: info(masked.value).id === binaryen.LocalSetId ? masked.value : source,
                 highMask: outer.constant,
@@ -427,7 +492,8 @@ function isComplement(expr, width) {
     if (info(expr).id !== binaryen.BinaryId || binary(expr).op !== xorOp(width))
         return false;
     const all = (1n << BigInt(width)) - 1n;
-    return integerConstantValue(binary(expr).left, width) === all || integerConstantValue(binary(expr).right, width) === all;
+    return (integerConstantValue(binary(expr).left, width) === all ||
+        integerConstantValue(binary(expr).right, width) === all);
 }
 function complementValue(expr) {
     const { left, right } = binary(expr);
@@ -435,7 +501,9 @@ function complementValue(expr) {
 }
 function isCheapLeaf(expr) {
     const id = info(expr).id;
-    return id === binaryen.LocalGetId || id === binaryen.GlobalGetId || id === binaryen.ConstId;
+    return (id === binaryen.LocalGetId ||
+        id === binaryen.GlobalGetId ||
+        id === binaryen.ConstId);
 }
 function sameSimpleValue(a, b) {
     const ai = info(a);
@@ -445,11 +513,13 @@ function sameSimpleValue(a, b) {
         return false;
     switch (aid) {
         case binaryen.LocalGetId:
-            return ai.index === bi.index;
+            return (ai.index ===
+                bi.index);
         case binaryen.GlobalGetId:
-            return ai.name === bi.name;
+            return (ai.name ===
+                bi.name);
         case binaryen.ConstId:
-            return ai.value === bi.value;
+            return (ai.value === bi.value);
         default:
             return false;
     }
@@ -457,10 +527,13 @@ function sameSimpleValue(a, b) {
 function sameValueReference(a, b) {
     const ai = info(a);
     const bi = info(b);
-    if ((ai.id === binaryen.LocalGetId || ai.id === binaryen.LocalSetId) && (bi.id === binaryen.LocalGetId || bi.id === binaryen.LocalSetId)) {
+    if ((ai.id === binaryen.LocalGetId || ai.id === binaryen.LocalSetId) &&
+        (bi.id === binaryen.LocalGetId || bi.id === binaryen.LocalSetId)) {
         const aLocal = ai;
         const bLocal = bi;
-        return aLocal.index === bLocal.index && (ai.id !== binaryen.LocalSetId || ai.isTee) && (bi.id !== binaryen.LocalSetId || bi.isTee);
+        return (aLocal.index === bLocal.index &&
+            (ai.id !== binaryen.LocalSetId || ai.isTee) &&
+            (bi.id !== binaryen.LocalSetId || bi.isTee));
     }
     return sameSimpleValue(a, b);
 }

@@ -181,9 +181,9 @@ export function allEqLoop(iters: u32, a: u64, b: u64): u64 {
   }
   return result ^ a ^ b;
 }
-import { i8x8 } from "../../assembly/v64/i8x8";
-import { i16x4 } from "../../assembly/v64/i16x4";
-import { i32x2 } from "../../assembly/v64/i32x2";
+import { i8x8 } from "../../assembly/v64/lanes";
+import { i16x4 } from "../../assembly/v64/lanes";
+import { i32x2 } from "../../assembly/v64/lanes";
 
 type Unary64 = (value: u64) => u64;
 

@@ -45,27 +45,44 @@ const INPUTS = [
 ] as const;
 
 function esc(value: string): string {
-  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
 }
 
 function readRows(file: string): BenchRow[] {
   const rows: BenchRow[] = [];
-  for (const line of fs.readFileSync(path.join(CHARTS, file), "utf8").split("\n")) {
-    const match = line.match(/^\| `([^`]+)` \| ([\d.]+) \| [^|]+ \| ([\d.]+) \|/);
-    if (match) rows.push({ op: match[1], swar: Number(match[2]), simd: Number(match[3]) });
+  for (const line of fs
+    .readFileSync(path.join(CHARTS, file), "utf8")
+    .split("\n")) {
+    const match = line.match(
+      /^\| `([^`]+)` \| ([\d.]+) \| [^|]+ \| ([\d.]+) \|/,
+    );
+    if (match)
+      rows.push({
+        op: match[1],
+        swar: Number(match[2]),
+        simd: Number(match[3]),
+      });
   }
-  if (!rows.length) throw new Error(`No V8 benchmark rows found in charts/${file}`);
+  if (!rows.length)
+    throw new Error(`No V8 benchmark rows found in charts/${file}`);
   return rows;
 }
 
 function geometricMean(values: number[]): number {
-  return Math.exp(values.reduce((sum, value) => sum + Math.log(value), 0) / values.length);
+  return Math.exp(
+    values.reduce((sum, value) => sum + Math.log(value), 0) / values.length,
+  );
 }
 
 function median(values: number[]): number {
   const sorted = [...values].sort((a, b) => a - b);
   const middle = Math.floor(sorted.length / 2);
-  return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+  return sorted.length % 2
+    ? sorted[middle]
+    : (sorted[middle - 1] + sorted[middle]) / 2;
 }
 
 function pct(row: BenchRow): number {
@@ -104,43 +121,80 @@ function writeThroughputChart(): void {
   const bottom = 125;
   const plotW = width - left - right;
   const plotH = height - top - bottom;
-  const max = niceMax(Math.max(...families.flatMap((family) => [family.swar, family.simd])) * 1.12);
+  const max = niceMax(
+    Math.max(...families.flatMap((family) => [family.swar, family.simd])) *
+      1.12,
+  );
   const groupW = plotW / families.length;
   const barW = Math.min(38, groupW * 0.3);
   const out: string[] = [];
 
-  out.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`);
+  out.push(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
+  );
   out.push(`<rect width="${width}" height="${height}" fill="transparent"/>`);
-  out.push(`<text x="${width / 2}" y="42" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="25" font-weight="700" fill="${COLORS.ink}">V8 Vector Throughput Overview</text>`);
-  out.push(`<text x="${width / 2}" y="68" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="600" fill="${COLORS.muted}">${esc(chartSubtitle(ROOT))}</text>`);
-  out.push(`<text x="${width / 2}" y="94" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="13" fill="${COLORS.muted}">Geometric mean across every operation shared by each same-width SWAR/SIMD suite</text>`);
-  out.push(`<rect x="${width / 2 - 118}" y="112" width="13" height="13" rx="2" fill="${COLORS.swar}"/><text x="${width / 2 - 98}" y="123" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="600" fill="${COLORS.ink}">SWAR</text>`);
-  out.push(`<rect x="${width / 2 + 20}" y="112" width="13" height="13" rx="2" fill="${COLORS.simd}"/><text x="${width / 2 + 40}" y="123" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="600" fill="${COLORS.ink}">SIMD</text>`);
+  out.push(
+    `<text x="${width / 2}" y="42" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="25" font-weight="700" fill="${COLORS.ink}">V8 Vector Throughput Overview</text>`,
+  );
+  out.push(
+    `<text x="${width / 2}" y="68" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="600" fill="${COLORS.muted}">${esc(chartSubtitle(ROOT))}</text>`,
+  );
+  out.push(
+    `<text x="${width / 2}" y="94" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="13" fill="${COLORS.muted}">Geometric mean across every operation shared by each same-width SWAR/SIMD suite</text>`,
+  );
+  out.push(
+    `<rect x="${width / 2 - 118}" y="112" width="13" height="13" rx="2" fill="${COLORS.swar}"/><text x="${width / 2 - 98}" y="123" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="600" fill="${COLORS.ink}">SWAR</text>`,
+  );
+  out.push(
+    `<rect x="${width / 2 + 20}" y="112" width="13" height="13" rx="2" fill="${COLORS.simd}"/><text x="${width / 2 + 40}" y="123" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="600" fill="${COLORS.ink}">SIMD</text>`,
+  );
 
   for (let tick = 0; tick <= 5; tick++) {
     const value = (max * tick) / 5;
     const y = top + plotH - (value / max) * plotH;
-    out.push(`<line x1="${left}" y1="${y}" x2="${width - right}" y2="${y}" stroke="${COLORS.grid}" stroke-width="1" opacity="0.65"/>`);
-    out.push(`<text x="${left - 12}" y="${y + 5}" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="13" fill="${COLORS.muted}">${Math.round(value)}</text>`);
+    out.push(
+      `<line x1="${left}" y1="${y}" x2="${width - right}" y2="${y}" stroke="${COLORS.grid}" stroke-width="1" opacity="0.65"/>`,
+    );
+    out.push(
+      `<text x="${left - 12}" y="${y + 5}" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="13" fill="${COLORS.muted}">${Math.round(value)}</text>`,
+    );
   }
-  out.push(`<text x="25" y="${top + plotH / 2}" transform="rotate(-90 25 ${top + plotH / 2})" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="15" font-weight="700" fill="${COLORS.ink}">Throughput (million operations/s)</text>`);
+  out.push(
+    `<text x="25" y="${top + plotH / 2}" transform="rotate(-90 25 ${top + plotH / 2})" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="15" font-weight="700" fill="${COLORS.ink}">Throughput (million operations/s)</text>`,
+  );
 
   families.forEach((family, index) => {
     const center = left + groupW * (index + 0.5);
-    const values = [[family.swar, COLORS.swar], [family.simd, COLORS.simd]] as const;
+    const values = [
+      [family.swar, COLORS.swar],
+      [family.simd, COLORS.simd],
+    ] as const;
     values.forEach(([value, color], series) => {
       const h = (value / max) * plotH;
       const x = center + (series === 0 ? -barW - 2 : 2);
       const y = top + plotH - h;
-      out.push(`<rect x="${x}" y="${y}" width="${barW}" height="${h}" rx="3" fill="${color}" fill-opacity="0.9"/>`);
-      out.push(`<text x="${x + barW / 2}" y="${y - 7}" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="12" font-weight="700" fill="${COLORS.ink}">${value.toFixed(0)}</text>`);
+      out.push(
+        `<rect x="${x}" y="${y}" width="${barW}" height="${h}" rx="3" fill="${color}" fill-opacity="0.9"/>`,
+      );
+      out.push(
+        `<text x="${x + barW / 2}" y="${y - 7}" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="12" font-weight="700" fill="${COLORS.ink}">${value.toFixed(0)}</text>`,
+      );
     });
-    out.push(`<text x="${center}" y="${top + plotH + 25}" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="${COLORS.ink}">${esc(family.label)}</text>`);
-    out.push(`<text x="${center}" y="${top + plotH + 44}" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="11" fill="${COLORS.muted}">n=${family.rows.length}</text>`);
+    out.push(
+      `<text x="${center}" y="${top + plotH + 25}" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="${COLORS.ink}">${esc(family.label)}</text>`,
+    );
+    out.push(
+      `<text x="${center}" y="${top + plotH + 44}" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="11" fill="${COLORS.muted}">n=${family.rows.length}</text>`,
+    );
   });
-  out.push(`<text x="${width / 2}" y="${height - 24}" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="12" fill="${COLORS.muted}">Higher is better · See the per-family chart tables for individual operations and WAVM results</text>`);
+  out.push(
+    `<text x="${width / 2}" y="${height - 24}" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="12" fill="${COLORS.muted}">Higher is better · See the per-family chart tables for individual operations and WAVM results</text>`,
+  );
   out.push("</svg>");
-  fs.writeFileSync(path.join(CHARTS, "chart-overview-v8.svg"), `${out.join("\n")}\n`);
+  fs.writeFileSync(
+    path.join(CHARTS, "chart-overview-v8.svg"),
+    `${out.join("\n")}\n`,
+  );
 }
 
 function writeSpeedupChart(): void {
@@ -156,20 +210,33 @@ function writeSpeedupChart(): void {
   const lo = Math.floor(min / 10) * 10;
   // Keep the value label clear of the right-hand win-count summary.
   const hi = Math.ceil((max + 10) / 10) * 10;
-  const x = (value: number): number => left + ((value - lo) / (hi - lo)) * plotW;
+  const x = (value: number): number =>
+    left + ((value - lo) / (hi - lo)) * plotW;
   const zero = x(0);
   const out: string[] = [];
 
-  out.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`);
+  out.push(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
+  );
   out.push(`<rect width="${width}" height="${height}" fill="transparent"/>`);
-  out.push(`<text x="${width / 2}" y="42" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="25" font-weight="700" fill="${COLORS.ink}">Native SIMD Speedup over SWAR on V8</text>`);
-  out.push(`<text x="${width / 2}" y="68" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="600" fill="${COLORS.muted}">${esc(chartSubtitle(ROOT))}</text>`);
-  out.push(`<text x="${width / 2}" y="94" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="13" fill="${COLORS.muted}">Geometric mean of per-operation SIMD/SWAR throughput ratios; equal weight per operation</text>`);
+  out.push(
+    `<text x="${width / 2}" y="42" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="25" font-weight="700" fill="${COLORS.ink}">Native SIMD Speedup over SWAR on V8</text>`,
+  );
+  out.push(
+    `<text x="${width / 2}" y="68" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="600" fill="${COLORS.muted}">${esc(chartSubtitle(ROOT))}</text>`,
+  );
+  out.push(
+    `<text x="${width / 2}" y="94" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="13" fill="${COLORS.muted}">Geometric mean of per-operation SIMD/SWAR throughput ratios; equal weight per operation</text>`,
+  );
 
   for (let tick = lo; tick <= hi; tick += 10) {
     const tx = x(tick);
-    out.push(`<line x1="${tx}" y1="${top - 10}" x2="${tx}" y2="${top + families.length * rowH}" stroke="${tick === 0 ? COLORS.ink : COLORS.grid}" stroke-width="${tick === 0 ? 2 : 1}" opacity="${tick === 0 ? 0.7 : 0.6}"/>`);
-    out.push(`<text x="${tx}" y="${top - 18}" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="12" fill="${COLORS.muted}">${tick > 0 ? "+" : ""}${tick}%</text>`);
+    out.push(
+      `<line x1="${tx}" y1="${top - 10}" x2="${tx}" y2="${top + families.length * rowH}" stroke="${tick === 0 ? COLORS.ink : COLORS.grid}" stroke-width="${tick === 0 ? 2 : 1}" opacity="${tick === 0 ? 0.7 : 0.6}"/>`,
+    );
+    out.push(
+      `<text x="${tx}" y="${top - 18}" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="12" fill="${COLORS.muted}">${tick > 0 ? "+" : ""}${tick}%</text>`,
+    );
   }
 
   families.forEach((family, index) => {
@@ -177,14 +244,27 @@ function writeSpeedupChart(): void {
     const end = x(family.speedup);
     const barX = Math.min(zero, end);
     const color = family.speedup >= 0 ? COLORS.positive : COLORS.negative;
-    out.push(`<text x="${left - 18}" y="${y + 22}" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="${COLORS.ink}">${esc(family.label)}</text>`);
-    out.push(`<rect x="${barX}" y="${y + 5}" width="${Math.max(2, Math.abs(end - zero))}" height="24" rx="3" fill="${color}" fill-opacity="0.9"/>`);
-    out.push(`<text x="${family.speedup >= 0 ? end + 9 : end - 9}" y="${y + 22}" text-anchor="${family.speedup >= 0 ? "start" : "end"}" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="${color}">${family.speedup >= 0 ? "+" : ""}${family.speedup.toFixed(1)}%</text>`);
-    out.push(`<text x="${width - right + 25}" y="${y + 22}" font-family="Inter,Arial,sans-serif" font-size="12" fill="${COLORS.muted}">${family.wins}/${family.rows.length} ops faster</text>`);
+    out.push(
+      `<text x="${left - 18}" y="${y + 22}" text-anchor="end" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="${COLORS.ink}">${esc(family.label)}</text>`,
+    );
+    out.push(
+      `<rect x="${barX}" y="${y + 5}" width="${Math.max(2, Math.abs(end - zero))}" height="24" rx="3" fill="${color}" fill-opacity="0.9"/>`,
+    );
+    out.push(
+      `<text x="${family.speedup >= 0 ? end + 9 : end - 9}" y="${y + 22}" text-anchor="${family.speedup >= 0 ? "start" : "end"}" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" fill="${color}">${family.speedup >= 0 ? "+" : ""}${family.speedup.toFixed(1)}%</text>`,
+    );
+    out.push(
+      `<text x="${width - right + 25}" y="${y + 22}" font-family="Inter,Arial,sans-serif" font-size="12" fill="${COLORS.muted}">${family.wins}/${family.rows.length} ops faster</text>`,
+    );
   });
-  out.push(`<text x="${width / 2}" y="${height - 25}" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="12" fill="${COLORS.muted}">Right of zero favors SIMD · A geometric mean prevents a few very fast operations from dominating the summary</text>`);
+  out.push(
+    `<text x="${width / 2}" y="${height - 25}" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="12" fill="${COLORS.muted}">Right of zero favors SIMD · A geometric mean prevents a few very fast operations from dominating the summary</text>`,
+  );
   out.push("</svg>");
-  fs.writeFileSync(path.join(CHARTS, "chart-speedup-v8.svg"), `${out.join("\n")}\n`);
+  fs.writeFileSync(
+    path.join(CHARTS, "chart-speedup-v8.svg"),
+    `${out.join("\n")}\n`,
+  );
 }
 
 function writeTable(): void {
@@ -197,9 +277,15 @@ function writeTable(): void {
     "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
   ];
   for (const family of families) {
-    out.push(`| ${family.label} | ${family.rows.length} | ${family.swar.toFixed(1)} | ${family.simd.toFixed(1)} | ${family.speedup >= 0 ? "+" : ""}${family.speedup.toFixed(1)}% | ${family.median >= 0 ? "+" : ""}${family.median.toFixed(1)}% | ${family.wins}/${family.rows.length} | \`${family.best.op}\` (${pct(family.best) >= 0 ? "+" : ""}${pct(family.best).toFixed(1)}%) | \`${family.worst.op}\` (${pct(family.worst) >= 0 ? "+" : ""}${pct(family.worst).toFixed(1)}%) |`);
+    out.push(
+      `| ${family.label} | ${family.rows.length} | ${family.swar.toFixed(1)} | ${family.simd.toFixed(1)} | ${family.speedup >= 0 ? "+" : ""}${family.speedup.toFixed(1)}% | ${family.median >= 0 ? "+" : ""}${family.median.toFixed(1)}% | ${family.wins}/${family.rows.length} | \`${family.best.op}\` (${pct(family.best) >= 0 ? "+" : ""}${pct(family.best).toFixed(1)}%) | \`${family.worst.op}\` (${pct(family.worst) >= 0 ? "+" : ""}${pct(family.worst).toFixed(1)}%) |`,
+    );
   }
-  out.push("", "Sources: the corresponding `charts/chart-*-swar-v-*-simd.md` tables. Regenerate those benchmarks before publishing a new overview.", "");
+  out.push(
+    "",
+    "Sources: the corresponding `charts/chart-*-swar-v-*-simd.md` tables. Regenerate those benchmarks before publishing a new overview.",
+    "",
+  );
   fs.writeFileSync(path.join(CHARTS, "chart-overview-v8.md"), out.join("\n"));
 }
 

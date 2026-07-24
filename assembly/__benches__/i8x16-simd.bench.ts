@@ -55,7 +55,13 @@ const i8x16_replace_lane_lane: u8 = 11;
 bench(
   "i8x16.replace_lane",
   () => {
-    blackbox(i8x16.replace_lane(blackbox(i8x16_replace_lane_v0), 0, blackbox(i8x16_replace_lane_x)));
+    blackbox(
+      i8x16.replace_lane(
+        blackbox(i8x16_replace_lane_v0),
+        0,
+        blackbox(i8x16_replace_lane_x),
+      ),
+    );
   },
   OPS,
   8,
@@ -153,7 +159,9 @@ const i8x16_avgr_u_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.avgr_u",
   () => {
-    blackbox(i8x16.avgr_u(blackbox(i8x16_avgr_u_v0), blackbox(i8x16_avgr_u_v0)));
+    blackbox(
+      i8x16.avgr_u(blackbox(i8x16_avgr_u_v0), blackbox(i8x16_avgr_u_v0)),
+    );
   },
   OPS,
   8,
@@ -195,7 +203,12 @@ const i8x16_add_sat_s_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.add_sat_s",
   () => {
-    blackbox(i8x16.add_sat_s(blackbox(i8x16_add_sat_s_v0), blackbox(i8x16_add_sat_s_v0)));
+    blackbox(
+      i8x16.add_sat_s(
+        blackbox(i8x16_add_sat_s_v0),
+        blackbox(i8x16_add_sat_s_v0),
+      ),
+    );
   },
   OPS,
   8,
@@ -209,7 +222,12 @@ const i8x16_add_sat_u_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.add_sat_u",
   () => {
-    blackbox(i8x16.add_sat_u(blackbox(i8x16_add_sat_u_v0), blackbox(i8x16_add_sat_u_v0)));
+    blackbox(
+      i8x16.add_sat_u(
+        blackbox(i8x16_add_sat_u_v0),
+        blackbox(i8x16_add_sat_u_v0),
+      ),
+    );
   },
   OPS,
   8,
@@ -223,7 +241,12 @@ const i8x16_sub_sat_s_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.sub_sat_s",
   () => {
-    blackbox(i8x16.sub_sat_s(blackbox(i8x16_sub_sat_s_v0), blackbox(i8x16_sub_sat_s_v0)));
+    blackbox(
+      i8x16.sub_sat_s(
+        blackbox(i8x16_sub_sat_s_v0),
+        blackbox(i8x16_sub_sat_s_v0),
+      ),
+    );
   },
   OPS,
   8,
@@ -237,7 +260,12 @@ const i8x16_sub_sat_u_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.sub_sat_u",
   () => {
-    blackbox(i8x16.sub_sat_u(blackbox(i8x16_sub_sat_u_v0), blackbox(i8x16_sub_sat_u_v0)));
+    blackbox(
+      i8x16.sub_sat_u(
+        blackbox(i8x16_sub_sat_u_v0),
+        blackbox(i8x16_sub_sat_u_v0),
+      ),
+    );
   },
   OPS,
   8,
@@ -267,7 +295,9 @@ const i8x16_shr_s_shift: i32 = 3;
 bench(
   "i8x16.shr_s",
   () => {
-    blackbox(i8x16.shr_s(blackbox(i8x16_shr_s_v0), blackbox(i8x16_shr_s_shift)));
+    blackbox(
+      i8x16.shr_s(blackbox(i8x16_shr_s_v0), blackbox(i8x16_shr_s_shift)),
+    );
   },
   OPS,
   8,
@@ -282,7 +312,9 @@ const i8x16_shr_u_shift: i32 = 3;
 bench(
   "i8x16.shr_u",
   () => {
-    blackbox(i8x16.shr_u(blackbox(i8x16_shr_u_v0), blackbox(i8x16_shr_u_shift)));
+    blackbox(
+      i8x16.shr_u(blackbox(i8x16_shr_u_v0), blackbox(i8x16_shr_u_shift)),
+    );
   },
   OPS,
   8,
@@ -464,7 +496,12 @@ const i8x16_narrow_i16x8_s_x: i8 = -37;
 bench(
   "i8x16.narrow_i16x8_s",
   () => {
-    blackbox(i8x16.narrow_i16x8_s(i16x8.splat(blackbox(i8x16_narrow_i16x8_s_x) as i16), i16x8.splat(blackbox(i8x16_narrow_i16x8_s_x) as i16)));
+    blackbox(
+      i8x16.narrow_i16x8_s(
+        i16x8.splat(blackbox(i8x16_narrow_i16x8_s_x) as i16),
+        i16x8.splat(blackbox(i8x16_narrow_i16x8_s_x) as i16),
+      ),
+    );
   },
   OPS,
   8,
@@ -478,7 +515,12 @@ const i8x16_narrow_i16x8_u_x: i8 = -37;
 bench(
   "i8x16.narrow_i16x8_u",
   () => {
-    blackbox(i8x16.narrow_i16x8_u(i16x8.splat(blackbox(i8x16_narrow_i16x8_u_x) as i16), i16x8.splat(blackbox(i8x16_narrow_i16x8_u_x) as i16)));
+    blackbox(
+      i8x16.narrow_i16x8_u(
+        i16x8.splat(blackbox(i8x16_narrow_i16x8_u_x) as i16),
+        i16x8.splat(blackbox(i8x16_narrow_i16x8_u_x) as i16),
+      ),
+    );
   },
   OPS,
   8,
@@ -492,7 +534,28 @@ const i8x16_shuffle_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.shuffle",
   () => {
-    blackbox(i8x16.shuffle(blackbox(i8x16_shuffle_v0), blackbox(i8x16_shuffle_v0), 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0));
+    blackbox(
+      i8x16.shuffle(
+        blackbox(i8x16_shuffle_v0),
+        blackbox(i8x16_shuffle_v0),
+        15,
+        14,
+        13,
+        12,
+        11,
+        10,
+        9,
+        8,
+        7,
+        6,
+        5,
+        4,
+        3,
+        2,
+        1,
+        0,
+      ),
+    );
   },
   OPS,
   16,
@@ -506,7 +569,9 @@ const i8x16_swizzle_hi: u64 = 0x0123456789abcdef;
 bench(
   "i8x16.swizzle",
   () => {
-    blackbox(i8x16.swizzle(blackbox(i8x16_swizzle_v0), blackbox(i8x16_swizzle_v0)));
+    blackbox(
+      i8x16.swizzle(blackbox(i8x16_swizzle_v0), blackbox(i8x16_swizzle_v0)),
+    );
   },
   OPS,
   8,
@@ -514,7 +579,10 @@ bench(
 dumpToFile("i8x16", "swizzle");
 
 const i8x16_relaxed_swizzle_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
-const i8x16_relaxed_laneselect_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
+const i8x16_relaxed_laneselect_v0 = i64x2(
+  0xfedcba9876543210,
+  0x0123456789abcdef,
+);
 const i8x16_relaxed_swizzle_a: u64 = 0xfedcba9876543210;
 const i8x16_relaxed_swizzle_hi: u64 = 0x0123456789abcdef;
 const i8x16_relaxed_laneselect_a: u64 = 0xfedcba9876543210;
@@ -526,7 +594,12 @@ if (ASC_FEATURE_RELAXED_SIMD) {
   bench(
     "i8x16.relaxed_swizzle",
     () => {
-      blackbox(i8x16.relaxed_swizzle(blackbox(i8x16_relaxed_swizzle_v0), blackbox(i8x16_relaxed_swizzle_v0)));
+      blackbox(
+        i8x16.relaxed_swizzle(
+          blackbox(i8x16_relaxed_swizzle_v0),
+          blackbox(i8x16_relaxed_swizzle_v0),
+        ),
+      );
     },
     OPS,
     8,
@@ -536,14 +609,19 @@ if (ASC_FEATURE_RELAXED_SIMD) {
   bench(
     "i8x16.relaxed_laneselect",
     () => {
-      blackbox(i8x16.relaxed_laneselect(blackbox(i8x16_relaxed_laneselect_v0), blackbox(i8x16_relaxed_laneselect_v0), blackbox(i8x16_relaxed_laneselect_v0)));
+      blackbox(
+        i8x16.relaxed_laneselect(
+          blackbox(i8x16_relaxed_laneselect_v0),
+          blackbox(i8x16_relaxed_laneselect_v0),
+          blackbox(i8x16_relaxed_laneselect_v0),
+        ),
+      );
     },
     OPS,
     24,
   );
   dumpToFile("i8x16", "relaxed-laneselect");
 }
-
 
 const i8x16_popcnt_v0 = i64x2(0xfedcba9876543210, 0x0123456789abcdef);
 const i8x16_popcnt_a: u64 = 0xfedcba9876543210;

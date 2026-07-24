@@ -14,7 +14,10 @@ const SIMD_ENABLED = BENCH_FORCE_SWAR
   ? "swar"
   : BENCH_FORCE_SIMD
     ? "simd"
-    : (ASC_FEATURE_SIMD ? "simd" : "swar");
+    : ASC_FEATURE_SIMD
+      ? "simd"
+      : "swar";
+
 
 @json
 class BenchResult {
@@ -44,7 +47,9 @@ let result: BenchResult | null = null;
 // 64KB per WebAssembly memory page
 const WASM_PAGE_SIZE: usize = 64 * 1024;
 // @ts-expect-error: BENCH_PREALLOC_BYTES may be undefined.
-const PREALLOC_BYTES: usize = isDefined(BENCH_PREALLOC_BYTES) ? BENCH_PREALLOC_BYTES : 1 << 30; // 1GB
+const PREALLOC_BYTES: usize = isDefined(BENCH_PREALLOC_BYTES)
+  ? BENCH_PREALLOC_BYTES
+  : 1 << 30; // 1GB
 let preallocated = false;
 // @ts-expect-error: BENCH_SAMPLES may be undefined.
 const BENCH_SAMPLE_COUNT: i32 = isDefined(BENCH_SAMPLES) ? BENCH_SAMPLES : 7;
@@ -85,14 +90,20 @@ console.log("Runtime: " + BENCH_RUNTIME_NAME + "\n");
   preallocated = true;
   if (PREALLOC_BYTES == 0) return;
   const currentPages = usize(memory.size());
-  const targetPages: usize = (PREALLOC_BYTES + (WASM_PAGE_SIZE - 1)) / WASM_PAGE_SIZE;
+  const targetPages: usize =
+    (PREALLOC_BYTES + (WASM_PAGE_SIZE - 1)) / WASM_PAGE_SIZE;
   if (targetPages > currentPages) {
     // Ignore failure (memory.grow returns -1 on failure)
     memory.grow(i32(targetPages - currentPages));
   }
 }
 
-export function bench(description: string, routine: () => void, ops: u64 = 1_000_000, bytesPerOp: u64 = 0): void {
+export function bench(
+  description: string,
+  routine: () => void,
+  ops: u64 = 1_000_000,
+  bytesPerOp: u64 = 0,
+): void {
   bench_common.advanceSuite();
   preallocateMemory();
   // Run a full GC cycle before timing to reduce cross-bench noise.
@@ -122,8 +133,8 @@ export function bench(description: string, routine: () => void, ops: u64 = 1_000
     opsSamples[i] = opsPerSecond;
   }
 
-  elapsedSamples.sort((a: f64, b: f64): i32 => a < b ? -1 : (a > b ? 1 : 0));
-  opsSamples.sort((a: f64, b: f64): i32 => a < b ? -1 : (a > b ? 1 : 0));
+  elapsedSamples.sort((a: f64, b: f64): i32 => (a < b ? -1 : a > b ? 1 : 0));
+  opsSamples.sort((a: f64, b: f64): i32 => (a < b ? -1 : a > b ? 1 : 0));
 
   const elapsedMin = elapsedSamples[0];
   const elapsedMax = elapsedSamples[samples - 1];
@@ -194,28 +205,74 @@ export function dumpToFile(suite: string, type: string): void {
   if (result == null) return;
   const r = result!;
   const json =
-    "{"
-    + "\"language\":\"" + r.language + "\","
-    + "\"description\":\"" + r.description + "\","
-    + "\"elapsed\":" + r.elapsed.toString() + ","
-    + "\"bytes\":" + r.bytes.toString() + ","
-    + "\"operations\":" + r.operations.toString() + ","
-    + "\"features\":[" + (r.features.length ? ("\"" + r.features.join("\",\"") + "\"") : "") + "],"
-    + "\"mbps\":" + r.mbps.toString() + ","
-    + "\"gbps\":" + r.gbps.toString() + ","
-    + "\"samples\":" + r.samples.toString() + ","
-    + "\"elapsed_min\":" + r.elapsed_min.toString() + ","
-    + "\"elapsed_max\":" + r.elapsed_max.toString() + ","
-    + "\"elapsed_mean\":" + r.elapsed_mean.toString() + ","
-    + "\"elapsed_median\":" + r.elapsed_median.toString() + ","
-    + "\"elapsed_stddev\":" + r.elapsed_stddev.toString() + ","
-    + "\"ops_min\":" + r.ops_min.toString() + ","
-    + "\"ops_max\":" + r.ops_max.toString() + ","
-    + "\"ops_mean\":" + r.ops_mean.toString() + ","
-    + "\"ops_median\":" + r.ops_median.toString() + ","
-    + "\"ops_stddev\":" + r.ops_stddev.toString()
-    + "}";
-  const fileName = "./build/logs/as/" + SIMD_ENABLED + "/" + suite + "." + type + "." + BENCH_RUNTIME_NAME + ".json";
+    "{" +
+    '"language":"' +
+    r.language +
+    '",' +
+    '"description":"' +
+    r.description +
+    '",' +
+    '"elapsed":' +
+    r.elapsed.toString() +
+    "," +
+    '"bytes":' +
+    r.bytes.toString() +
+    "," +
+    '"operations":' +
+    r.operations.toString() +
+    "," +
+    '"features":[' +
+    (r.features.length ? '"' + r.features.join('","') + '"' : "") +
+    "]," +
+    '"mbps":' +
+    r.mbps.toString() +
+    "," +
+    '"gbps":' +
+    r.gbps.toString() +
+    "," +
+    '"samples":' +
+    r.samples.toString() +
+    "," +
+    '"elapsed_min":' +
+    r.elapsed_min.toString() +
+    "," +
+    '"elapsed_max":' +
+    r.elapsed_max.toString() +
+    "," +
+    '"elapsed_mean":' +
+    r.elapsed_mean.toString() +
+    "," +
+    '"elapsed_median":' +
+    r.elapsed_median.toString() +
+    "," +
+    '"elapsed_stddev":' +
+    r.elapsed_stddev.toString() +
+    "," +
+    '"ops_min":' +
+    r.ops_min.toString() +
+    "," +
+    '"ops_max":' +
+    r.ops_max.toString() +
+    "," +
+    '"ops_mean":' +
+    r.ops_mean.toString() +
+    "," +
+    '"ops_median":' +
+    r.ops_median.toString() +
+    "," +
+    '"ops_stddev":' +
+    r.ops_stddev.toString() +
+    "}";
+  const fileName =
+    "./build/logs/as/" +
+    SIMD_ENABLED +
+    "/" +
+    suite +
+    "." +
+    type +
+    "." +
+    BENCH_RUNTIME_NAME +
+    ".json";
   if (BENCH_RUNTIME_STDOUT) {
     // LLVM/WASI path: emit structured payload to stdout for scripts/run-bench.sh.
     console.log("__AS_BENCH_JSON__" + fileName + "\t" + json);
