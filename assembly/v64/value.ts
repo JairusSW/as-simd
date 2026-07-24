@@ -1,6 +1,4 @@
-import { i8x8 } from "./i8x8";
-import { i16x4 } from "./i16x4";
-import { i32x2 } from "./i32x2";
+import { i8x8, i16x4, i32x2 } from "./lanes";
 
 export type v64 = u64;
 

@@ -22,7 +22,7 @@ function methods(path) {
   return result;
 }
 
-const v128 = methods("assembly/v128/v128_fallback.ts");
+const v128 = methods("assembly/v128/value.ts");
 v128.delete("pair");
 
 for (const [width, path, maskType] of [

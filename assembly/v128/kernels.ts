@@ -19,7 +19,7 @@ import { rf } from "./regfile";
 // beats scalar words; simple operations retain their faster scalar kernels.
 //
 // `T` selects the lane type exactly as in `v128_swar` (e.g. i8/u8/i16/.../f64).
-export namespace v128r {
+export namespace v128_kernels {
   // @ts-expect-error: decorator
   @inline function store_lo_hi(dst: u32, lo: u64): void { rf.set(dst, lo, v128_swar.take_hi()); }
 

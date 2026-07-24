@@ -1,4 +1,4 @@
-import { i8x8 } from "../../assembly/v64/i8x8";
+import { i8x8 } from "../../assembly/v64/lanes";
 
 // @ts-expect-error: decorator
 @inline function mixStep(x: u64): u64 {

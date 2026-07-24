@@ -1,4 +1,4 @@
-import { i16x4 } from "../../v64/i16x4";
+import { i16x4 } from "../../v64/lanes";
 import { bench_common } from "../common";
 import { bench, blackbox, dumpToFile } from "../lib/bench";
 

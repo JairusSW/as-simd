@@ -1,4 +1,4 @@
-import { v64 } from "../v64/v64";
+import { v64 } from "../v64/value";
 
 // @ts-expect-error: decorator
 @inline function mem_load<T>(ptr: usize, immAlign: usize = 1): T { return load<T>(ptr); }

@@ -23,6 +23,15 @@ The shared width API includes:
 `v128.bitmask<T>` returns `i32`, `v256.bitmask<T>` returns `u32`, and
 `v512.bitmask<T>` returns `u64`, providing enough bits for every byte lane.
 
+Every width directory uses the same module layout:
+
+- `value.ts` defines the width-generic value interface.
+- `lanes.ts` defines the lane-family interfaces.
+- `kernels.ts` defines or names the hot kernel implementation.
+
+The scalar-backed `v32` and `v64` widths execute their value namespaces
+directly, so their `*_kernels` exports alias those implementations.
+
 ## Lane-specific APIs
 
 The six native v128 lane families have width-scaled public counterparts:
@@ -55,7 +64,7 @@ This file records the public `v64` namespace surface so the lane families stay a
 
 ## Shared `v64` method surface
 
-These methods exist on both [`i8x8`](./assembly/v64/i8x8.ts) and [`i16x4`](./assembly/v64/i16x4.ts):
+These methods exist on both [`i8x8`](./assembly/v64/lanes.ts) and [`i16x4`](./assembly/v64/lanes.ts):
 
 - `splat`
 - `extract_lane_s`

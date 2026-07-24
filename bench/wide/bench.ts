@@ -1,6 +1,6 @@
 import { v128_swar } from "../../assembly/v128/v128_swar";
 import { rf } from "../../assembly/v128/regfile";
-import { v128r } from "../../assembly/v128/v128r";
+import { v128_kernels } from "../../assembly/v128/kernels";
 import { wrf } from "../../assembly/wide/regfile";
 import { v256r, v512r } from "../../assembly/wide/wide";
 
@@ -419,56 +419,56 @@ export function v512ExtractLane(iters:u32,a:u64):u64{for(let c:u32=0;c<4;c++)wrf
 export function v128rAddI8(iters: u32, a: u64, b: u64): u64 {
   rf.set(0, a, ~a);
   rf.set(1, b, ~b);
-  for (let i: u32 = 0; i < iters; i++) v128r.add<i8>(0, 0, 1);
+  for (let i: u32 = 0; i < iters; i++) v128_kernels.add<i8>(0, 0, 1);
   return rf.lo(0) ^ rf.hi(0);
 }
 
-export function v128rMinI8(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128r.min<i8>(0,0,1);return rf.lo(0)^rf.hi(0);}
-export function v128rMulI8(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128r.mul<i8>(0,0,1);return rf.lo(0)^rf.hi(0);}
-export function v128rAddSatI16(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128r.add_sat<i16>(0,0,1);return rf.lo(0)^rf.hi(0);}
-export function v128rXor(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128r.xor(0,0,1);return rf.lo(0)^rf.hi(0);}
-export function v128rBitselect(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);rf.set(2,0x00ff00ff00ff00ff,0xff00ff00ff00ff00);for(let i:u32=0;i<iters;i++)v128r.bitselect(0,0,1,2);return rf.lo(0)^rf.hi(0);}
-export function v128rBitmaskI8(iters:u32,a:u64):u64{rf.set(0,a,~a);let sink:u64=0;for(let i:u32=0;i<iters;i++)sink+=v128r.bitmask<i8>(0) as u32 as u64;return sink;}
-export function v128rMaxI16(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128r.max<i16>(0,0,1);return rf.lo(0)^rf.hi(0);}
-export function v128rSubSatI8(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128r.sub_sat<i8>(0,0,1);return rf.lo(0)^rf.hi(0);}
-export function v128rDotI16(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128r.dot<i16>(0,0,1);return rf.lo(0)^rf.hi(0);}
-export function v128rLtI8(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128r.lt<i8>(0,0,1);return rf.lo(0)^rf.hi(0);}
-export function v128rAllTrueI8(iters:u32,a:u64):u64{rf.set(0,a|0x0101010101010101,~a|0x0101010101010101);let sink:u64=0;for(let i:u32=0;i<iters;i++)sink+=v128r.all_true<i8>(0) as u64;return sink;}
-export function v128rSwizzle(iters:u32,a:u64):u64{rf.set(0,a,~a);rf.set(1,0x0706050403020100,0x0f0e0d0c0b0a0908);for(let i:u32=0;i<iters;i++)v128r.swizzle(0,0,1);return rf.lo(0)^rf.hi(0);}
-export function v128rNarrowI16(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128r.narrow<i16>(0,0,1);return rf.lo(0)^rf.hi(0);}
-export function v128rExtractLane(iters:u32,a:u64):u64{rf.set(0,a,~a);let sink:u64=0;for(let i:u32=0;i<iters;i++)sink+=v128r.extract_lane<i16>(0,(i&7) as u8) as u16 as u64;return sink;}
-export function v128rReplaceLane(iters:u32,a:u64):u64{rf.set(0,a,~a);for(let i:u32=0;i<iters;i++)v128r.replace_lane<i16>(1,0,5,i as i16);return rf.lo(1)^rf.hi(1);}
-export function v128rReplaceLaneInPlace(iters:u32,a:u64):u64{rf.set(0,a,~a);for(let i:u32=0;i<iters;i++)v128r.replace_lane<i16>(0,0,5,i as i16);return rf.lo(0)^rf.hi(0);}
-export function v128rLoad(iters:u32,a:u64):u64{store<u64>(wideIo,a);store<u64>(wideIo+8,~a);for(let i:u32=0;i<iters;i++)v128r.load(0,wideIo);return rf.lo(0)^rf.hi(0);}
-export function v128rStore(iters:u32,a:u64):u64{rf.set(0,a,~a);for(let i:u32=0;i<iters;i++)v128r.store(wideIo,0);return load<u64>(wideIo)^load<u64>(wideIo+8);}
-export function v128rAbsI8(iters:u32,a:u64):u64{rf.set(0,a,~a);for(let i:u32=0;i<iters;i++)v128r.abs<i8>(0,0);return rf.lo(0)^rf.hi(0);}
-export function v128rSqrtF32(iters:u32,a:u64,b:u64):u64{rf.set(0,a,b);for(let i:u32=0;i<iters;i++)v128r.sqrt<f32>(0,0);return rf.lo(0)^rf.hi(0);}
-export function v128rExtendLowI8(iters:u32,a:u64):u64{rf.set(0,a,~a);for(let i:u32=0;i<iters;i++)v128r.extend_low<i8>(0,0);return rf.lo(0)^rf.hi(0);}
-export function v128rExtaddI8(iters:u32,a:u64):u64{rf.set(0,a,~a);for(let i:u32=0;i<iters;i++)v128r.extadd_pairwise<i8>(0,0);return rf.lo(0)^rf.hi(0);}
-export function v128rExtmulI8(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128r.extmul_low<i8>(0,0,1);return rf.lo(0)^rf.hi(0);}
-export function v128rQ15(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128r.q15mulr_sat<i16>(0,0,1);return rf.lo(0)^rf.hi(0);}
-export function v128rTruncSatI32(iters:u32,a:u64,b:u64):u64{rf.set(0,a,b);for(let i:u32=0;i<iters;i++)v128r.trunc_sat<i32>(0,0);return rf.lo(0)^rf.hi(0);}
-export function v128rConvertI32(iters:u32,a:u64,b:u64):u64{rf.set(0,a,b);for(let i:u32=0;i<iters;i++)v128r.convert<i32>(0,0);return rf.lo(0)^rf.hi(0);}
-export function v128rConvertLowI32(iters:u32,a:u64,b:u64):u64{rf.set(0,a,b);for(let i:u32=0;i<iters;i++)v128r.convert_low<i32>(0,0);return rf.lo(0)^rf.hi(0);}
-export function v128rTruncZeroI32(iters:u32,a:u64,b:u64):u64{rf.set(0,a,b);for(let i:u32=0;i<iters;i++)v128r.trunc_sat_zero<i32>(0,0);return rf.lo(0)^rf.hi(0);}
-export function v128rDemoteF64(iters:u32,a:u64,b:u64):u64{rf.set(0,a,b);for(let i:u32=0;i<iters;i++)v128r.demote_zero(0,0);return rf.lo(0)^rf.hi(0);}
-export function v128rPromoteF32(iters:u32,a:u64,b:u64):u64{rf.set(0,a,b);for(let i:u32=0;i<iters;i++)v128r.promote_low(0,0);return rf.lo(0)^rf.hi(0);}
-export function v128rAnyTrue(iters:u32,a:u64):u64{rf.set(0,a,~a);let sink:u64=0;for(let i:u32=0;i<iters;i++)sink+=v128r.any_true(0) as u64;return sink;}
-export function v128rAnyTrueZero(iters:u32):u64{rf.set(0,0,0);let sink:u64=0;for(let i:u32=0;i<iters;i++)sink+=v128r.any_true(0) as u64;return sink;}
-export function v128rPopcntI8(iters:u32,a:u64):u64{rf.set(0,a,~a);for(let i:u32=0;i<iters;i++)v128r.popcnt<i8>(0,0);return rf.lo(0)^rf.hi(0);}
-export function v128rLoadExtI8(iters:u32,a:u64):u64{store<u64>(wideIo,a);for(let i:u32=0;i<iters;i++)v128r.load_ext<i8>(0,wideIo);return rf.lo(0)^rf.hi(0);}
-export function v128rLoadZeroI32(iters:u32,a:u64):u64{store<u64>(wideIo,a);for(let i:u32=0;i<iters;i++)v128r.load_zero<i32>(0,wideIo);return rf.lo(0)^rf.hi(0);}
-export function v128rLoadSplatI8(iters:u32,a:u64):u64{store<u64>(wideIo,a);for(let i:u32=0;i<iters;i++)v128r.load_splat<i8>(0,wideIo);return rf.lo(0)^rf.hi(0);}
-export function v128rLoadLaneI16(iters:u32,a:u64):u64{rf.set(0,a,~a);store<i16>(wideIo,-1234);for(let i:u32=0;i<iters;i++)v128r.load_lane<i16>(0,wideIo,0,5);return rf.lo(0)^rf.hi(0);}
-export function v128rStoreLaneI16(iters:u32,a:u64):u64{rf.set(0,a,~a);for(let i:u32=0;i<iters;i++)v128r.store_lane<i16>(wideIo,0,5);return load<u16>(wideIo);}
-export function v128rMulI32(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128r.mul<i32>(0,0,1);return rf.lo(0)^rf.hi(0);}
-export function v128rAbsI16(iters:u32,a:u64):u64{rf.set(0,a,~a);for(let i:u32=0;i<iters;i++)v128r.abs<i16>(0,0);return rf.lo(0)^rf.hi(0);}
-export function v128rAbsI32(iters:u32,a:u64):u64{rf.set(0,a,~a);for(let i:u32=0;i<iters;i++)v128r.abs<i32>(0,0);return rf.lo(0)^rf.hi(0);}
-export function v128rEqI32(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128r.eq<i32>(0,0,1);return rf.lo(0)^rf.hi(0);}
-export function v128rLtI32(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128r.lt<i32>(0,0,1);return rf.lo(0)^rf.hi(0);}
-export function v128rAllTrueI32(iters:u32,a:u64):u64{rf.set(0,a|0x0000000100000001,~a|0x0000000100000001);let sink:u64=0;for(let i:u32=0;i<iters;i++)sink+=v128r.all_true<i32>(0) as u64;return sink;}
-export function v128rExtendLowI16(iters:u32,a:u64):u64{rf.set(0,a,~a);for(let i:u32=0;i<iters;i++)v128r.extend_low<i16>(0,0);return rf.lo(0)^rf.hi(0);}
-export function v128rExtendLowI32(iters:u32,a:u64):u64{rf.set(0,a,~a);for(let i:u32=0;i<iters;i++)v128r.extend_low<i32>(0,0);return rf.lo(0)^rf.hi(0);}
-export function v128rExtaddI16(iters:u32,a:u64):u64{rf.set(0,a,~a);for(let i:u32=0;i<iters;i++)v128r.extadd_pairwise<i16>(0,0);return rf.lo(0)^rf.hi(0);}
-export function v128rExtmulI16(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128r.extmul_low<i16>(0,0,1);return rf.lo(0)^rf.hi(0);}
-export function v128rExtmulI32(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128r.extmul_low<i32>(0,0,1);return rf.lo(0)^rf.hi(0);}
+export function v128rMinI8(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128_kernels.min<i8>(0,0,1);return rf.lo(0)^rf.hi(0);}
+export function v128rMulI8(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128_kernels.mul<i8>(0,0,1);return rf.lo(0)^rf.hi(0);}
+export function v128rAddSatI16(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128_kernels.add_sat<i16>(0,0,1);return rf.lo(0)^rf.hi(0);}
+export function v128rXor(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128_kernels.xor(0,0,1);return rf.lo(0)^rf.hi(0);}
+export function v128rBitselect(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);rf.set(2,0x00ff00ff00ff00ff,0xff00ff00ff00ff00);for(let i:u32=0;i<iters;i++)v128_kernels.bitselect(0,0,1,2);return rf.lo(0)^rf.hi(0);}
+export function v128rBitmaskI8(iters:u32,a:u64):u64{rf.set(0,a,~a);let sink:u64=0;for(let i:u32=0;i<iters;i++)sink+=v128_kernels.bitmask<i8>(0) as u32 as u64;return sink;}
+export function v128rMaxI16(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128_kernels.max<i16>(0,0,1);return rf.lo(0)^rf.hi(0);}
+export function v128rSubSatI8(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128_kernels.sub_sat<i8>(0,0,1);return rf.lo(0)^rf.hi(0);}
+export function v128rDotI16(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128_kernels.dot<i16>(0,0,1);return rf.lo(0)^rf.hi(0);}
+export function v128rLtI8(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128_kernels.lt<i8>(0,0,1);return rf.lo(0)^rf.hi(0);}
+export function v128rAllTrueI8(iters:u32,a:u64):u64{rf.set(0,a|0x0101010101010101,~a|0x0101010101010101);let sink:u64=0;for(let i:u32=0;i<iters;i++)sink+=v128_kernels.all_true<i8>(0) as u64;return sink;}
+export function v128rSwizzle(iters:u32,a:u64):u64{rf.set(0,a,~a);rf.set(1,0x0706050403020100,0x0f0e0d0c0b0a0908);for(let i:u32=0;i<iters;i++)v128_kernels.swizzle(0,0,1);return rf.lo(0)^rf.hi(0);}
+export function v128rNarrowI16(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128_kernels.narrow<i16>(0,0,1);return rf.lo(0)^rf.hi(0);}
+export function v128rExtractLane(iters:u32,a:u64):u64{rf.set(0,a,~a);let sink:u64=0;for(let i:u32=0;i<iters;i++)sink+=v128_kernels.extract_lane<i16>(0,(i&7) as u8) as u16 as u64;return sink;}
+export function v128rReplaceLane(iters:u32,a:u64):u64{rf.set(0,a,~a);for(let i:u32=0;i<iters;i++)v128_kernels.replace_lane<i16>(1,0,5,i as i16);return rf.lo(1)^rf.hi(1);}
+export function v128rReplaceLaneInPlace(iters:u32,a:u64):u64{rf.set(0,a,~a);for(let i:u32=0;i<iters;i++)v128_kernels.replace_lane<i16>(0,0,5,i as i16);return rf.lo(0)^rf.hi(0);}
+export function v128rLoad(iters:u32,a:u64):u64{store<u64>(wideIo,a);store<u64>(wideIo+8,~a);for(let i:u32=0;i<iters;i++)v128_kernels.load(0,wideIo);return rf.lo(0)^rf.hi(0);}
+export function v128rStore(iters:u32,a:u64):u64{rf.set(0,a,~a);for(let i:u32=0;i<iters;i++)v128_kernels.store(wideIo,0);return load<u64>(wideIo)^load<u64>(wideIo+8);}
+export function v128rAbsI8(iters:u32,a:u64):u64{rf.set(0,a,~a);for(let i:u32=0;i<iters;i++)v128_kernels.abs<i8>(0,0);return rf.lo(0)^rf.hi(0);}
+export function v128rSqrtF32(iters:u32,a:u64,b:u64):u64{rf.set(0,a,b);for(let i:u32=0;i<iters;i++)v128_kernels.sqrt<f32>(0,0);return rf.lo(0)^rf.hi(0);}
+export function v128rExtendLowI8(iters:u32,a:u64):u64{rf.set(0,a,~a);for(let i:u32=0;i<iters;i++)v128_kernels.extend_low<i8>(0,0);return rf.lo(0)^rf.hi(0);}
+export function v128rExtaddI8(iters:u32,a:u64):u64{rf.set(0,a,~a);for(let i:u32=0;i<iters;i++)v128_kernels.extadd_pairwise<i8>(0,0);return rf.lo(0)^rf.hi(0);}
+export function v128rExtmulI8(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128_kernels.extmul_low<i8>(0,0,1);return rf.lo(0)^rf.hi(0);}
+export function v128rQ15(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128_kernels.q15mulr_sat<i16>(0,0,1);return rf.lo(0)^rf.hi(0);}
+export function v128rTruncSatI32(iters:u32,a:u64,b:u64):u64{rf.set(0,a,b);for(let i:u32=0;i<iters;i++)v128_kernels.trunc_sat<i32>(0,0);return rf.lo(0)^rf.hi(0);}
+export function v128rConvertI32(iters:u32,a:u64,b:u64):u64{rf.set(0,a,b);for(let i:u32=0;i<iters;i++)v128_kernels.convert<i32>(0,0);return rf.lo(0)^rf.hi(0);}
+export function v128rConvertLowI32(iters:u32,a:u64,b:u64):u64{rf.set(0,a,b);for(let i:u32=0;i<iters;i++)v128_kernels.convert_low<i32>(0,0);return rf.lo(0)^rf.hi(0);}
+export function v128rTruncZeroI32(iters:u32,a:u64,b:u64):u64{rf.set(0,a,b);for(let i:u32=0;i<iters;i++)v128_kernels.trunc_sat_zero<i32>(0,0);return rf.lo(0)^rf.hi(0);}
+export function v128rDemoteF64(iters:u32,a:u64,b:u64):u64{rf.set(0,a,b);for(let i:u32=0;i<iters;i++)v128_kernels.demote_zero(0,0);return rf.lo(0)^rf.hi(0);}
+export function v128rPromoteF32(iters:u32,a:u64,b:u64):u64{rf.set(0,a,b);for(let i:u32=0;i<iters;i++)v128_kernels.promote_low(0,0);return rf.lo(0)^rf.hi(0);}
+export function v128rAnyTrue(iters:u32,a:u64):u64{rf.set(0,a,~a);let sink:u64=0;for(let i:u32=0;i<iters;i++)sink+=v128_kernels.any_true(0) as u64;return sink;}
+export function v128rAnyTrueZero(iters:u32):u64{rf.set(0,0,0);let sink:u64=0;for(let i:u32=0;i<iters;i++)sink+=v128_kernels.any_true(0) as u64;return sink;}
+export function v128rPopcntI8(iters:u32,a:u64):u64{rf.set(0,a,~a);for(let i:u32=0;i<iters;i++)v128_kernels.popcnt<i8>(0,0);return rf.lo(0)^rf.hi(0);}
+export function v128rLoadExtI8(iters:u32,a:u64):u64{store<u64>(wideIo,a);for(let i:u32=0;i<iters;i++)v128_kernels.load_ext<i8>(0,wideIo);return rf.lo(0)^rf.hi(0);}
+export function v128rLoadZeroI32(iters:u32,a:u64):u64{store<u64>(wideIo,a);for(let i:u32=0;i<iters;i++)v128_kernels.load_zero<i32>(0,wideIo);return rf.lo(0)^rf.hi(0);}
+export function v128rLoadSplatI8(iters:u32,a:u64):u64{store<u64>(wideIo,a);for(let i:u32=0;i<iters;i++)v128_kernels.load_splat<i8>(0,wideIo);return rf.lo(0)^rf.hi(0);}
+export function v128rLoadLaneI16(iters:u32,a:u64):u64{rf.set(0,a,~a);store<i16>(wideIo,-1234);for(let i:u32=0;i<iters;i++)v128_kernels.load_lane<i16>(0,wideIo,0,5);return rf.lo(0)^rf.hi(0);}
+export function v128rStoreLaneI16(iters:u32,a:u64):u64{rf.set(0,a,~a);for(let i:u32=0;i<iters;i++)v128_kernels.store_lane<i16>(wideIo,0,5);return load<u16>(wideIo);}
+export function v128rMulI32(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128_kernels.mul<i32>(0,0,1);return rf.lo(0)^rf.hi(0);}
+export function v128rAbsI16(iters:u32,a:u64):u64{rf.set(0,a,~a);for(let i:u32=0;i<iters;i++)v128_kernels.abs<i16>(0,0);return rf.lo(0)^rf.hi(0);}
+export function v128rAbsI32(iters:u32,a:u64):u64{rf.set(0,a,~a);for(let i:u32=0;i<iters;i++)v128_kernels.abs<i32>(0,0);return rf.lo(0)^rf.hi(0);}
+export function v128rEqI32(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128_kernels.eq<i32>(0,0,1);return rf.lo(0)^rf.hi(0);}
+export function v128rLtI32(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128_kernels.lt<i32>(0,0,1);return rf.lo(0)^rf.hi(0);}
+export function v128rAllTrueI32(iters:u32,a:u64):u64{rf.set(0,a|0x0000000100000001,~a|0x0000000100000001);let sink:u64=0;for(let i:u32=0;i<iters;i++)sink+=v128_kernels.all_true<i32>(0) as u64;return sink;}
+export function v128rExtendLowI16(iters:u32,a:u64):u64{rf.set(0,a,~a);for(let i:u32=0;i<iters;i++)v128_kernels.extend_low<i16>(0,0);return rf.lo(0)^rf.hi(0);}
+export function v128rExtendLowI32(iters:u32,a:u64):u64{rf.set(0,a,~a);for(let i:u32=0;i<iters;i++)v128_kernels.extend_low<i32>(0,0);return rf.lo(0)^rf.hi(0);}
+export function v128rExtaddI16(iters:u32,a:u64):u64{rf.set(0,a,~a);for(let i:u32=0;i<iters;i++)v128_kernels.extadd_pairwise<i16>(0,0);return rf.lo(0)^rf.hi(0);}
+export function v128rExtmulI16(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128_kernels.extmul_low<i16>(0,0,1);return rf.lo(0)^rf.hi(0);}
+export function v128rExtmulI32(iters:u32,a:u64,b:u64):u64{rf.set(0,a,~a);rf.set(1,b,~b);for(let i:u32=0;i<iters;i++)v128_kernels.extmul_low<i32>(0,0,1);return rf.lo(0)^rf.hi(0);}

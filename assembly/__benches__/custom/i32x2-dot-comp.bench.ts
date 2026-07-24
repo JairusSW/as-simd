@@ -1,4 +1,4 @@
-import { i32x2 } from "../../v64/i32x2";
+import { i32x2 } from "../../v64/lanes";
 import { bench_common } from "../common";
 import { bench, blackbox, dumpToFile } from "../lib/bench";
 

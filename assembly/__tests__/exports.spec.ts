@@ -4,11 +4,15 @@ import {
   i8x32, i16x16, i32x8, i64x4, f32x8, f64x4,
   i8x64, i16x32, i32x16, i64x8, f32x16, f64x8,
 } from "as-simd";
+import { v32_kernels } from "../v32/kernels";
+import { v64_kernels } from "../v64/kernels";
 
 describe("public package exports", () => {
   test("all vector widths resolve from the package root", () => {
     expect<u32>(v32.add<u8>(0x01020304, 0x01010101)).toBe(0x02030405);
     expect<u64>(v64.add<u16>(0x0001000200030004, 0x0001000100010001)).toBe(0x0002000300040005);
+    expect<u32>(v32_kernels.add<u8>(0x01020304, 0x01010101)).toBe(0x02030405);
+    expect<u64>(v64_kernels.add<u16>(0x0001000200030004, 0x0001000100010001)).toBe(0x0002000300040005);
 
     const lo = v128_swar.splat<i32>(7), hi = v128_swar.take_hi();
     expect<u64>(lo).toBe(0x0000000700000007);

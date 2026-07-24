@@ -1,5 +1,5 @@
 import { describe, expect, test } from "as-test";
-import { i8x8 } from "../v64/i8x8";
+import { i8x8 } from "../v64/lanes";
 import { i8x8_scalar } from "../scalar/i8x8";
 
 type FnSplat = (x: i8) => u64;

@@ -1,4 +1,4 @@
-import { i32x2 } from "../v64/i32x2";
+import { i32x2 } from "../v64/lanes";
 import { i32x2_scalar } from "../scalar/i32x2";
 import { expect, fuzz, FuzzSeed } from "as-test";
 

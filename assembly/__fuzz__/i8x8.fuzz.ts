@@ -1,4 +1,4 @@
-import { i8x8 } from "../v64/i8x8";
+import { i8x8 } from "../v64/lanes";
 import { i8x8_scalar } from "../scalar/i8x8";
 import { expect, fuzz, FuzzSeed } from "as-test";
 

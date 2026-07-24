@@ -1,4 +1,4 @@
-import { i8x8 } from "../../v64/i8x8";
+import { i8x8 } from "../../v64/lanes";
 import { bench_common } from "../common";
 import { bench, blackbox, dumpToFile } from "../lib/bench";
 const OPS: u64 = bench_common.DEFAULT_OPS;

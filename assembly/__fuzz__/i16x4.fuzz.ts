@@ -1,4 +1,4 @@
-import { i16x4 } from "../v64/i16x4";
+import { i16x4 } from "../v64/lanes";
 import { i16x4_scalar } from "../scalar/i16x4";
 import { expect, fuzz, FuzzSeed } from "as-test";
 

@@ -1,6 +1,6 @@
-import { i8x8 } from "../../assembly/v64/i8x8";
-import { i16x4 } from "../../assembly/v64/i16x4";
-import { i32x2 } from "../../assembly/v64/i32x2";
+import { i8x8 } from "../../assembly/v64/lanes";
+import { i16x4 } from "../../assembly/v64/lanes";
+import { i32x2 } from "../../assembly/v64/lanes";
 
 export function i8Min(a: u64, b: u64): u64 { return i8x8.min_s(a, b); }
 export function i8AddSat(a: u64, b: u64): u64 { return i8x8.add_sat_s(a, b); }

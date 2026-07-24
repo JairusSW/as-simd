@@ -1,5 +1,5 @@
-import { i8x8 } from "../../v64/i8x8";
-import { v64 } from "../../v64/v64";
+import { i8x8 } from "../../v64/lanes";
+import { v64 } from "../../v64/value";
 import { bench_common } from "../common";
 import { bench, blackbox, dumpToFile } from "../lib/bench";
 

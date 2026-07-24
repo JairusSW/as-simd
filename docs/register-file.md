@@ -24,13 +24,13 @@ way. This document records the design we ship and why.
    in wasm locals) and is what the higher layer is built on.
 
 2. **Internal register-file API** — `rf` (statically reserved, 64 × 16-byte slots) plus
-   `v128r`, a register-indexed VM used by benchmarks and width-tuning work. Vectors live in numbered registers; every op
+   `v128_kernels`, a register-indexed VM used by benchmarks and width-tuning work. Vectors live in numbered registers; every op
    names operands and destination by index:
 
    ```ts
    rf.set(0, aLo, aHi);
    rf.set(1, bLo, bHi);
-   v128r.add<i8>(2, 0, 1);     // reg2 = reg0 + reg1
+   v128_kernels.add<i8>(2, 0, 1);     // reg2 = reg0 + reg1
    const lo = rf.lo(2), hi = rf.hi(2);
    ```
 

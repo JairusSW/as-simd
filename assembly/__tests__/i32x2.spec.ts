@@ -1,5 +1,5 @@
 import { describe, expect, test } from "as-test";
-import { i32x2 } from "../v64/i32x2";
+import { i32x2 } from "../v64/lanes";
 import { i32x2_scalar } from "../scalar/i32x2";
 
 let state: u64 = 0;

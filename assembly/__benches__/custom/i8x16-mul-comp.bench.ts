@@ -1,5 +1,5 @@
-import { i8x16_swar } from "../../v128/i8x16_swar";
-import { i16x8_swar } from "../../v128/i16x8_swar";
+import { i8x16_swar } from "../../v128/lanes";
+import { i16x8_swar } from "../../v128/lanes";
 import { bench_common } from "../common";
 import { bench, blackbox, dumpToFile } from "../lib/bench";
 

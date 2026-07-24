@@ -1,4 +1,4 @@
-import { i32x4_swar } from "../v128/i32x4_swar";
+import { i32x4_swar } from "../v128/lanes";
 import { bench_common } from "./common";
 import { bench, blackbox, dumpToFile } from "./lib/bench";
 

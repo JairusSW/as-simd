@@ -1,8 +1,5 @@
-import { v64 } from "../v64/v64";
-import { i8x16_swar } from "./i8x16_swar";
-import { i16x8_swar } from "./i16x8_swar";
-import { i32x4_swar } from "./i32x4_swar";
-import { i64x2_swar } from "./i64x2_swar";
+import { v64 } from "../v64/value";
+import { i8x16_swar, i16x8_swar, i32x4_swar, i64x2_swar } from "./lanes";
 
 let __as_simd_v128_hi: u64 = 0;
 
@@ -28,7 +25,7 @@ export namespace v128_swar {
   }
   // Native SIMD bridge. These helpers are only reached from compile-time
   // `ASC_FEATURE_SIMD` branches, so non-SIMD builds eliminate them completely.
-  // Keeping the bridge here also means `v128r` and wider chunked vectors get
+  // Keeping the bridge here also means `v128_kernels` and wider chunked vectors get
   // native SIMD without paying an extra register-file round trip per lane.
   // @ts-expect-error: decorator
   @inline function native_pair(x: v128): u64 {

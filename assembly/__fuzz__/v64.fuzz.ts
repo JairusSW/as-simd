@@ -1,8 +1,8 @@
 import { expect, fuzz, FuzzSeed } from "as-test";
-import { v64 } from "../v64/v64";
-import { i8x8 } from "../v64/i8x8";
-import { i16x4 } from "../v64/i16x4";
-import { i32x2 } from "../v64/i32x2";
+import { v64 } from "../v64/value";
+import { i8x8 } from "../v64/lanes";
+import { i16x4 } from "../v64/lanes";
+import { i32x2 } from "../v64/lanes";
 
 let checkId: i32 = 0;
 

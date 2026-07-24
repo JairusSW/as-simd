@@ -1,5 +1,5 @@
 import { v128_swar } from "../v128/v128_swar";
-import { V128Fallback } from "../v128/v128_fallback";
+import { V128Fallback } from "../v128/value";
 
 /**
  * Allocation-lean immutable 256-bit value.

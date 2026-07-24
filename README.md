@@ -367,7 +367,7 @@ const indexed = i8x8.swizzle(a, i8x8(7, 6, 5, 4, 3, 2, 1, 0));
 `as-simd` focuses on lane-parallel `i8x8` behavior with multiple implementations:
 
 - scalar mirror (`assembly/scalar/i8x8.ts`) for correctness oracle behavior
-- SWAR implementation (`assembly/v64/i8x8.ts`) for baseline portability
+- SWAR implementation (`assembly/v64/lanes.ts`) for baseline portability
 - SIMD-enabled code paths (compile-time gated by `ASC_FEATURE_SIMD`) where profitable
 
 Correctness is validated by:

@@ -1,9 +1,9 @@
 import { describe, expect, test } from "as-test";
-import { v64 } from "../v64/v64";
-import { i16x4 } from "../v64/i16x4";
+import { v64 } from "../v64/value";
+import { i16x4 } from "../v64/lanes";
 import { v128_swar } from "../v128/v128_swar";
 import { rf } from "../v128/regfile";
-import { v128r } from "../v128/v128r";
+import { v128 } from "../v128";
 
 let state: u64 = 0;
 
@@ -73,7 +73,7 @@ describe("v128 adaptive SIMD/SWAR dispatcher", () => {
 
     rf.set(0, aLo, aHi);
     rf.set(1, bLo, bHi);
-    v128r.add<i8>(0, 0, 1);
+    v128.add<i8>(0, 0, 1);
 
     expect<u64>(rf.lo(0)).toBe(expectedLo);
     expect<u64>(rf.hi(0)).toBe(expectedHi);

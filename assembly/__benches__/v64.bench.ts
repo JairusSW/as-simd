@@ -1,4 +1,4 @@
-import { v64 } from "../v64/v64";
+import { v64 } from "../v64/value";
 import { bench_common } from "./common";
 import { bench, blackbox, dumpToFile } from "./lib/bench";
 

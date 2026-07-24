@@ -1,4 +1,4 @@
-import { V128Fallback } from "../v128/v128_fallback";
+import { V128Fallback } from "../v128/value";
 
 /** Immutable, value-semantics 256-bit facade composed from two 128-bit chunks. */
 export class V256 {

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "as-test";
-import { v32 } from "../v32/v32";
-import { v64 } from "../v64/v64";
+import { v32 } from "../v32/value";
+import { v64 } from "../v64/value";
 import { v128_swar } from "../v128/v128_swar";
 import { v256 } from "../v256/value";
 import { i8x32, i16x16, i32x8, i64x4 } from "../v256/lanes";
