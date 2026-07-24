@@ -2,7 +2,7 @@ import { Transform } from "assemblyscript/dist/transform.js";
 import binaryen from "binaryen";
 import { optimizeSwarExpressions } from "./swar.js";
 import { injectPortableVectors } from "./v128.js";
-import { insertWideIntrinsicKernels } from "./wide-intrinsics.js";
+import { insertJSONEscapeCopyIntrinsic, insertWideIntrinsicKernels, } from "./wide-intrinsics.js";
 const CLEANUP_PASSES = [
     "precompute",
     "optimize-instructions",
@@ -36,18 +36,23 @@ export default class AsSimdTransform extends Transform {
     afterCompile(module) {
         if (process.env["AS_SIMD_OPTIMIZE"] === "0")
             return;
+        const useWideIntrinsics = wideIntrinsicsEnabled() &&
+            this.fallbackSources === 0 &&
+            !!(module.getFeatures() & binaryen.Features.SIMD128);
+        let wideKernels = 0;
+        if (useWideIntrinsics) {
+            wideKernels += insertJSONEscapeCopyIntrinsic(module);
+        }
         module.runPasses(EXPOSE_PASSES);
         module.updateMaps();
         const stats = optimizeSwarExpressions(module);
         module.runPasses(CLEANUP_PASSES);
-        let wideKernels = 0;
-        if (wideIntrinsicsEnabled() &&
-            this.fallbackSources === 0 &&
-            module.getFeatures() & binaryen.Features.SIMD128) {
+        if (useWideIntrinsics) {
+            wideKernels += insertJSONEscapeCopyIntrinsic(module);
             for (let i = 0; i < 4; i++)
                 module.optimize();
             module.updateMaps();
-            wideKernels = insertWideIntrinsicKernels(module);
+            wideKernels += insertWideIntrinsicKernels(module);
         }
         if (wideKernels) {
             module.optimize();

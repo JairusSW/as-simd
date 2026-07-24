@@ -427,6 +427,43 @@ describe("32 through 512 bit vectors", () => {
     expect<u64>(v512r.extract_lane<u64>(9, 6)).toBe(0x0123456789abcdef);
   });
 
+  test("fused memory predicates and copies bypass the register file", () => {
+    const source = new Uint16Array(32),
+      copy = new Uint16Array(32);
+    source[0] = 34;
+    source[7] = 92;
+    source[15] = 34;
+    source[16] = 92;
+    source[31] = 34;
+    const src = changetype<usize>(source.dataStart),
+      dst = changetype<usize>(copy.dataStart);
+
+    expect<u64>(v256r.eq_splat_bitmask<u16>(src, 34)).toBe(0x8001);
+    expect<u64>(v256r.eq_either_splat_bitmask<u16>(src, 34, 92)).toBe(0x8081);
+    expect<u64>(v512r.eq_splat_bitmask<u16>(src, 34)).toBe(0x80008001);
+    expect<u64>(v512r.eq_either_splat_bitmask<u16>(src, 34, 92)).toBe(
+      0x80018081,
+    );
+
+    source.fill(0x61);
+    source[0] = 34;
+    source[7] = 92;
+    source[16] = 1;
+    source[31] = 0xd800;
+    expect<u64>(v256r.json_escape_bitmask_utf16(src)).toBe(0xc003);
+    expect<u64>(v512r.json_escape_bitmask_utf16(src)).toBe(0x800000030000c003);
+
+    v256r.copy(dst, src);
+    v512r.copy(dst, src);
+    for (let i = 0; i < 32; i++) expect<u16>(copy[i]).toBe(source[i]);
+
+    copy.fill(0);
+    expect<u32>(v512r.copy_json_escape_bitmask_utf16_64(src, dst)).toBe(
+      0x80010081,
+    );
+    for (let i = 0; i < 32; i++) expect<u16>(copy[i]).toBe(source[i]);
+  });
+
   test("dedicated wide I/O honors runtime byte offsets", () => {
     const memory = new Uint64Array(20);
     for (let i = 0; i < 20; i++) memory[i] = (0x0102030405060708 + i) as u64;

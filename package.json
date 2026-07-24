@@ -1,6 +1,6 @@
 {
   "name": "as-simd",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Drop-in AssemblyScript SIMD-compatible SWAR wrappers with transform support.",
   "main": "./transform/lib/index.js",
   "types": "assembly/index.ts",

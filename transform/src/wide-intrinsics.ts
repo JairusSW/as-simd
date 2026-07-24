@@ -577,6 +577,91 @@ class KernelRewriter extends ExpressionRewriter {
   }
 }
 
+class JSONEscapeCopyRewriter extends ExpressionRewriter {
+  rewrites = 0;
+  private readonly helpers = new Map<string, string>();
+
+  run(): void {
+    const functions: string[] = [];
+    for (let i = 0, n = this.module.getNumFunctions(); i < n; i++) {
+      functions.push(
+        binaryen.getFunctionInfo(this.module.getFunctionByIndex(i)).name,
+      );
+    }
+    for (const name of functions) {
+      const func = this.module.getFunction(name);
+      if (!func) continue;
+      const body = binaryen.getFunctionInfo(func).body;
+      if (body) raw._BinaryenFunctionSetBody(func, this.visit(body));
+    }
+  }
+
+  protected rewrite(expr: Ref): Ref {
+    const call = safeInfo(expr) as binaryen.CallInfo | null;
+    if (!call || call.id !== binaryen.CallId) {
+      return expr;
+    }
+    const isV512Bulk =
+      call.target.endsWith("/json_escape_copy_utf16_bulk_v512") ||
+      call.target.endsWith("/jsonEscapeCopyUtf16BulkV512Intrinsic");
+    const isV512FindQuoteBackslash = call.target.endsWith(
+      "/json_find_quote_backslash_utf16_64_v512",
+    );
+    const isV512x4 = call.target.endsWith("/json_escape_copy_utf16_256_v512");
+    const isV512 = call.target.endsWith("/json_escape_copy_utf16_64_v512");
+    if (
+      !isV512Bulk &&
+      !isV512FindQuoteBackslash &&
+      !isV512x4 &&
+      !isV512 &&
+      !call.target.endsWith("/json_escape_copy_utf16_64")
+    ) {
+      return expr;
+    }
+    const operandCount = isV512Bulk ? 4 : isV512FindQuoteBackslash ? 1 : 2;
+    if (call.operands.length !== operandCount) return expr;
+    const external = isV512Bulk
+      ? "json.escape_copy_utf16_bulk.v512"
+      : isV512FindQuoteBackslash
+        ? "json.find_quote_backslash_utf16_64.v512"
+        : isV512x4
+          ? "json.escape_copy_utf16_256.v512"
+          : isV512
+            ? "json.escape_copy_utf16_64.v512"
+            : "json.escape_copy_utf16_64";
+    let helper = this.helpers.get(external);
+    if (!helper) {
+      helper = isV512Bulk
+        ? "__as_simd_json_escape_copy_utf16_bulk_v512"
+        : isV512FindQuoteBackslash
+          ? "__as_simd_json_find_quote_backslash_utf16_64_v512"
+          : isV512x4
+            ? "__as_simd_json_escape_copy_utf16_256_v512"
+            : isV512
+              ? "__as_simd_json_escape_copy_utf16_64_v512"
+              : "__as_simd_json_escape_copy_utf16_64";
+      this.module.addFunctionImport(
+        helper,
+        INSTRUCTION_MODULE,
+        external,
+        binaryen.createType(
+          Array.from({ length: operandCount }, () => binaryen.i32),
+        ),
+        binaryen.i32,
+      );
+      this.helpers.set(external, helper);
+    }
+    this.rewrites++;
+    return this.module.call(helper, call.operands, binaryen.i32);
+  }
+}
+
+export function insertJSONEscapeCopyIntrinsic(module: binaryen.Module): number {
+  const pass = new JSONEscapeCopyRewriter(module);
+  pass.run();
+  return pass.rewrites;
+}
+
 export function insertWideIntrinsicKernels(module: binaryen.Module): number {
   const pass = new KernelRewriter(module);
   pass.runOriginals();

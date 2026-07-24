@@ -3,7 +3,10 @@ import { Feature, Parser } from "assemblyscript/dist/assemblyscript.js";
 import binaryen from "binaryen";
 import { optimizeSwarExpressions } from "./swar.js";
 import { injectPortableVectors } from "./v128.js";
-import { insertWideIntrinsicKernels } from "./wide-intrinsics.js";
+import {
+  insertJSONEscapeCopyIntrinsic,
+  insertWideIntrinsicKernels,
+} from "./wide-intrinsics.js";
 
 const CLEANUP_PASSES = [
   "precompute",
@@ -47,6 +50,17 @@ export default class AsSimdTransform extends Transform {
   afterCompile(module: binaryen.Module): void {
     if (process.env["AS_SIMD_OPTIMIZE"] === "0") return;
 
+    const useWideIntrinsics =
+      wideIntrinsicsEnabled() &&
+      this.fallbackSources === 0 &&
+      !!(module.getFeatures() & binaryen.Features.SIMD128);
+    let wideKernels = 0;
+    // Preserve domain-specific calls with dynamic loop bounds before the
+    // generic inliner expands their portable fallback bodies.
+    if (useWideIntrinsics) {
+      wideKernels += insertJSONEscapeCopyIntrinsic(module);
+    }
+
     // Valent-block style rewriting needs the whole pure expression island.
     // Expose it first by inlining AssemblyScript's tiny SWAR helpers and
     // forwarding locals, then run the domain-specific rules bottom-up.
@@ -54,12 +68,9 @@ export default class AsSimdTransform extends Transform {
     (module as binaryen.Module & { updateMaps(): void }).updateMaps();
     const stats = optimizeSwarExpressions(module);
     module.runPasses(CLEANUP_PASSES);
-    let wideKernels = 0;
-    if (
-      wideIntrinsicsEnabled() &&
-      this.fallbackSources === 0 &&
-      module.getFeatures() & binaryen.Features.SIMD128
-    ) {
+    if (useWideIntrinsics) {
+      // Catch fixed-size helpers revealed by the generic inliner as well.
+      wideKernels += insertJSONEscapeCopyIntrinsic(module);
       // AssemblyScript's afterCompile hook precedes its final emission cleanup.
       // Run Binaryen's configured pipeline here so adjacent v128 halves have the
       // same canonical store/load shape the emitted module would otherwise gain
@@ -67,7 +78,7 @@ export default class AsSimdTransform extends Transform {
       // retain their requested optimization level and skip this SIMD pipeline.
       for (let i = 0; i < 4; i++) module.optimize();
       (module as binaryen.Module & { updateMaps(): void }).updateMaps();
-      wideKernels = insertWideIntrinsicKernels(module);
+      wideKernels += insertWideIntrinsicKernels(module);
     }
     if (wideKernels) {
       module.optimize();
