@@ -19,6 +19,7 @@
     "build:transform": "tsc -p ./transform",
     "test:transform": "npm run build:transform && node ./transform/__tests__/api-parity.test.mjs && node ./transform/__tests__/import-paths.test.mjs && node ./transform/__tests__/code-shape.test.mjs && node ./transform/__tests__/wide-kernels.test.mjs && node ./transform/__tests__/wide-lane-exhaustive.test.mjs && node ./transform/__tests__/wide-generic-exhaustive.test.mjs && node ./transform/__tests__/v64-dispatch.test.mjs && node ./transform/__tests__/canonical-simd.test.mjs && node ./transform/__tests__/strict-benches.test.mjs && node ./transform/__tests__/v128-auto.test.mjs",
     "test:wasmtime": "wasmtime ./build/test.wasm",
+    "test:wago-wide": "npm run build:transform && node ./scripts/test-wago-wide.mjs",
     "bench": "./scripts/run-bench.sh",
     "bench:wide": "sh ./bench/wide/run.sh",
     "bench:wide-values": "sh ./bench/wide-values/run.sh",

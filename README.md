@@ -149,6 +149,13 @@ entered into the runtime reference store. Every backend retains validated call
 boundaries and checked loads/stores. No custom Wasm section, custom value type,
 digest, post-build rewrite, or architecture-specific import is involved.
 
+Until Wide's externref integration is released as a stable tag, install its
+current branch explicitly:
+
+```bash
+go get github.com/JairusSW/wide@main
+```
+
 ```go
 rt := wago.NewRuntime()
 if err := rt.Use(wide.New()); err != nil { panic(err) }
@@ -194,6 +201,18 @@ Set `AS_SIMD_WIDE_INTRINSICS=0` to disable wide helper bundling while retaining
 the SWAR optimizer and ordinary SIMD dispatch. This is useful for code-shape
 comparison. `AS_SIMD_OPTIMIZE=0` disables the entire transform optimization
 pipeline, including custom-instruction call generation.
+
+To verify the emitted ABI against Wide's current `main` branch and the latest
+Wago compiler:
+
+```bash
+npm run test:wago-wide
+```
+
+The integration check covers the default `externref` carrier and every
+`AS_SIMD_WIDE_CARRIER` alternative. Set `WIDE_DIR` or `WAGO_DIR` to test local
+checkouts without modifying either checkout, or use `WIDE_VERSION` and
+`WAGO_VERSION` to select specific Go module revisions.
 
 CLI:
 
