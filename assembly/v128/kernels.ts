@@ -1,4 +1,4 @@
-import { v128_swar } from "./v128_swar";
+import { v128_swar } from "./value";
 import { rf } from "./regfile";
 
 // Keep scalar builtins outside the namespace, whose public load/store methods

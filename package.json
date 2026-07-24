@@ -104,7 +104,6 @@
     "./assembly/v128/value": "./assembly/v128/value.ts",
     "./assembly/v128/lanes": "./assembly/v128/lanes.ts",
     "./assembly/v128/kernels": "./assembly/v128/kernels.ts",
-    "./assembly/v128/v128_swar": "./assembly/v128/v128_swar.ts",
     "./transform": "./transform/lib/index.js",
     "./globals": "./globals.d.ts",
     "./package.json": "./package.json"

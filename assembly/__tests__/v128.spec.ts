@@ -1,7 +1,7 @@
 import { describe, expect, test } from "as-test";
 import { v64 } from "../v64/value";
 import { i16x4 } from "../v64/lanes";
-import { v128_swar } from "../v128/v128_swar";
+import { v128_swar } from "../v128/value";
 import { rf } from "../v128/regfile";
 import { v128 } from "../v128";
 

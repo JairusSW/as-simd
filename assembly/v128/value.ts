@@ -1,4 +1,6 @@
-import { v128_swar } from "./v128_swar";
+import { v128_swar } from "./fallback";
+
+export { v128_swar } from "./fallback";
 
 /**
  * Value-semantics facade over the two-u64 SWAR implementation.

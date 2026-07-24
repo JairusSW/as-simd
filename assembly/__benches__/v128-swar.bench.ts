@@ -1,4 +1,4 @@
-import { v128_swar } from "../v128/v128_swar";
+import { v128_swar } from "../v128/value";
 import { bench_common } from "./common";
 import { bench, blackbox, dumpToFile } from "./lib/bench";
 

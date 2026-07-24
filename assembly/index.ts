@@ -9,7 +9,7 @@ export { i8x16_swar } from "./v128/lanes";
 export { i16x8_swar } from "./v128/lanes";
 export { i32x4_swar } from "./v128/lanes";
 export { i64x2_swar } from "./v128/lanes";
-export { v128_swar } from "./v128/v128_swar";
+export { v128_swar } from "./v128/value";
 export { V128Fallback } from "./v128/value";
 export { V128Fallback as v128 } from "./v128/value";
 export { v256 } from "./v256/value";

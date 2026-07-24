@@ -1,4 +1,4 @@
-import { v128_swar } from "../../assembly/v128/v128_swar";
+import { v128_swar } from "../../assembly/v128/value";
 import { rf } from "../../assembly/v128/regfile";
 import { v128_kernels } from "../../assembly/v128/kernels";
 import { wrf } from "../../assembly/wide/regfile";

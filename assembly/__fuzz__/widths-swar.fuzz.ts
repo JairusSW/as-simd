@@ -1,7 +1,7 @@
 import { expect, fuzz, FuzzSeed } from "as-test";
 import { v32 } from "../v32/value";
 import { v64 } from "../v64/value";
-import { v128_swar } from "../v128/v128_swar";
+import { v128_swar } from "../v128/value";
 import { v256 } from "../v256/value";
 import { v512 } from "../v512/value";
 import { wrf } from "../wide/regfile";
