@@ -5,6 +5,12 @@ import { injectPortableVectors } from "./v128.js";
 import { insertWideIntrinsicKernels } from "./wide-intrinsics.js";
 const CLEANUP_PASSES = ["precompute", "optimize-instructions", "local-cse", "code-folding", "dce", "vacuum"];
 const EXPOSE_PASSES = ["inlining", "remove-unused-brs", "merge-blocks", "simplify-locals", "vacuum"];
+function wideIntrinsicsEnabled() {
+    return (process.env["WAGO_PLUGINS"] ?? "")
+        .toLowerCase()
+        .split(/[\s,;]+/)
+        .includes("wide");
+}
 export default class AsSimdTransform extends Transform {
     fallbackSources = 0;
     afterParse(parser) {
@@ -21,7 +27,7 @@ export default class AsSimdTransform extends Transform {
         const stats = optimizeSwarExpressions(module);
         module.runPasses(CLEANUP_PASSES);
         let wideKernels = 0;
-        if (process.env["AS_SIMD_WIDE_INTRINSICS"] !== "0" && this.fallbackSources === 0 && (module.getFeatures() & binaryen.Features.SIMD128)) {
+        if (wideIntrinsicsEnabled() && this.fallbackSources === 0 && (module.getFeatures() & binaryen.Features.SIMD128)) {
             for (let i = 0; i < 4; i++)
                 module.optimize();
             module.updateMaps();

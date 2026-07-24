@@ -127,15 +127,15 @@ successful SWAR fusions.
 
 ### Optional Wago native wide-SIMD lowering
 
-In SIMD builds, the transform recognizes adjacent 128-bit chunks of eligible
-`v256` and `v512` operations and replaces them with ordinary function imports
-from `as-simd`. By default, vector operations use standard `externref`
-parameters and results, bracketed by pointer-based `v256.load`/`v256.store` or
-`v512.load`/`v512.store` imports. Import names are dedicated, architecture-neutral
-Wasm-SIMD-style operations such as `i8x32.add`, `i16x32.mul`, and
-`v512.bitselect`; numeric Wasm opcodes and machine instruction names are never
-part of the guest ABI. A v512 group remains one 64-byte instruction instead of
-two independent v256 calls.
+When `WAGO_PLUGINS` contains `wide`, SIMD builds recognize adjacent 128-bit
+chunks of eligible `v256` and `v512` operations and replace them with ordinary
+function imports from `as-simd`. By default, vector operations use standard
+`externref` parameters and results, bracketed by pointer-based
+`v256.load`/`v256.store` or `v512.load`/`v512.store` imports. Import names are
+dedicated, architecture-neutral Wasm-SIMD-style operations such as
+`i8x32.add`, `i16x32.mul`, and `v512.bitselect`; numeric Wasm opcodes and
+machine instruction names are never part of the guest ABI. A v512 group
+remains one 64-byte instruction instead of two independent v256 calls.
 
 With the separate `github.com/JairusSW/wide` Wago plugin installed, Wago
 selects the native backend internally: cost-selected AVX-512/ZMM or AVX2/YMM
@@ -174,7 +174,7 @@ portable validation signature. Select the same carrier in the transform and
 plugin:
 
 ```bash
-AS_SIMD_WIDE_CARRIER=v128 npx asc assembly/index.ts \
+WAGO_PLUGINS=wide AS_SIMD_WIDE_CARRIER=v128 npx asc assembly/index.ts \
   --transform as-simd --enable simd
 ```
 
@@ -189,18 +189,24 @@ make the carrier interchangeable with ordinary values of that Wasm type.
 Wago's registered custom-type identity still prevents a plain `v128`, scalar,
 or reference expression from being consumed by a wide instruction.
 
-Current
-automatic v512 recognition covers chunk-independent unary and binary SIMD
-operations. The plugin registers reviewed unary, binary, and ternary virtual
-kernels directly under the same import module. Automatic ternary grouping is
-deliberately left portable when Binaryen aliases prevent the transform from
-proving that all three sources are adjacent. Width-crossing operations likewise
-retain their portable implementation.
+Current automatic v512 recognition covers chunk-independent unary and binary
+SIMD operations. The plugin registers reviewed unary, binary, and ternary
+virtual kernels directly under the same import module. Automatic ternary
+grouping is deliberately left portable when Binaryen aliases prevent the
+transform from proving that all three sources are adjacent. Width-crossing
+operations likewise retain their portable implementation.
 
-Set `AS_SIMD_WIDE_INTRINSICS=0` to disable wide helper bundling while retaining
-the SWAR optimizer and ordinary SIMD dispatch. This is useful for code-shape
-comparison. `AS_SIMD_OPTIMIZE=0` disables the entire transform optimization
-pipeline, including custom-instruction call generation.
+Wide imports are opt-in. Enable them when the corresponding Wago plugin is part
+of the build:
+
+```bash
+WAGO_PLUGINS=wide npx asc assembly/index.ts --transform as-simd --enable simd
+```
+
+`WAGO_PLUGINS` accepts a comma-separated list, such as `wide,other`. Without
+`wide` in that list, an ordinary SIMD build stays self-contained.
+`AS_SIMD_OPTIMIZE=0` disables the entire transform optimization pipeline,
+including custom-instruction call generation.
 
 To verify the emitted ABI against Wide's current `main` branch and the latest
 Wago compiler:

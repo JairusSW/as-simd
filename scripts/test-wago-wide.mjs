@@ -47,7 +47,7 @@ for (const carrier of carriers) {
     {
       env: {
         ...process.env,
-        AS_SIMD_WIDE_INTRINSICS: "1",
+        WAGO_PLUGINS: "wide",
         AS_SIMD_WIDE_CARRIER: carrier,
       },
     },

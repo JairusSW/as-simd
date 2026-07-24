@@ -10,11 +10,11 @@ function compile(mode, carrier = "") {
   const args = ["bench/wide/bench.ts", "--runtime", "stub", "--transform", "./transform", "-O3", "--converge", "-o", `${output}/wide-${suffix}.wasm`, "--textFile", `${output}/wide-${suffix}.wat`];
   if (mode === "simd" || mode === "native" || mode === "relaxed") args.push("--enable", "simd");
   if (mode === "relaxed") args.push("--enable", "relaxed-simd");
-  const env = {
-    ...process.env,
-    AS_SIMD_WIDE_INTRINSICS: mode === "native" ? "1" : "0",
-    ...(carrier ? {AS_SIMD_WIDE_CARRIER: carrier} : {}),
-  };
+  const env = { ...process.env };
+  delete env.AS_SIMD_WIDE_CARRIER;
+  delete env.WAGO_PLUGINS;
+  if (mode === "native") env.WAGO_PLUGINS = "wide";
+  if (carrier) env.AS_SIMD_WIDE_CARRIER = carrier;
   execFileSync("node_modules/.bin/asc", args, { env, stdio: "inherit" });
   return readFileSync(`${output}/wide-${suffix}.wat`, "utf8");
 }
@@ -30,6 +30,7 @@ const swar = compile("swar");
 const simd = compile("simd");
 const relaxed = compile("relaxed");
 const native = compile("native");
+assert.doesNotMatch(simd, /\(import "as-simd" "(?:v256|v512)\./, "ordinary SIMD builds must not require Wide");
 assert.match(body(native, "v256AddI8"), /call \$__as_simd_instruction_v256_fd_110/);
 assert.match(native, /\(import "as-simd" "i8x32\.add"/);
 assert.match(native, /\(import "as-simd" "v256\.load" \(func \$[^ ]+ \(param i32\) \(result externref\)\)\)/);
