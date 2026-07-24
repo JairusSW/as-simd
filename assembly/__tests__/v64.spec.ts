@@ -17,7 +17,7 @@ let state: u64 = 0;
 
 // @ts-expect-error: decorator
 @inline function nextU64(): u64 {
-  return (<u64>nextU32() << 32) | <u64>nextU32();
+  return ((<u64>nextU32()) << 32) | (<u64>nextU32());
 }
 
 describe("v64 generic api", () => {
@@ -48,7 +48,10 @@ describe("v64 generic api", () => {
       mismatches += v64.popcnt<i8>(a) != i8x8.popcnt(a) ? 1 : 0;
       mismatches += v64.eq<i8>(a, b) != i8x8.eq(a, b) ? 1 : 0;
       mismatches += v64.lt<u8>(a, b) != i8x8.lt_u(a, b) ? 1 : 0;
-      mismatches += v64.relaxed_laneselect<i8>(a, b, m) != i8x8.relaxed_laneselect(a, b, m) ? 1 : 0;
+      mismatches +=
+        v64.relaxed_laneselect<i8>(a, b, m) != i8x8.relaxed_laneselect(a, b, m)
+          ? 1
+          : 0;
 
       mismatches += v64.add<i16>(a, b) != i16x4.add(a, b) ? 1 : 0;
       mismatches += v64.mul<i16>(a, b) != i16x4.mul(a, b) ? 1 : 0;

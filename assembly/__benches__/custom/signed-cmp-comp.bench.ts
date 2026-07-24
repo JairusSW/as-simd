@@ -3,46 +3,220 @@ import { bench_common } from "../common";
 import { bench, blackbox, dumpToFile } from "../lib/bench";
 const OPS: u64 = bench_common.DEFAULT_OPS;
 // @ts-expect-error: decorator
-@inline function lt_s_lib(a: u64, b: u64): u64 { return i8x8.lt_s(a, b); }
+@inline function lt_s_lib(a: u64, b: u64): u64 {
+  return i8x8.lt_s(a, b);
+}
 // @ts-expect-error: decorator
-@inline function le_s_lib(a: u64, b: u64): u64 { return i8x8.le_s(a, b); }
+@inline function le_s_lib(a: u64, b: u64): u64 {
+  return i8x8.le_s(a, b);
+}
 // @ts-expect-error: decorator
-@inline function gt_s_lib(a: u64, b: u64): u64 { return i8x8.gt_s(a, b); }
+@inline function gt_s_lib(a: u64, b: u64): u64 {
+  return i8x8.gt_s(a, b);
+}
 // @ts-expect-error: decorator
-@inline function ge_s_lib(a: u64, b: u64): u64 { return i8x8.ge_s(a, b); }
+@inline function ge_s_lib(a: u64, b: u64): u64 {
+  return i8x8.ge_s(a, b);
+}
 // @ts-expect-error: decorator
-@inline function lt_s_via_ge(a: u64, b: u64): u64 { return ~i8x8.ge_s(a, b); }
+@inline function lt_s_via_ge(a: u64, b: u64): u64 {
+  return ~i8x8.ge_s(a, b);
+}
 // @ts-expect-error: decorator
-@inline function le_s_via_ge(a: u64, b: u64): u64 { return i8x8.ge_s(b, a); }
+@inline function le_s_via_ge(a: u64, b: u64): u64 {
+  return i8x8.ge_s(b, a);
+}
 // @ts-expect-error: decorator
-@inline function le_s_ge_shape(a: u64, b: u64): u64 { const ax = b ^ 0x8080808080808080; const bx = a ^ 0x8080808080808080; const d = ((ax | 0x8080808080808080) - (bx & 0x7f7f7f7f7f7f7f7f)) ^ ((ax ^ ~bx) & 0x8080808080808080); return ~(((((~ax & bx) | (~(ax ^ bx) & d)) & 0x8080808080808080) >> 7) * 0xff); }
+@inline function le_s_ge_shape(a: u64, b: u64): u64 {
+  const ax = b ^ 0x8080808080808080;
+  const bx = a ^ 0x8080808080808080;
+  const d =
+    ((ax | 0x8080808080808080) - (bx & 0x7f7f7f7f7f7f7f7f)) ^
+    ((ax ^ ~bx) & 0x8080808080808080);
+  return ~(
+    ((((~ax & bx) | (~(ax ^ bx) & d)) & 0x8080808080808080) >> 7) *
+    0xff
+  );
+}
 // @ts-expect-error: decorator
-@inline function gt_s_via_le(a: u64, b: u64): u64 { return ~i8x8.le_s(a, b); }
+@inline function gt_s_via_le(a: u64, b: u64): u64 {
+  return ~i8x8.le_s(a, b);
+}
 // @ts-expect-error: decorator
-@inline function gt_s_via_lt(a: u64, b: u64): u64 { return i8x8.lt_s(b, a); }
+@inline function gt_s_via_lt(a: u64, b: u64): u64 {
+  return i8x8.lt_s(b, a);
+}
 // @ts-expect-error: decorator
-@inline function ge_s_via_lt(a: u64, b: u64): u64 { return ~i8x8.lt_s(a, b); }
+@inline function ge_s_via_lt(a: u64, b: u64): u64 {
+  return ~i8x8.lt_s(a, b);
+}
 // @ts-expect-error: decorator
-@inline function lt_s_old(a: u64, b: u64): u64 { const ax = a ^ 0x8080808080808080; const bx = b ^ 0x8080808080808080; const d = ((ax | 0x8080808080808080) - (bx & 0x7f7f7f7f7f7f7f7f)) ^ ((ax ^ ~bx) & 0x8080808080808080); return ((((~ax & bx) | (~(ax ^ bx) & d)) & 0x8080808080808080) >> 7) * 0xff; }
+@inline function lt_s_old(a: u64, b: u64): u64 {
+  const ax = a ^ 0x8080808080808080;
+  const bx = b ^ 0x8080808080808080;
+  const d =
+    ((ax | 0x8080808080808080) - (bx & 0x7f7f7f7f7f7f7f7f)) ^
+    ((ax ^ ~bx) & 0x8080808080808080);
+  return ((((~ax & bx) | (~(ax ^ bx) & d)) & 0x8080808080808080) >> 7) * 0xff;
+}
 // @ts-expect-error: decorator
-@inline function le_s_old(a: u64, b: u64): u64 { const bx = b ^ 0x8080808080808080; const ax = a ^ 0x8080808080808080; const d = ((bx | 0x8080808080808080) - (ax & 0x7f7f7f7f7f7f7f7f)) ^ ((bx ^ ~ax) & 0x8080808080808080); return ~(((((~bx & ax) | (~(bx ^ ax) & d)) & 0x8080808080808080) >> 7) * 0xff); }
+@inline function le_s_old(a: u64, b: u64): u64 {
+  const bx = b ^ 0x8080808080808080;
+  const ax = a ^ 0x8080808080808080;
+  const d =
+    ((bx | 0x8080808080808080) - (ax & 0x7f7f7f7f7f7f7f7f)) ^
+    ((bx ^ ~ax) & 0x8080808080808080);
+  return ~(
+    ((((~bx & ax) | (~(bx ^ ax) & d)) & 0x8080808080808080) >> 7) *
+    0xff
+  );
+}
 // @ts-expect-error: decorator
-@inline function gt_s_old(a: u64, b: u64): u64 { const bx = b ^ 0x8080808080808080; const ax = a ^ 0x8080808080808080; const d = ((bx | 0x8080808080808080) - (ax & 0x7f7f7f7f7f7f7f7f)) ^ ((bx ^ ~ax) & 0x8080808080808080); return ((((~bx & ax) | (~(bx ^ ax) & d)) & 0x8080808080808080) >> 7) * 0xff; }
+@inline function gt_s_old(a: u64, b: u64): u64 {
+  const bx = b ^ 0x8080808080808080;
+  const ax = a ^ 0x8080808080808080;
+  const d =
+    ((bx | 0x8080808080808080) - (ax & 0x7f7f7f7f7f7f7f7f)) ^
+    ((bx ^ ~ax) & 0x8080808080808080);
+  return ((((~bx & ax) | (~(bx ^ ax) & d)) & 0x8080808080808080) >> 7) * 0xff;
+}
 // @ts-expect-error: decorator
-@inline function ge_s_old(a: u64, b: u64): u64 { const ax = a ^ 0x8080808080808080; const bx = b ^ 0x8080808080808080; const d = ((ax | 0x8080808080808080) - (bx & 0x7f7f7f7f7f7f7f7f)) ^ ((ax ^ ~bx) & 0x8080808080808080); return ~(((((~ax & bx) | (~(ax ^ bx) & d)) & 0x8080808080808080) >> 7) * 0xff); }
+@inline function ge_s_old(a: u64, b: u64): u64 {
+  const ax = a ^ 0x8080808080808080;
+  const bx = b ^ 0x8080808080808080;
+  const d =
+    ((ax | 0x8080808080808080) - (bx & 0x7f7f7f7f7f7f7f7f)) ^
+    ((ax ^ ~bx) & 0x8080808080808080);
+  return ~(
+    ((((~ax & bx) | (~(ax ^ bx) & d)) & 0x8080808080808080) >> 7) *
+    0xff
+  );
+}
 const a: u64 = 0xfedcba9876543210;
 const b: u64 = 0x7766554433221100;
-bench("lt-s.lib", () => { blackbox(lt_s_lib(blackbox(a), blackbox(b))); }, OPS, 8); dumpToFile("signed-cmp-comp", "lt-lib");
-bench("lt-s.via-ge", () => { blackbox(lt_s_via_ge(blackbox(a), blackbox(b))); }, OPS, 8); dumpToFile("signed-cmp-comp", "lt-via-ge");
-bench("lt-s.old", () => { blackbox(lt_s_old(blackbox(a), blackbox(b))); }, OPS, 8); dumpToFile("signed-cmp-comp", "lt-old");
-bench("le-s.lib", () => { blackbox(le_s_lib(blackbox(a), blackbox(b))); }, OPS, 8); dumpToFile("signed-cmp-comp", "le-lib");
-bench("le-s.via-ge", () => { blackbox(le_s_via_ge(blackbox(a), blackbox(b))); }, OPS, 8); dumpToFile("signed-cmp-comp", "le-via-ge");
-bench("le-s.ge-shape", () => { blackbox(le_s_ge_shape(blackbox(a), blackbox(b))); }, OPS, 8); dumpToFile("signed-cmp-comp", "le-ge-shape");
-bench("le-s.old", () => { blackbox(le_s_old(blackbox(a), blackbox(b))); }, OPS, 8); dumpToFile("signed-cmp-comp", "le-old");
-bench("gt-s.lib", () => { blackbox(gt_s_lib(blackbox(a), blackbox(b))); }, OPS, 8); dumpToFile("signed-cmp-comp", "gt-lib");
-bench("gt-s.via-le", () => { blackbox(gt_s_via_le(blackbox(a), blackbox(b))); }, OPS, 8); dumpToFile("signed-cmp-comp", "gt-via-le");
-bench("gt-s.via-lt", () => { blackbox(gt_s_via_lt(blackbox(a), blackbox(b))); }, OPS, 8); dumpToFile("signed-cmp-comp", "gt-via-lt");
-bench("gt-s.old", () => { blackbox(gt_s_old(blackbox(a), blackbox(b))); }, OPS, 8); dumpToFile("signed-cmp-comp", "gt-old");
-bench("ge-s.lib", () => { blackbox(ge_s_lib(blackbox(a), blackbox(b))); }, OPS, 8); dumpToFile("signed-cmp-comp", "ge-lib");
-bench("ge-s.via-lt", () => { blackbox(ge_s_via_lt(blackbox(a), blackbox(b))); }, OPS, 8); dumpToFile("signed-cmp-comp", "ge-via-lt");
-bench("ge-s.old", () => { blackbox(ge_s_old(blackbox(a), blackbox(b))); }, OPS, 8); dumpToFile("signed-cmp-comp", "ge-old");
+bench(
+  "lt-s.lib",
+  () => {
+    blackbox(lt_s_lib(blackbox(a), blackbox(b)));
+  },
+  OPS,
+  8,
+);
+dumpToFile("signed-cmp-comp", "lt-lib");
+bench(
+  "lt-s.via-ge",
+  () => {
+    blackbox(lt_s_via_ge(blackbox(a), blackbox(b)));
+  },
+  OPS,
+  8,
+);
+dumpToFile("signed-cmp-comp", "lt-via-ge");
+bench(
+  "lt-s.old",
+  () => {
+    blackbox(lt_s_old(blackbox(a), blackbox(b)));
+  },
+  OPS,
+  8,
+);
+dumpToFile("signed-cmp-comp", "lt-old");
+bench(
+  "le-s.lib",
+  () => {
+    blackbox(le_s_lib(blackbox(a), blackbox(b)));
+  },
+  OPS,
+  8,
+);
+dumpToFile("signed-cmp-comp", "le-lib");
+bench(
+  "le-s.via-ge",
+  () => {
+    blackbox(le_s_via_ge(blackbox(a), blackbox(b)));
+  },
+  OPS,
+  8,
+);
+dumpToFile("signed-cmp-comp", "le-via-ge");
+bench(
+  "le-s.ge-shape",
+  () => {
+    blackbox(le_s_ge_shape(blackbox(a), blackbox(b)));
+  },
+  OPS,
+  8,
+);
+dumpToFile("signed-cmp-comp", "le-ge-shape");
+bench(
+  "le-s.old",
+  () => {
+    blackbox(le_s_old(blackbox(a), blackbox(b)));
+  },
+  OPS,
+  8,
+);
+dumpToFile("signed-cmp-comp", "le-old");
+bench(
+  "gt-s.lib",
+  () => {
+    blackbox(gt_s_lib(blackbox(a), blackbox(b)));
+  },
+  OPS,
+  8,
+);
+dumpToFile("signed-cmp-comp", "gt-lib");
+bench(
+  "gt-s.via-le",
+  () => {
+    blackbox(gt_s_via_le(blackbox(a), blackbox(b)));
+  },
+  OPS,
+  8,
+);
+dumpToFile("signed-cmp-comp", "gt-via-le");
+bench(
+  "gt-s.via-lt",
+  () => {
+    blackbox(gt_s_via_lt(blackbox(a), blackbox(b)));
+  },
+  OPS,
+  8,
+);
+dumpToFile("signed-cmp-comp", "gt-via-lt");
+bench(
+  "gt-s.old",
+  () => {
+    blackbox(gt_s_old(blackbox(a), blackbox(b)));
+  },
+  OPS,
+  8,
+);
+dumpToFile("signed-cmp-comp", "gt-old");
+bench(
+  "ge-s.lib",
+  () => {
+    blackbox(ge_s_lib(blackbox(a), blackbox(b)));
+  },
+  OPS,
+  8,
+);
+dumpToFile("signed-cmp-comp", "ge-lib");
+bench(
+  "ge-s.via-lt",
+  () => {
+    blackbox(ge_s_via_lt(blackbox(a), blackbox(b)));
+  },
+  OPS,
+  8,
+);
+dumpToFile("signed-cmp-comp", "ge-via-lt");
+bench(
+  "ge-s.old",
+  () => {
+    blackbox(ge_s_old(blackbox(a), blackbox(b)));
+  },
+  OPS,
+  8,
+);
+dumpToFile("signed-cmp-comp", "ge-old");

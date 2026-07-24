@@ -86,16 +86,48 @@ const rows = [
   ["v128.max<i8>", 3_000_000, (x, n) => x.v128MaxI8(n, a, ~a, b, ~b)],
   ["v128.min<i16>", 3_000_000, (x, n) => x.v128MinI16(n, a, ~a, b, ~b)],
   ["v128.max<i16>", 3_000_000, (x, n) => x.v128MaxI16(n, a, ~a, b, ~b)],
-  ["v128.swizzle", 2_000_000, (x, n) => x.v128Swizzle(n, a, ~a, 0x0706050403020100n, 0x0f0e0d0c0b0a0908n)],
-  ["v128.sqrt<f32>", 3_000_000, (x, n) => x.v128SqrtF32(n, 0x408000003f800000n, 0x4180000041100000n)],
-  ["v128.sqrt<f64>", 3_000_000, (x, n) => x.v128SqrtF64(n, 0x4010000000000000n, 0x4030000000000000n)],
-  ["v128.ceil<f32>", 3_000_000, (x, n) => x.v128CeilF32(n, 0x402000003fc00000n, 0x4128000040b00000n)],
-  ["v128.ceil<f64>", 3_000_000, (x, n) => x.v128CeilF64(n, 0x4004000000000000n, 0x4025000000000000n)],
-  ["v128.nearest<f32>", 3_000_000, (x, n) => x.v128NearestF32(n, 0x402000003fc00000n, 0x4128000040b00000n)],
-  ["v128.nearest<f64>", 3_000_000, (x, n) => x.v128NearestF64(n, 0x4004000000000000n, 0x4025000000000000n)],
+  [
+    "v128.swizzle",
+    2_000_000,
+    (x, n) => x.v128Swizzle(n, a, ~a, 0x0706050403020100n, 0x0f0e0d0c0b0a0908n),
+  ],
+  [
+    "v128.sqrt<f32>",
+    3_000_000,
+    (x, n) => x.v128SqrtF32(n, 0x408000003f800000n, 0x4180000041100000n),
+  ],
+  [
+    "v128.sqrt<f64>",
+    3_000_000,
+    (x, n) => x.v128SqrtF64(n, 0x4010000000000000n, 0x4030000000000000n),
+  ],
+  [
+    "v128.ceil<f32>",
+    3_000_000,
+    (x, n) => x.v128CeilF32(n, 0x402000003fc00000n, 0x4128000040b00000n),
+  ],
+  [
+    "v128.ceil<f64>",
+    3_000_000,
+    (x, n) => x.v128CeilF64(n, 0x4004000000000000n, 0x4025000000000000n),
+  ],
+  [
+    "v128.nearest<f32>",
+    3_000_000,
+    (x, n) => x.v128NearestF32(n, 0x402000003fc00000n, 0x4128000040b00000n),
+  ],
+  [
+    "v128.nearest<f64>",
+    3_000_000,
+    (x, n) => x.v128NearestF64(n, 0x4004000000000000n, 0x4025000000000000n),
+  ],
   ["v128.convert<i32>", 3_000_000, (x, n) => x.v128ConvertI32(n, a, ~a)],
   ["v128.convert_low<i32>", 3_000_000, (x, n) => x.v128ConvertLowI32(n, a, ~a)],
-  ["v128.trunc_sat<i32>", 3_000_000, (x, n) => x.v128TruncSatI32(n, 0x402000003fc00000n, 0x4128000040b00000n)],
+  [
+    "v128.trunc_sat<i32>",
+    3_000_000,
+    (x, n) => x.v128TruncSatI32(n, 0x402000003fc00000n, 0x4128000040b00000n),
+  ],
   ["v128.narrow<i16>", 2_000_000, (x, n) => x.v128NarrowI16(n, a, ~a, b, ~b)],
   ["v128.narrow<i32>", 2_000_000, (x, n) => x.v128NarrowI32(n, a, ~a, b, ~b)],
   ["v128.extend_low<i8>", 3_000_000, (x, n) => x.v128ExtendLowI8(n, a, ~a)],
@@ -105,10 +137,23 @@ const rows = [
   ["v128.extmul<i8>", 2_000_000, (x, n) => x.v128ExtmulI8(n, a, ~a, b, ~b)],
   ["v128.extmul<i16>", 2_000_000, (x, n) => x.v128ExtmulI16(n, a, ~a, b, ~b)],
   ["v128.extmul<i32>", 2_000_000, (x, n) => x.v128ExtmulI32(n, a, ~a, b, ~b)],
-  ["v128.trunc_zero<i32>", 3_000_000, (x, n) => x.v128TruncSatZeroI32(n, 0x4004000000000000n, 0x4025000000000000n)],
+  [
+    "v128.trunc_zero<i32>",
+    3_000_000,
+    (x, n) =>
+      x.v128TruncSatZeroI32(n, 0x4004000000000000n, 0x4025000000000000n),
+  ],
   ["v128.extadd<i16>", 3_000_000, (x, n) => x.v128ExtaddI16(n, a, ~a)],
-  ["v128.demote<f64>", 3_000_000, (x, n) => x.v128DemoteF64(n, 0x4004000000000000n, 0x4025000000000000n)],
-  ["v128.promote<f32>", 3_000_000, (x, n) => x.v128PromoteF32(n, 0x402000003fc00000n, 0x4128000040b00000n)],
+  [
+    "v128.demote<f64>",
+    3_000_000,
+    (x, n) => x.v128DemoteF64(n, 0x4004000000000000n, 0x4025000000000000n),
+  ],
+  [
+    "v128.promote<f32>",
+    3_000_000,
+    (x, n) => x.v128PromoteF32(n, 0x402000003fc00000n, 0x4128000040b00000n),
+  ],
   ["v128.q15mulr", 2_000_000, (x, n) => x.v128Q15Mulr(n, a, ~a, b, ~b)],
   ["v128r.add<i8>", 5_000_000, (x, n) => x.v128rAddI8(n, a, b)],
   ["v128r.min<i8>", 4_000_000, (x, n) => x.v128rMinI8(n, a, b)],
@@ -126,21 +171,53 @@ const rows = [
   ["v128r.narrow<i16>", 3_000_000, (x, n) => x.v128rNarrowI16(n, a, b)],
   ["v128r.extract_lane", 8_000_000, (x, n) => x.v128rExtractLane(n, a)],
   ["v128r.replace_lane", 5_000_000, (x, n) => x.v128rReplaceLane(n, a)],
-  ["v128r.replace_lane.inplace", 5_000_000, (x, n) => x.v128rReplaceLaneInPlace(n, a)],
+  [
+    "v128r.replace_lane.inplace",
+    5_000_000,
+    (x, n) => x.v128rReplaceLaneInPlace(n, a),
+  ],
   ["v128r.load", 6_000_000, (x, n) => x.v128rLoad(n, a)],
   ["v128r.store", 6_000_000, (x, n) => x.v128rStore(n, a)],
   ["v128r.abs<i8>", 4_000_000, (x, n) => x.v128rAbsI8(n, a)],
-  ["v128r.sqrt<f32>", 3_000_000, (x, n) => x.v128rSqrtF32(n, 0x408000003f800000n, 0x4180000041100000n)],
+  [
+    "v128r.sqrt<f32>",
+    3_000_000,
+    (x, n) => x.v128rSqrtF32(n, 0x408000003f800000n, 0x4180000041100000n),
+  ],
   ["v128r.extend_low<i8>", 4_000_000, (x, n) => x.v128rExtendLowI8(n, a)],
   ["v128r.extadd<i8>", 4_000_000, (x, n) => x.v128rExtaddI8(n, a)],
   ["v128r.extmul<i8>", 3_000_000, (x, n) => x.v128rExtmulI8(n, a, b)],
   ["v128r.q15mulr", 3_000_000, (x, n) => x.v128rQ15(n, a, b)],
-  ["v128r.trunc_sat<i32>", 3_000_000, (x, n) => x.v128rTruncSatI32(n, 0x400000003f800000n, 0x4080000040400000n)],
-  ["v128r.convert<i32>", 3_000_000, (x, n) => x.v128rConvertI32(n, 0x00000002ffffffffn, 0x00000004fffffffdn)],
-  ["v128r.convert_low<i32>", 3_000_000, (x, n) => x.v128rConvertLowI32(n, 0x00000002ffffffffn, 0x00000004fffffffdn)],
-  ["v128r.trunc_zero<i32>", 3_000_000, (x, n) => x.v128rTruncZeroI32(n, 0x4004000000000000n, 0x4025000000000000n)],
-  ["v128r.demote<f64>", 3_000_000, (x, n) => x.v128rDemoteF64(n, 0x4004000000000000n, 0x4025000000000000n)],
-  ["v128r.promote<f32>", 3_000_000, (x, n) => x.v128rPromoteF32(n, 0x402000003fc00000n, 0x4128000040b00000n)],
+  [
+    "v128r.trunc_sat<i32>",
+    3_000_000,
+    (x, n) => x.v128rTruncSatI32(n, 0x400000003f800000n, 0x4080000040400000n),
+  ],
+  [
+    "v128r.convert<i32>",
+    3_000_000,
+    (x, n) => x.v128rConvertI32(n, 0x00000002ffffffffn, 0x00000004fffffffdn),
+  ],
+  [
+    "v128r.convert_low<i32>",
+    3_000_000,
+    (x, n) => x.v128rConvertLowI32(n, 0x00000002ffffffffn, 0x00000004fffffffdn),
+  ],
+  [
+    "v128r.trunc_zero<i32>",
+    3_000_000,
+    (x, n) => x.v128rTruncZeroI32(n, 0x4004000000000000n, 0x4025000000000000n),
+  ],
+  [
+    "v128r.demote<f64>",
+    3_000_000,
+    (x, n) => x.v128rDemoteF64(n, 0x4004000000000000n, 0x4025000000000000n),
+  ],
+  [
+    "v128r.promote<f32>",
+    3_000_000,
+    (x, n) => x.v128rPromoteF32(n, 0x402000003fc00000n, 0x4128000040b00000n),
+  ],
   ["v128r.any_true", 8_000_000, (x, n) => x.v128rAnyTrue(n, a)],
   ["v128r.any_true.zero", 8_000_000, (x, n) => x.v128rAnyTrueZero(n)],
   ["v128r.popcnt<i8>", 4_000_000, (x, n) => x.v128rPopcntI8(n, a)],
@@ -252,34 +329,76 @@ const rows = [
   ["v512.load", 5_000_000, (x, n) => x.v512Load(n, a)],
   ["v512.store", 5_000_000, (x, n) => x.v512Store(n, a)],
   ["v256.replace_lane", 3_000_000, (x, n) => x.v256ReplaceLane(n, a)],
-  ["v256.replace_lane.inplace", 3_000_000, (x, n) => x.v256ReplaceLaneInPlace(n, a)],
+  [
+    "v256.replace_lane.inplace",
+    3_000_000,
+    (x, n) => x.v256ReplaceLaneInPlace(n, a),
+  ],
   ["v512.replace_lane", 3_000_000, (x, n) => x.v512ReplaceLane(n, a)],
-  ["v512.replace_lane.inplace", 3_000_000, (x, n) => x.v512ReplaceLaneInPlace(n, a)],
-  ["v256.replace_lane.legacy", 3_000_000, (x, n) => x.v256ReplaceLaneLegacy(n, a)],
-  ["v512.replace_lane.legacy", 3_000_000, (x, n) => x.v512ReplaceLaneLegacy(n, a)],
+  [
+    "v512.replace_lane.inplace",
+    3_000_000,
+    (x, n) => x.v512ReplaceLaneInPlace(n, a),
+  ],
+  [
+    "v256.replace_lane.legacy",
+    3_000_000,
+    (x, n) => x.v256ReplaceLaneLegacy(n, a),
+  ],
+  [
+    "v512.replace_lane.legacy",
+    3_000_000,
+    (x, n) => x.v512ReplaceLaneLegacy(n, a),
+  ],
   ["v256.extract_lane", 8_000_000, (x, n) => x.v256ExtractLane(n, a)],
   ["v512.extract_lane", 8_000_000, (x, n) => x.v512ExtractLane(n, a)],
 ];
 
-console.log("operation".padEnd(18), "SWAR Mvec/s".padStart(12), "SIMD Mvec/s".padStart(12), "winner".padStart(14));
+console.log(
+  "operation".padEnd(18),
+  "SWAR Mvec/s".padStart(12),
+  "SIMD Mvec/s".padStart(12),
+  "winner".padStart(14),
+);
 const results = [];
 for (const [name, iters, invoke] of rows) {
   const sw = bench(() => invoke(swar, iters), iters);
   const si = bench(() => invoke(simd, iters), iters);
-  if (sw.sink !== si.sink) throw new Error(`${name}: SIMD/SWAR result mismatch`);
-  const winner = si.rate >= sw.rate ? `SIMD +${((si.rate / sw.rate - 1) * 100).toFixed(0)}%` : `SWAR +${((sw.rate / si.rate - 1) * 100).toFixed(0)}%`;
-  console.log(name.padEnd(18), sw.rate.toFixed(1).padStart(12), si.rate.toFixed(1).padStart(12), winner.padStart(14));
-  results.push({ operation: name, swar: sw.rate, simd: si.rate, speedup: si.rate / sw.rate });
+  if (sw.sink !== si.sink)
+    throw new Error(`${name}: SIMD/SWAR result mismatch`);
+  const winner =
+    si.rate >= sw.rate
+      ? `SIMD +${((si.rate / sw.rate - 1) * 100).toFixed(0)}%`
+      : `SWAR +${((sw.rate / si.rate - 1) * 100).toFixed(0)}%`;
+  console.log(
+    name.padEnd(18),
+    sw.rate.toFixed(1).padStart(12),
+    si.rate.toFixed(1).padStart(12),
+    winner.padStart(14),
+  );
+  results.push({
+    operation: name,
+    swar: sw.rate,
+    simd: si.rate,
+    speedup: si.rate / sw.rate,
+  });
 }
 
 const output = "build/bench/wide-v8.json";
 fs.mkdirSync(path.dirname(output), { recursive: true });
-fs.writeFileSync(output, JSON.stringify({
-  generatedAt: new Date().toISOString(),
-  runtime: `Node ${process.version} / V8 ${process.versions.v8}`,
-  platform: `${process.platform} ${process.arch}`,
-  cpu: os.cpus()[0]?.model ?? "unknown CPU",
-  rounds: ROUNDS,
-  results,
-}, null, 2) + "\n");
+fs.writeFileSync(
+  output,
+  JSON.stringify(
+    {
+      generatedAt: new Date().toISOString(),
+      runtime: `Node ${process.version} / V8 ${process.versions.v8}`,
+      platform: `${process.platform} ${process.arch}`,
+      cpu: os.cpus()[0]?.model ?? "unknown CPU",
+      rounds: ROUNDS,
+      results,
+    },
+    null,
+    2,
+  ) + "\n",
+);
 console.log(`wrote ${output}`);

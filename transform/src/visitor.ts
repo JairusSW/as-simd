@@ -4,12 +4,27 @@ type ExpressionRef = binaryen.ExpressionRef;
 type Module = binaryen.Module;
 
 interface RawBinaryen {
-  _BinaryenBlockSetChildAt(expr: ExpressionRef, index: number, child: ExpressionRef): void;
+  _BinaryenBlockSetChildAt(
+    expr: ExpressionRef,
+    index: number,
+    child: ExpressionRef,
+  ): void;
   _BinaryenBreakSetCondition(expr: ExpressionRef, child: ExpressionRef): void;
   _BinaryenBreakSetValue(expr: ExpressionRef, child: ExpressionRef): void;
-  _BinaryenCallSetOperandAt(expr: ExpressionRef, index: number, child: ExpressionRef): void;
-  _BinaryenCallIndirectSetTarget(expr: ExpressionRef, child: ExpressionRef): void;
-  _BinaryenCallIndirectSetOperandAt(expr: ExpressionRef, index: number, child: ExpressionRef): void;
+  _BinaryenCallSetOperandAt(
+    expr: ExpressionRef,
+    index: number,
+    child: ExpressionRef,
+  ): void;
+  _BinaryenCallIndirectSetTarget(
+    expr: ExpressionRef,
+    child: ExpressionRef,
+  ): void;
+  _BinaryenCallIndirectSetOperandAt(
+    expr: ExpressionRef,
+    index: number,
+    child: ExpressionRef,
+  ): void;
   _BinaryenDropSetValue(expr: ExpressionRef, child: ExpressionRef): void;
   _BinaryenFunctionSetBody(func: number, body: ExpressionRef): void;
   _BinaryenGlobalSetSetValue(expr: ExpressionRef, child: ExpressionRef): void;
@@ -39,8 +54,15 @@ interface RawBinaryen {
   _BinaryenTableSetSetValue(expr: ExpressionRef, child: ExpressionRef): void;
   _BinaryenTableGrowSetValue(expr: ExpressionRef, child: ExpressionRef): void;
   _BinaryenTableGrowSetDelta(expr: ExpressionRef, child: ExpressionRef): void;
-  _BinaryenTupleMakeSetOperandAt(expr: ExpressionRef, index: number, child: ExpressionRef): void;
-  _BinaryenTupleExtractSetTuple(expr: ExpressionRef, child: ExpressionRef): void;
+  _BinaryenTupleMakeSetOperandAt(
+    expr: ExpressionRef,
+    index: number,
+    child: ExpressionRef,
+  ): void;
+  _BinaryenTupleExtractSetTuple(
+    expr: ExpressionRef,
+    child: ExpressionRef,
+  ): void;
   _BinaryenUnarySetValue(expr: ExpressionRef, child: ExpressionRef): void;
   _BinaryenBinarySetLeft(expr: ExpressionRef, child: ExpressionRef): void;
   _BinaryenBinarySetRight(expr: ExpressionRef, child: ExpressionRef): void;
@@ -73,58 +95,83 @@ export abstract class ExpressionRewriter {
       // Binaryen occasionally exposes transient Stack IR nodes after an
       // inlining pass that its JS metadata decoder does not model. They are
       // valid IR but must remain opaque to a tree rewrite.
-      if (process.env["AS_SIMD_OPTIMIZE_TRACE"] === "1") console.error("[as-simd:opaque]", expr, binaryen.getExpressionId(expr));
+      if (process.env["AS_SIMD_OPTIMIZE_TRACE"] === "1")
+        console.error("[as-simd:opaque]", expr, binaryen.getExpressionId(expr));
       return expr;
     }
-    if (process.env["AS_SIMD_OPTIMIZE_TRACE"] === "1") console.error("[as-simd:trace]", expr, info.id, info);
+    if (process.env["AS_SIMD_OPTIMIZE_TRACE"] === "1")
+      console.error("[as-simd:trace]", expr, info.id, info);
 
     switch (info.id) {
       case binaryen.BlockId: {
         const node = info as binaryen.BlockInfo;
-        for (let i = 0; i < node.children.length; i++) raw._BinaryenBlockSetChildAt(expr, i, this.visit(node.children[i]));
+        for (let i = 0; i < node.children.length; i++)
+          raw._BinaryenBlockSetChildAt(expr, i, this.visit(node.children[i]));
         break;
       }
       case binaryen.IfId: {
         const node = info as binaryen.IfInfo;
         raw._BinaryenIfSetCondition(expr, this.visit(node.condition));
         raw._BinaryenIfSetIfTrue(expr, this.visit(node.ifTrue));
-        if (node.ifFalse) raw._BinaryenIfSetIfFalse(expr, this.visit(node.ifFalse));
+        if (node.ifFalse)
+          raw._BinaryenIfSetIfFalse(expr, this.visit(node.ifFalse));
         break;
       }
       case binaryen.LoopId:
-        raw._BinaryenLoopSetBody(expr, this.visit((info as binaryen.LoopInfo).body));
+        raw._BinaryenLoopSetBody(
+          expr,
+          this.visit((info as binaryen.LoopInfo).body),
+        );
         break;
       case binaryen.BreakId: {
         const node = info as binaryen.BreakInfo;
-        if (node.condition) raw._BinaryenBreakSetCondition(expr, this.visit(node.condition));
-        if (node.value) raw._BinaryenBreakSetValue(expr, this.visit(node.value));
+        if (node.condition)
+          raw._BinaryenBreakSetCondition(expr, this.visit(node.condition));
+        if (node.value)
+          raw._BinaryenBreakSetValue(expr, this.visit(node.value));
         break;
       }
       case binaryen.SwitchId: {
         const node = info as binaryen.SwitchInfo;
         raw._BinaryenSwitchSetCondition(expr, this.visit(node.condition));
-        if (node.value) raw._BinaryenSwitchSetValue(expr, this.visit(node.value));
+        if (node.value)
+          raw._BinaryenSwitchSetValue(expr, this.visit(node.value));
         break;
       }
       case binaryen.CallId: {
         const node = info as binaryen.CallInfo;
-        for (let i = 0; i < node.operands.length; i++) raw._BinaryenCallSetOperandAt(expr, i, this.visit(node.operands[i]));
+        for (let i = 0; i < node.operands.length; i++)
+          raw._BinaryenCallSetOperandAt(expr, i, this.visit(node.operands[i]));
         break;
       }
       case binaryen.CallIndirectId: {
         const node = info as binaryen.CallIndirectInfo;
         raw._BinaryenCallIndirectSetTarget(expr, this.visit(node.target));
-        for (let i = 0; i < node.operands.length; i++) raw._BinaryenCallIndirectSetOperandAt(expr, i, this.visit(node.operands[i]));
+        for (let i = 0; i < node.operands.length; i++)
+          raw._BinaryenCallIndirectSetOperandAt(
+            expr,
+            i,
+            this.visit(node.operands[i]),
+          );
         break;
       }
       case binaryen.LocalSetId:
-        raw._BinaryenLocalSetSetValue(expr, this.visit((info as binaryen.LocalSetInfo).value));
+        raw._BinaryenLocalSetSetValue(
+          expr,
+          this.visit((info as binaryen.LocalSetInfo).value),
+        );
         break;
       case binaryen.GlobalSetId:
-        raw._BinaryenGlobalSetSetValue(expr, this.visit((info as binaryen.GlobalSetInfo).value));
+        raw._BinaryenGlobalSetSetValue(
+          expr,
+          this.visit((info as binaryen.GlobalSetInfo).value),
+        );
         break;
       case binaryen.TableGetId:
-        raw._BinaryenTableGetSetIndex(expr, this.visit((info as binaryen.TableGetInfo).index));
+        raw._BinaryenTableGetSetIndex(
+          expr,
+          this.visit((info as binaryen.TableGetInfo).index),
+        );
         break;
       case binaryen.TableSetId: {
         const node = info as binaryen.TableSetInfo;
@@ -139,7 +186,10 @@ export abstract class ExpressionRewriter {
         break;
       }
       case binaryen.LoadId:
-        raw._BinaryenLoadSetPtr(expr, this.visit((info as binaryen.LoadInfo).ptr));
+        raw._BinaryenLoadSetPtr(
+          expr,
+          this.visit((info as binaryen.LoadInfo).ptr),
+        );
         break;
       case binaryen.StoreId: {
         const node = info as binaryen.StoreInfo;
@@ -148,7 +198,10 @@ export abstract class ExpressionRewriter {
         break;
       }
       case binaryen.UnaryId:
-        raw._BinaryenUnarySetValue(expr, this.visit((info as binaryen.UnaryInfo).value));
+        raw._BinaryenUnarySetValue(
+          expr,
+          this.visit((info as binaryen.UnaryInfo).value),
+        );
         break;
       case binaryen.BinaryId: {
         const node = info as binaryen.BinaryInfo;
@@ -164,7 +217,10 @@ export abstract class ExpressionRewriter {
         break;
       }
       case binaryen.DropId:
-        raw._BinaryenDropSetValue(expr, this.visit((info as binaryen.DropInfo).value));
+        raw._BinaryenDropSetValue(
+          expr,
+          this.visit((info as binaryen.DropInfo).value),
+        );
         break;
       case binaryen.ReturnId: {
         const value = (info as binaryen.ReturnInfo).value;
@@ -172,7 +228,10 @@ export abstract class ExpressionRewriter {
         break;
       }
       case binaryen.MemoryGrowId:
-        raw._BinaryenMemoryGrowSetDelta(expr, this.visit((info as binaryen.MemoryGrowInfo).delta));
+        raw._BinaryenMemoryGrowSetDelta(
+          expr,
+          this.visit((info as binaryen.MemoryGrowInfo).delta),
+        );
         break;
       case binaryen.MemoryCopyId: {
         const node = info as binaryen.MemoryCopyInfo;
@@ -190,11 +249,19 @@ export abstract class ExpressionRewriter {
       }
       case binaryen.TupleMakeId: {
         const node = info as binaryen.TupleMakeInfo;
-        for (let i = 0; i < node.operands.length; i++) raw._BinaryenTupleMakeSetOperandAt(expr, i, this.visit(node.operands[i]));
+        for (let i = 0; i < node.operands.length; i++)
+          raw._BinaryenTupleMakeSetOperandAt(
+            expr,
+            i,
+            this.visit(node.operands[i]),
+          );
         break;
       }
       case binaryen.TupleExtractId:
-        raw._BinaryenTupleExtractSetTuple(expr, this.visit((info as binaryen.TupleExtract).tuple));
+        raw._BinaryenTupleExtractSetTuple(
+          expr,
+          this.visit((info as binaryen.TupleExtract).tuple),
+        );
         break;
     }
 

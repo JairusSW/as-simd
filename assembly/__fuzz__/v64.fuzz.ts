@@ -8,7 +8,9 @@ let checkId: i32 = 0;
 
 // @ts-expect-error: decorator
 @inline function u64At(words: u32[], index: i32): u64 {
-  return (<u64>unchecked(words[index]) << 32) | <u64>unchecked(words[index + 1]);
+  return (
+    ((<u64>unchecked(words[index])) << 32) | (<u64>unchecked(words[index + 1]))
+  );
 }
 
 // @ts-expect-error: decorator
@@ -38,7 +40,13 @@ fuzz("v64 generic integer parity", (words: u32[]): bool => {
   if (!check64(v64.popcnt<i8>(a), i8x8.popcnt(a))) return false;
   if (!check64(v64.eq<i8>(a, b), i8x8.eq(a, b))) return false;
   if (!check64(v64.lt<i8>(a, b), i8x8.lt_s(a, b))) return false;
-  if (!check64(v64.relaxed_laneselect<i8>(a, b, m), i8x8.relaxed_laneselect(a, b, m))) return false;
+  if (
+    !check64(
+      v64.relaxed_laneselect<i8>(a, b, m),
+      i8x8.relaxed_laneselect(a, b, m),
+    )
+  )
+    return false;
 
   if (!check64(v64.add<i16>(a, b), i16x4.add(a, b))) return false;
   if (!check64(v64.mul<i16>(a, b), i16x4.mul(a, b))) return false;

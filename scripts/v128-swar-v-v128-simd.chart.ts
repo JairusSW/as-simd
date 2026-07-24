@@ -1,5 +1,9 @@
 import { chartSubtitle } from "./chart-meta";
-import { createComparisonChart, projectRootFrom, type ChartVariant } from "./chart-lib";
+import {
+  createComparisonChart,
+  projectRootFrom,
+  type ChartVariant,
+} from "./chart-lib";
 
 const ROOT = projectRootFrom(import.meta.url);
 
@@ -25,10 +29,34 @@ const ORDER = [
 ];
 
 const VARIANTS: [ChartVariant, ChartVariant, ChartVariant, ChartVariant] = [
-  { key: "v128-swar-v8", color: "rgb(99,102,241)", runtime: "v8", mode: "swar", suite: "v128" },
-  { key: "v128-swar-wavm", color: "rgb(34,197,94)", runtime: "wavm", mode: "swar", suite: "v128" },
-  { key: "v128-simd-v8", color: "rgb(234,220,90)", runtime: "v8", mode: "simd", suite: "v128" },
-  { key: "v128-simd-wavm", color: "rgb(239,68,68)", runtime: "wavm", mode: "simd", suite: "v128" },
+  {
+    key: "v128-swar-v8",
+    color: "rgb(99,102,241)",
+    runtime: "v8",
+    mode: "swar",
+    suite: "v128",
+  },
+  {
+    key: "v128-swar-wavm",
+    color: "rgb(34,197,94)",
+    runtime: "wavm",
+    mode: "swar",
+    suite: "v128",
+  },
+  {
+    key: "v128-simd-v8",
+    color: "rgb(234,220,90)",
+    runtime: "v8",
+    mode: "simd",
+    suite: "v128",
+  },
+  {
+    key: "v128-simd-wavm",
+    color: "rgb(239,68,68)",
+    runtime: "wavm",
+    mode: "simd",
+    suite: "v128",
+  },
 ];
 
 createComparisonChart({

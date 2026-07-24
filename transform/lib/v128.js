@@ -1,19 +1,35 @@
 import { ImportStatement, Source, Tokenizer, } from "assemblyscript/dist/assemblyscript.js";
 import { computeVectorImportSpecifier } from "./imports.js";
 const VECTOR_NAMES = [
-    "v64", "v128", "v256", "v512",
-    "i8x32", "i16x16", "i32x8", "i64x4", "f32x8", "f64x4",
-    "i8x64", "i16x32", "i32x16", "i64x8", "f32x16", "f64x8",
+    "v64",
+    "v128",
+    "v256",
+    "v512",
+    "i8x32",
+    "i16x16",
+    "i32x8",
+    "i64x4",
+    "f32x8",
+    "f64x4",
+    "i8x64",
+    "i16x32",
+    "i32x16",
+    "i64x8",
+    "f32x16",
+    "f64x8",
 ];
 export function injectPortableVectors(parser, injectV128, baseDir) {
     let rewritten = 0;
     for (const source of parser.sources) {
-        if (source.sourceKind !== 0 && source.sourceKind !== 1)
+        if (source.sourceKind !== 0 &&
+            source.sourceKind !== 1)
             continue;
         if (isAsSimdSource(source.normalizedPath))
             continue;
         const declared = declaredNames(source);
-        const needed = VECTOR_NAMES.filter((name) => (name !== "v128" || injectV128) && !declared.has(name) && new RegExp(`\\b${name}\\b`).test(source.text));
+        const needed = VECTOR_NAMES.filter((name) => (name !== "v128" || injectV128) &&
+            !declared.has(name) &&
+            new RegExp(`\\b${name}\\b`).test(source.text));
         if (!needed.length)
             continue;
         const specifier = computeVectorImportSpecifier(source.normalizedPath, baseDir);
@@ -24,7 +40,9 @@ export function injectPortableVectors(parser, injectV128, baseDir) {
 }
 function isAsSimdSource(path) {
     const normalized = path.replaceAll("\\", "/");
-    return normalized.startsWith("assembly/") || normalized.includes("/node_modules/as-simd/assembly/") || normalized.startsWith("~lib/as-simd/assembly/");
+    return (normalized.startsWith("assembly/") ||
+        normalized.includes("/node_modules/as-simd/assembly/") ||
+        normalized.startsWith("~lib/as-simd/assembly/"));
 }
 function declaredNames(source) {
     const declared = new Set();

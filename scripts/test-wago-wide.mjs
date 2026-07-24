@@ -8,7 +8,9 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const output = path.join(root, "build", "wago-wide");
 const goEnv = {
   ...process.env,
-  GONOSUMDB: [process.env.GONOSUMDB, "github.com/JairusSW/wide"].filter(Boolean).join(","),
+  GONOSUMDB: [process.env.GONOSUMDB, "github.com/JairusSW/wide"]
+    .filter(Boolean)
+    .join(","),
 };
 
 function run(command, args, options = {}) {
@@ -21,9 +23,18 @@ function run(command, args, options = {}) {
 
 function localModule(module, directory) {
   const resolved = path.resolve(root, directory);
-  run("go", ["mod", "edit", `-require=${module}@v0.0.0`, `-replace=${module}=${resolved}`], {
-    cwd: temporaryModule,
-  });
+  run(
+    "go",
+    [
+      "mod",
+      "edit",
+      `-require=${module}@v0.0.0`,
+      `-replace=${module}=${resolved}`,
+    ],
+    {
+      cwd: temporaryModule,
+    },
+  );
 }
 
 mkdirSync(output, { recursive: true });
@@ -50,7 +61,9 @@ run(
   },
 );
 
-const temporaryModule = mkdtempSync(path.join(os.tmpdir(), "as-simd-wago-wide-"));
+const temporaryModule = mkdtempSync(
+  path.join(os.tmpdir(), "as-simd-wago-wide-"),
+);
 writeFileSync(
   path.join(temporaryModule, "go.mod"),
   "module as-simd-wago-wide-integration\n\ngo 1.22\n",
@@ -100,16 +113,27 @@ try {
   if (process.env.WIDE_DIR) {
     localModule("github.com/JairusSW/wide", process.env.WIDE_DIR);
   } else {
-    run("go", ["get", `github.com/JairusSW/wide@${process.env.WIDE_VERSION ?? "main"}`], {
-      cwd: temporaryModule,
-    });
+    run(
+      "go",
+      ["get", `github.com/JairusSW/wide@${process.env.WIDE_VERSION ?? "main"}`],
+      {
+        cwd: temporaryModule,
+      },
+    );
   }
   if (process.env.WAGO_DIR) {
     localModule("github.com/wago-org/wago", process.env.WAGO_DIR);
   } else {
-    run("go", ["get", `github.com/wago-org/wago@${process.env.WAGO_VERSION ?? "latest"}`], {
-      cwd: temporaryModule,
-    });
+    run(
+      "go",
+      [
+        "get",
+        `github.com/wago-org/wago@${process.env.WAGO_VERSION ?? "latest"}`,
+      ],
+      {
+        cwd: temporaryModule,
+      },
+    );
   }
   run("go", ["mod", "tidy"], { cwd: temporaryModule });
   run("go", ["run", ".", output], { cwd: temporaryModule });

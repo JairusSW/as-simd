@@ -6,7 +6,9 @@ let checkId: i32 = 0;
 
 // @ts-expect-error: decorator
 @inline function u64At(words: u32[], index: i32): u64 {
-  return (<u64>unchecked(words[index]) << 32) | <u64>unchecked(words[index + 1]);
+  return (
+    ((<u64>unchecked(words[index])) << 32) | (<u64>unchecked(words[index + 1]))
+  );
 }
 
 // @ts-expect-error: decorator
@@ -51,8 +53,15 @@ fuzz("i32x2 scalar reference parity", (words: u32[]): bool => {
   checkId = 1;
 
   if (!check64(i32x2.splat(laneVal), i32x2_scalar.splat(laneVal))) return false;
-  if (!check32(i32x2.extract_lane(a, idx), i32x2_scalar.extract_lane(a, idx))) return false;
-  if (!check64(i32x2.replace_lane(a, idx, laneVal), i32x2_scalar.replace_lane(a, idx, laneVal))) return false;
+  if (!check32(i32x2.extract_lane(a, idx), i32x2_scalar.extract_lane(a, idx)))
+    return false;
+  if (
+    !check64(
+      i32x2.replace_lane(a, idx, laneVal),
+      i32x2_scalar.replace_lane(a, idx, laneVal),
+    )
+  )
+    return false;
   if (!check64(i32x2.add(a, b), i32x2_scalar.add(a, b))) return false;
   if (!check64(i32x2.sub(a, b), i32x2_scalar.sub(a, b))) return false;
   if (!check64(i32x2.mul(a, b), i32x2_scalar.mul(a, b))) return false;
@@ -60,12 +69,15 @@ fuzz("i32x2 scalar reference parity", (words: u32[]): bool => {
   if (!check64(i32x2.min_u(a, b), i32x2_scalar.min_u(a, b))) return false;
   if (!check64(i32x2.max_s(a, b), i32x2_scalar.max_s(a, b))) return false;
   if (!check64(i32x2.max_u(a, b), i32x2_scalar.max_u(a, b))) return false;
-  if (!check64(i32x2.dot_i16x4_s(a, b), i32x2_scalar.dot_i16x4_s(a, b))) return false;
+  if (!check64(i32x2.dot_i16x4_s(a, b), i32x2_scalar.dot_i16x4_s(a, b)))
+    return false;
   if (!check64(i32x2.abs(a), i32x2_scalar.abs(a))) return false;
   if (!check64(i32x2.neg(a), i32x2_scalar.neg(a))) return false;
   if (!check64(i32x2.shl(a, shift), i32x2_scalar.shl(a, shift))) return false;
-  if (!check64(i32x2.shr_s(a, shift), i32x2_scalar.shr_s(a, shift))) return false;
-  if (!check64(i32x2.shr_u(a, shift), i32x2_scalar.shr_u(a, shift))) return false;
+  if (!check64(i32x2.shr_s(a, shift), i32x2_scalar.shr_s(a, shift)))
+    return false;
+  if (!check64(i32x2.shr_u(a, shift), i32x2_scalar.shr_u(a, shift)))
+    return false;
   if (!checkBool(i32x2.all_true(a), i32x2_scalar.all_true(a))) return false;
   if (!checkBool(i32x2.any_true(a), i32x2_scalar.any_true(a))) return false;
   if (!check32(i32x2.bitmask(a), i32x2_scalar.bitmask(a))) return false;
@@ -79,18 +91,69 @@ fuzz("i32x2 scalar reference parity", (words: u32[]): bool => {
   if (!check64(i32x2.gt_u(a, b), i32x2_scalar.gt_u(a, b))) return false;
   if (!check64(i32x2.ge_s(a, b), i32x2_scalar.ge_s(a, b))) return false;
   if (!check64(i32x2.ge_u(a, b), i32x2_scalar.ge_u(a, b))) return false;
-  if (!check64(i32x2.extend_low_i16x4_s(a), i32x2_scalar.extend_low_i16x4_s(a))) return false;
-  if (!check64(i32x2.extend_low_i16x4_u(a), i32x2_scalar.extend_low_i16x4_u(a))) return false;
-  if (!check64(i32x2.extend_high_i16x4_s(a), i32x2_scalar.extend_high_i16x4_s(a))) return false;
-  if (!check64(i32x2.extend_high_i16x4_u(a), i32x2_scalar.extend_high_i16x4_u(a))) return false;
-  if (!check64(i32x2.extadd_pairwise_i16x4_s(a), i32x2_scalar.extadd_pairwise_i16x4_s(a))) return false;
-  if (!check64(i32x2.extadd_pairwise_i16x4_u(a), i32x2_scalar.extadd_pairwise_i16x4_u(a))) return false;
-  if (!check64(i32x2.extmul_low_i16x4_s(a, b), i32x2_scalar.extmul_low_i16x4_s(a, b))) return false;
-  if (!check64(i32x2.extmul_low_i16x4_u(a, b), i32x2_scalar.extmul_low_i16x4_u(a, b))) return false;
-  if (!check64(i32x2.extmul_high_i16x4_s(a, b), i32x2_scalar.extmul_high_i16x4_s(a, b))) return false;
-  if (!check64(i32x2.extmul_high_i16x4_u(a, b), i32x2_scalar.extmul_high_i16x4_u(a, b))) return false;
-  if (!check64(i32x2.shuffle(a, b, l0, l1), i32x2_scalar.shuffle(a, b, l0, l1))) return false;
-  if (!check64(i32x2.relaxed_laneselect(a, b, m), i32x2_scalar.relaxed_laneselect(a, b, m))) return false;
+  if (!check64(i32x2.extend_low_i16x4_s(a), i32x2_scalar.extend_low_i16x4_s(a)))
+    return false;
+  if (!check64(i32x2.extend_low_i16x4_u(a), i32x2_scalar.extend_low_i16x4_u(a)))
+    return false;
+  if (
+    !check64(i32x2.extend_high_i16x4_s(a), i32x2_scalar.extend_high_i16x4_s(a))
+  )
+    return false;
+  if (
+    !check64(i32x2.extend_high_i16x4_u(a), i32x2_scalar.extend_high_i16x4_u(a))
+  )
+    return false;
+  if (
+    !check64(
+      i32x2.extadd_pairwise_i16x4_s(a),
+      i32x2_scalar.extadd_pairwise_i16x4_s(a),
+    )
+  )
+    return false;
+  if (
+    !check64(
+      i32x2.extadd_pairwise_i16x4_u(a),
+      i32x2_scalar.extadd_pairwise_i16x4_u(a),
+    )
+  )
+    return false;
+  if (
+    !check64(
+      i32x2.extmul_low_i16x4_s(a, b),
+      i32x2_scalar.extmul_low_i16x4_s(a, b),
+    )
+  )
+    return false;
+  if (
+    !check64(
+      i32x2.extmul_low_i16x4_u(a, b),
+      i32x2_scalar.extmul_low_i16x4_u(a, b),
+    )
+  )
+    return false;
+  if (
+    !check64(
+      i32x2.extmul_high_i16x4_s(a, b),
+      i32x2_scalar.extmul_high_i16x4_s(a, b),
+    )
+  )
+    return false;
+  if (
+    !check64(
+      i32x2.extmul_high_i16x4_u(a, b),
+      i32x2_scalar.extmul_high_i16x4_u(a, b),
+    )
+  )
+    return false;
+  if (!check64(i32x2.shuffle(a, b, l0, l1), i32x2_scalar.shuffle(a, b, l0, l1)))
+    return false;
+  if (
+    !check64(
+      i32x2.relaxed_laneselect(a, b, m),
+      i32x2_scalar.relaxed_laneselect(a, b, m),
+    )
+  )
+    return false;
   return true;
 }).generate((seed: FuzzSeed, run: (words: u32[]) => bool): void => {
   run(seed.array<u32>((s: FuzzSeed): u32 => s.u32(), { min: 11, max: 11 }));

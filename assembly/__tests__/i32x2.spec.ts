@@ -16,7 +16,7 @@ let checkId: i32 = 0;
 
 // @ts-expect-error: decorator
 @inline function nextU64(): u64 {
-  return (<u64>nextU32() << 32) | <u64>nextU32();
+  return ((<u64>nextU32()) << 32) | (<u64>nextU32());
 }
 
 // @ts-expect-error: decorator
@@ -56,13 +56,25 @@ describe("i32x2", () => {
     src[1] = -22;
     src[2] = 33;
     src[3] = 44;
-    const loaded = i32x2.loadPartial(changetype<usize>(src.dataStart), 1, 4, 4, -1);
+    const loaded = i32x2.loadPartial(
+      changetype<usize>(src.dataStart),
+      1,
+      4,
+      4,
+      -1,
+    );
     expect<i32>(i32x2.extract_lane(loaded, 0)).toBe(-22);
     expect<i32>(i32x2.extract_lane(loaded, 1)).toBe(-1);
 
     const dst = new Int32Array(4);
     for (let i = 0; i < dst.length; i++) dst[i] = 777777;
-    i32x2.storePartial(changetype<usize>(dst.dataStart), i32x2(123, 456), 1, 8, 4);
+    i32x2.storePartial(
+      changetype<usize>(dst.dataStart),
+      i32x2(123, 456),
+      1,
+      8,
+      4,
+    );
     expect<i32>(dst[1]).toBe(777777);
     expect<i32>(dst[2]).toBe(123);
     expect<i32>(dst[3]).toBe(777777);
@@ -83,8 +95,17 @@ describe("i32x2", () => {
       checkId = 1;
 
       if (!check64(i32x2.splat(laneVal), i32x2_scalar.splat(laneVal))) return;
-      if (!check32(i32x2.extract_lane(a, idx), i32x2_scalar.extract_lane(a, idx))) return;
-      if (!check64(i32x2.replace_lane(a, idx, laneVal), i32x2_scalar.replace_lane(a, idx, laneVal))) return;
+      if (
+        !check32(i32x2.extract_lane(a, idx), i32x2_scalar.extract_lane(a, idx))
+      )
+        return;
+      if (
+        !check64(
+          i32x2.replace_lane(a, idx, laneVal),
+          i32x2_scalar.replace_lane(a, idx, laneVal),
+        )
+      )
+        return;
       if (!check64(i32x2.add(a, b), i32x2_scalar.add(a, b))) return;
       if (!check64(i32x2.sub(a, b), i32x2_scalar.sub(a, b))) return;
       if (!check64(i32x2.mul(a, b), i32x2_scalar.mul(a, b))) return;
@@ -92,7 +113,8 @@ describe("i32x2", () => {
       if (!check64(i32x2.min_u(a, b), i32x2_scalar.min_u(a, b))) return;
       if (!check64(i32x2.max_s(a, b), i32x2_scalar.max_s(a, b))) return;
       if (!check64(i32x2.max_u(a, b), i32x2_scalar.max_u(a, b))) return;
-      if (!check64(i32x2.dot_i16x4_s(a, b), i32x2_scalar.dot_i16x4_s(a, b))) return;
+      if (!check64(i32x2.dot_i16x4_s(a, b), i32x2_scalar.dot_i16x4_s(a, b)))
+        return;
       if (!check64(i32x2.abs(a), i32x2_scalar.abs(a))) return;
       if (!check64(i32x2.neg(a), i32x2_scalar.neg(a))) return;
       if (!check64(i32x2.shl(a, shift), i32x2_scalar.shl(a, shift))) return;
@@ -111,18 +133,90 @@ describe("i32x2", () => {
       if (!check64(i32x2.gt_u(a, b), i32x2_scalar.gt_u(a, b))) return;
       if (!check64(i32x2.ge_s(a, b), i32x2_scalar.ge_s(a, b))) return;
       if (!check64(i32x2.ge_u(a, b), i32x2_scalar.ge_u(a, b))) return;
-      if (!check64(i32x2.extend_low_i16x4_s(a), i32x2_scalar.extend_low_i16x4_s(a))) return;
-      if (!check64(i32x2.extend_low_i16x4_u(a), i32x2_scalar.extend_low_i16x4_u(a))) return;
-      if (!check64(i32x2.extend_high_i16x4_s(a), i32x2_scalar.extend_high_i16x4_s(a))) return;
-      if (!check64(i32x2.extend_high_i16x4_u(a), i32x2_scalar.extend_high_i16x4_u(a))) return;
-      if (!check64(i32x2.extadd_pairwise_i16x4_s(a), i32x2_scalar.extadd_pairwise_i16x4_s(a))) return;
-      if (!check64(i32x2.extadd_pairwise_i16x4_u(a), i32x2_scalar.extadd_pairwise_i16x4_u(a))) return;
-      if (!check64(i32x2.extmul_low_i16x4_s(a, b), i32x2_scalar.extmul_low_i16x4_s(a, b))) return;
-      if (!check64(i32x2.extmul_low_i16x4_u(a, b), i32x2_scalar.extmul_low_i16x4_u(a, b))) return;
-      if (!check64(i32x2.extmul_high_i16x4_s(a, b), i32x2_scalar.extmul_high_i16x4_s(a, b))) return;
-      if (!check64(i32x2.extmul_high_i16x4_u(a, b), i32x2_scalar.extmul_high_i16x4_u(a, b))) return;
-      if (!check64(i32x2.shuffle(a, b, l0, l1), i32x2_scalar.shuffle(a, b, l0, l1))) return;
-      if (!check64(i32x2.relaxed_laneselect(a, b, m), i32x2_scalar.relaxed_laneselect(a, b, m))) return;
+      if (
+        !check64(
+          i32x2.extend_low_i16x4_s(a),
+          i32x2_scalar.extend_low_i16x4_s(a),
+        )
+      )
+        return;
+      if (
+        !check64(
+          i32x2.extend_low_i16x4_u(a),
+          i32x2_scalar.extend_low_i16x4_u(a),
+        )
+      )
+        return;
+      if (
+        !check64(
+          i32x2.extend_high_i16x4_s(a),
+          i32x2_scalar.extend_high_i16x4_s(a),
+        )
+      )
+        return;
+      if (
+        !check64(
+          i32x2.extend_high_i16x4_u(a),
+          i32x2_scalar.extend_high_i16x4_u(a),
+        )
+      )
+        return;
+      if (
+        !check64(
+          i32x2.extadd_pairwise_i16x4_s(a),
+          i32x2_scalar.extadd_pairwise_i16x4_s(a),
+        )
+      )
+        return;
+      if (
+        !check64(
+          i32x2.extadd_pairwise_i16x4_u(a),
+          i32x2_scalar.extadd_pairwise_i16x4_u(a),
+        )
+      )
+        return;
+      if (
+        !check64(
+          i32x2.extmul_low_i16x4_s(a, b),
+          i32x2_scalar.extmul_low_i16x4_s(a, b),
+        )
+      )
+        return;
+      if (
+        !check64(
+          i32x2.extmul_low_i16x4_u(a, b),
+          i32x2_scalar.extmul_low_i16x4_u(a, b),
+        )
+      )
+        return;
+      if (
+        !check64(
+          i32x2.extmul_high_i16x4_s(a, b),
+          i32x2_scalar.extmul_high_i16x4_s(a, b),
+        )
+      )
+        return;
+      if (
+        !check64(
+          i32x2.extmul_high_i16x4_u(a, b),
+          i32x2_scalar.extmul_high_i16x4_u(a, b),
+        )
+      )
+        return;
+      if (
+        !check64(
+          i32x2.shuffle(a, b, l0, l1),
+          i32x2_scalar.shuffle(a, b, l0, l1),
+        )
+      )
+        return;
+      if (
+        !check64(
+          i32x2.relaxed_laneselect(a, b, m),
+          i32x2_scalar.relaxed_laneselect(a, b, m),
+        )
+      )
+        return;
       completedRuns++;
     }
     expect<i32>(completedRuns).toBe(256);

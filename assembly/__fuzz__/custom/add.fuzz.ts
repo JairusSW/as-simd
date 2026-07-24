@@ -15,25 +15,35 @@ let state: u64 = 0;
 
 // @ts-expect-error: decorator
 @inline function nextU64(): u64 {
-  return (<u64>nextU32() << 32) | <u64>nextU32();
+  return ((<u64>nextU32()) << 32) | (<u64>nextU32());
 }
 
 // @ts-expect-error: decorator
 @inline function add_old(a: u64, b: u64): u64 {
-  return ((a & ~0x8080808080808080) + (b & ~0x8080808080808080)) ^ ((a ^ b) & 0x8080808080808080);
+  return (
+    ((a & ~0x8080808080808080) + (b & ~0x8080808080808080)) ^
+    ((a ^ b) & 0x8080808080808080)
+  );
 }
 
 // @ts-expect-error: decorator
 @inline function add_split16_candidate(a: u64, b: u64): u64 {
-  const lo = ((a & 0x007f007f007f007f) + (b & 0x007f007f007f007f)) ^ ((a ^ b) & 0x0080008000800080);
-  const hi = ((a & 0x7f007f007f007f00) + (b & 0x7f007f007f007f00)) ^ ((a ^ b) & 0x8000800080008000);
+  const lo =
+    ((a & 0x007f007f007f007f) + (b & 0x007f007f007f007f)) ^
+    ((a ^ b) & 0x0080008000800080);
+  const hi =
+    ((a & 0x7f007f007f007f00) + (b & 0x7f007f007f007f00)) ^
+    ((a ^ b) & 0x8000800080008000);
   return lo | hi;
 }
 
 // @ts-expect-error: decorator
 @inline function add_nibble_candidate(a: u64, b: u64): u64 {
   const lo = (a & 0x0f0f0f0f0f0f0f0f) + (b & 0x0f0f0f0f0f0f0f0f);
-  const hi = (a & 0xf0f0f0f0f0f0f0f0) + (b & 0xf0f0f0f0f0f0f0f0) + (lo & 0x1010101010101010);
+  const hi =
+    (a & 0xf0f0f0f0f0f0f0f0) +
+    (b & 0xf0f0f0f0f0f0f0f0) +
+    (lo & 0x1010101010101010);
   return (lo & 0x0f0f0f0f0f0f0f0f) | (hi & 0xf0f0f0f0f0f0f0f0);
 }
 
@@ -45,7 +55,12 @@ let state: u64 = 0;
   const nibble = add_nibble_candidate(a, b);
   const old = add_old(a, b);
 
-  if (actual != expected || split16 != expected || nibble != expected || old != expected) {
+  if (
+    actual != expected ||
+    split16 != expected ||
+    nibble != expected ||
+    old != expected
+  ) {
     expect<u64>(actual).toBe(expected);
     expect<u64>(split16).toBe(expected);
     expect<u64>(nibble).toBe(expected);

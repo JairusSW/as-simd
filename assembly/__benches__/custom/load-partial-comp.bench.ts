@@ -21,5 +21,23 @@ const fill: i8 = -37;
   return (load<u64>(ptr) & (mask as u64)) | (i8x8.splat(fill) & ~(mask as u64));
 }
 
-bench("load-partial.lib", () => { blackbox(load_partial_lib(blackbox(ptr), blackbox(len), blackbox(fill))); }, OPS, 8); dumpToFile("load-partial-comp", "lib");
-bench("load-partial.full-masked", () => { blackbox(load_partial_full_masked(blackbox(ptr), blackbox(len), blackbox(fill))); }, OPS, 8); dumpToFile("load-partial-comp", "full-masked");
+bench(
+  "load-partial.lib",
+  () => {
+    blackbox(load_partial_lib(blackbox(ptr), blackbox(len), blackbox(fill)));
+  },
+  OPS,
+  8,
+);
+dumpToFile("load-partial-comp", "lib");
+bench(
+  "load-partial.full-masked",
+  () => {
+    blackbox(
+      load_partial_full_masked(blackbox(ptr), blackbox(len), blackbox(fill)),
+    );
+  },
+  OPS,
+  8,
+);
+dumpToFile("load-partial-comp", "full-masked");

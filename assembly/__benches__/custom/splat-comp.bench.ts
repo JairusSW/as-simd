@@ -25,7 +25,39 @@ const x: i8 = -37;
   return y | (y << 32);
 }
 
-bench("splat.lib", () => { blackbox(i8x8.splat(blackbox(x))); }, OPS, 8); dumpToFile("splat-comp", "lib");
-bench("splat.mul", () => { blackbox(splat_mul(blackbox(x))); }, OPS, 8); dumpToFile("splat-comp", "mul");
-bench("splat.or32", () => { blackbox(splat_or32(blackbox(x))); }, OPS, 8); dumpToFile("splat-comp", "or32");
-bench("splat.or64", () => { blackbox(splat_or64(blackbox(x))); }, OPS, 8); dumpToFile("splat-comp", "or64");
+bench(
+  "splat.lib",
+  () => {
+    blackbox(i8x8.splat(blackbox(x)));
+  },
+  OPS,
+  8,
+);
+dumpToFile("splat-comp", "lib");
+bench(
+  "splat.mul",
+  () => {
+    blackbox(splat_mul(blackbox(x)));
+  },
+  OPS,
+  8,
+);
+dumpToFile("splat-comp", "mul");
+bench(
+  "splat.or32",
+  () => {
+    blackbox(splat_or32(blackbox(x)));
+  },
+  OPS,
+  8,
+);
+dumpToFile("splat-comp", "or32");
+bench(
+  "splat.or64",
+  () => {
+    blackbox(splat_or64(blackbox(x)));
+  },
+  OPS,
+  8,
+);
+dumpToFile("splat-comp", "or64");

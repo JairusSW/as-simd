@@ -14,7 +14,9 @@ let state: u64 = 0;
 }
 
 // @ts-expect-error: decorator
-@inline function nextU64(): u64 { return (<u64>nextU32() << 32) | <u64>nextU32(); }
+@inline function nextU64(): u64 {
+  return ((<u64>nextU32()) << 32) | (<u64>nextU32());
+}
 
 // @ts-expect-error: decorator
 @inline function avgr_current(a: u64, b: u64): u64 {
@@ -50,8 +52,10 @@ let state: u64 = 0;
 
 // @ts-expect-error: decorator
 @inline function avgr_split16(a: u64, b: u64): u64 {
-  const lo = ((a | b) - (((a ^ b) & 0x00fe00fe00fe00fe) >> 1)) & 0x00ff00ff00ff00ff;
-  const hi = ((a | b) - (((a ^ b) & 0xfe00fe00fe00fe00) >> 1)) & 0xff00ff00ff00ff00;
+  const lo =
+    ((a | b) - (((a ^ b) & 0x00fe00fe00fe00fe) >> 1)) & 0x00ff00ff00ff00ff;
+  const hi =
+    ((a | b) - (((a ^ b) & 0xfe00fe00fe00fe00) >> 1)) & 0xff00ff00ff00ff00;
   return lo | hi;
 }
 
@@ -64,7 +68,14 @@ let state: u64 = 0;
   const orXorMasked = avgr_or_xor_masked(a, b);
   const split32 = avgr_split32(a, b);
   const split16 = avgr_split16(a, b);
-  if (lib != expected || current != expected || currentConst != expected || orXorMasked != expected || split32 != expected || split16 != expected) {
+  if (
+    lib != expected ||
+    current != expected ||
+    currentConst != expected ||
+    orXorMasked != expected ||
+    split32 != expected ||
+    split16 != expected
+  ) {
     expect<u64>(lib).toBe(expected);
     expect<u64>(current).toBe(expected);
     expect<u64>(currentConst).toBe(expected);
@@ -84,6 +95,9 @@ fuzz("i8x8.avgr_u candidates", (seedValue: i32): bool => {
   if (!checkAvgr(0x7f7f7f7f7f7f7f7f, 0x8080808080808080)) return false;
   if (!checkAvgr(0x00ff00ff00ff00ff, 0xff00ff00ff00ff00)) return false;
   if (!checkAvgr(0xfedcba9876543210, 0x7766554433221100)) return false;
-  for (let i = 0; i < 64; i++) if (!checkAvgr(nextU64(), nextU64())) return false;
+  for (let i = 0; i < 64; i++)
+    if (!checkAvgr(nextU64(), nextU64())) return false;
   return true;
-}).generate((seed: FuzzSeed, run: (seedValue: i32) => bool): void => { run(<i32>seed.u32()); });
+}).generate((seed: FuzzSeed, run: (seedValue: i32) => bool): void => {
+  run(<i32>seed.u32());
+});

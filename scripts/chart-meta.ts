@@ -4,7 +4,10 @@ import { execSync } from "node:child_process";
 
 function safeGit(root: string, args: string[]): string {
   try {
-    return execSync(`git ${args.join(" ")}`, { cwd: root, stdio: ["ignore", "pipe", "ignore"] })
+    return execSync(`git ${args.join(" ")}`, {
+      cwd: root,
+      stdio: ["ignore", "pipe", "ignore"],
+    })
       .toString("utf8")
       .trim();
   } catch {
@@ -15,7 +18,9 @@ function safeGit(root: string, args: string[]): string {
 function packageVersion(root: string): string {
   try {
     const pkgPath = path.join(root, "package.json");
-    const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8")) as { version?: string };
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8")) as {
+      version?: string;
+    };
     return pkg.version ?? "0.0.0";
   } catch {
     return "0.0.0";

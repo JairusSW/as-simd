@@ -69,9 +69,17 @@ fuzz("i8x8 scalar reference parity", (seedValue: i32): bool => {
   checkId = 1;
 
   if (!check64(i8x8.splat(laneVal), i8x8_scalar.splat(laneVal))) return false;
-  if (!check32(i8x8.extract_lane_s(a, idx), i8x8_scalar.extract_lane_s(a, idx))) return false;
-  if (!check32(i8x8.extract_lane_u(a, idx), i8x8_scalar.extract_lane_u(a, idx))) return false;
-  if (!check64(i8x8.replace_lane(a, idx, laneVal), i8x8_scalar.replace_lane(a, idx, laneVal))) return false;
+  if (!check32(i8x8.extract_lane_s(a, idx), i8x8_scalar.extract_lane_s(a, idx)))
+    return false;
+  if (!check32(i8x8.extract_lane_u(a, idx), i8x8_scalar.extract_lane_u(a, idx)))
+    return false;
+  if (
+    !check64(
+      i8x8.replace_lane(a, idx, laneVal),
+      i8x8_scalar.replace_lane(a, idx, laneVal),
+    )
+  )
+    return false;
   if (!check64(i8x8.add(a, b), i8x8_scalar.add(a, b))) return false;
   if (!check64(i8x8.sub(a, b), i8x8_scalar.sub(a, b))) return false;
   if (!check64(i8x8.mul(a, b), i8x8_scalar.mul(a, b))) return false;
@@ -104,12 +112,27 @@ fuzz("i8x8 scalar reference parity", (seedValue: i32): bool => {
   if (!check64(i8x8.gt_u(a, b), i8x8_scalar.gt_u(a, b))) return false;
   if (!check64(i8x8.ge_s(a, b), i8x8_scalar.ge_s(a, b))) return false;
   if (!check64(i8x8.ge_u(a, b), i8x8_scalar.ge_u(a, b))) return false;
-  if (!check64(i8x8.narrow_i16x4_s(c, d), i8x8_scalar.narrow_i16x4_s(c, d))) return false;
-  if (!check64(i8x8.narrow_i16x4_u(c, d), i8x8_scalar.narrow_i16x4_u(c, d))) return false;
-  if (!check64(i8x8.shuffle(a, b, l0, l1, l2, l3, l4, l5, l6, l7), i8x8_scalar.shuffle(a, b, l0, l1, l2, l3, l4, l5, l6, l7))) return false;
+  if (!check64(i8x8.narrow_i16x4_s(c, d), i8x8_scalar.narrow_i16x4_s(c, d)))
+    return false;
+  if (!check64(i8x8.narrow_i16x4_u(c, d), i8x8_scalar.narrow_i16x4_u(c, d)))
+    return false;
+  if (
+    !check64(
+      i8x8.shuffle(a, b, l0, l1, l2, l3, l4, l5, l6, l7),
+      i8x8_scalar.shuffle(a, b, l0, l1, l2, l3, l4, l5, l6, l7),
+    )
+  )
+    return false;
   if (!check64(i8x8.swizzle(a, s), i8x8_scalar.swizzle(a, s))) return false;
-  if (!check64(i8x8.relaxed_swizzle(a, s), i8x8_scalar.relaxed_swizzle(a, s))) return false;
-  if (!check64(i8x8.relaxed_laneselect(a, b, m), i8x8_scalar.relaxed_laneselect(a, b, m))) return false;
+  if (!check64(i8x8.relaxed_swizzle(a, s), i8x8_scalar.relaxed_swizzle(a, s)))
+    return false;
+  if (
+    !check64(
+      i8x8.relaxed_laneselect(a, b, m),
+      i8x8_scalar.relaxed_laneselect(a, b, m),
+    )
+  )
+    return false;
   return true;
 }).generate((seed: FuzzSeed, run: (seedValue: i32) => bool): void => {
   run(seed.i32());

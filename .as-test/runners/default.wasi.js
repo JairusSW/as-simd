@@ -5,8 +5,12 @@ const originalEmitWarning = process.emitWarning.bind(process);
 process.emitWarning = (warning, ...args) => {
   const type = typeof args[0] == "string" ? args[0] : "";
   const name = typeof warning?.name == "string" ? warning.name : type;
-  const message = typeof warning == "string" ? warning : String(warning?.message ?? "");
-  if (name == "ExperimentalWarning" && message.includes("WASI is an experimental feature")) {
+  const message =
+    typeof warning == "string" ? warning : String(warning?.message ?? "");
+  if (
+    name == "ExperimentalWarning" &&
+    message.includes("WASI is an experimental feature")
+  ) {
     return;
   }
   return originalEmitWarning(warning, ...args);
@@ -14,7 +18,9 @@ process.emitWarning = (warning, ...args) => {
 
 const wasmPath = process.argv[2];
 if (!wasmPath) {
-  process.stderr.write("usage: node ./.as-test/runners/default.wasi.js <file.wasm>\n");
+  process.stderr.write(
+    "usage: node ./.as-test/runners/default.wasi.js <file.wasm>\n",
+  );
   process.exit(1);
 }
 

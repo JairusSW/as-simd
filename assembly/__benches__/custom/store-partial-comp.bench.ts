@@ -24,5 +24,23 @@ const len: i32 = 5;
   store<u64>(ptr, (load<u64>(ptr) & ~(mask as u64)) | (value & (mask as u64)));
 }
 
-bench("store-partial.lib", () => { store_partial_lib(blackbox(ptr), blackbox(value), blackbox(len)); blackbox(load<u64>(IO_PTR)); }, OPS, 8); dumpToFile("store-partial-comp", "lib");
-bench("store-partial.rmw", () => { store_partial_rmw(blackbox(ptr), blackbox(value), blackbox(len)); blackbox(load<u64>(IO_PTR)); }, OPS, 8); dumpToFile("store-partial-comp", "rmw");
+bench(
+  "store-partial.lib",
+  () => {
+    store_partial_lib(blackbox(ptr), blackbox(value), blackbox(len));
+    blackbox(load<u64>(IO_PTR));
+  },
+  OPS,
+  8,
+);
+dumpToFile("store-partial-comp", "lib");
+bench(
+  "store-partial.rmw",
+  () => {
+    store_partial_rmw(blackbox(ptr), blackbox(value), blackbox(len));
+    blackbox(load<u64>(IO_PTR));
+  },
+  OPS,
+  8,
+);
+dumpToFile("store-partial-comp", "rmw");

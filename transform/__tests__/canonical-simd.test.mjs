@@ -9,12 +9,16 @@ mkdirSync(output, { recursive: true });
 function compile(name, simd) {
   const args = [
     fixture,
-    "--config", "none",
-    "--runtime", "stub",
+    "--config",
+    "none",
+    "--runtime",
+    "stub",
     "-O3",
     "--converge",
-    "--textFile", `${output}/${name}.wat`,
-    "-o", `${output}/${name}.wasm`,
+    "--textFile",
+    `${output}/${name}.wat`,
+    "-o",
+    `${output}/${name}.wasm`,
   ];
   if (simd) args.push("--enable", "simd");
   execFileSync("node_modules/.bin/asc", args, { stdio: "inherit" });
@@ -22,7 +26,9 @@ function compile(name, simd) {
 }
 
 function body(wat, name) {
-  const start = wat.indexOf(`(func $transform/__tests__/canonical-simd-fixture/${name} `);
+  const start = wat.indexOf(
+    `(func $transform/__tests__/canonical-simd-fixture/${name} `,
+  );
   assert.notEqual(start, -1, `${name} body not found`);
   const next = wat.indexOf("\n (func $", start + 1);
   return wat.slice(start, next < 0 ? wat.length : next);
@@ -32,7 +38,11 @@ const swar = compile("canonical-swar", false);
 const simd = compile("canonical-simd", true);
 const vectorOpcode = /(?:v128|i8x16|i16x8|i32x4|i64x2)\./;
 
-assert.doesNotMatch(swar, vectorOpcode, "canonical SWAR modules emitted SIMD instructions");
+assert.doesNotMatch(
+  swar,
+  vectorOpcode,
+  "canonical SWAR modules emitted SIMD instructions",
+);
 
 const nativeInstructions = new Map([
   ["v32ValueMulI8", /i16x8\.extmul_low_i8x16_u/],
@@ -44,7 +54,11 @@ const nativeInstructions = new Map([
 ]);
 
 for (const [name, instruction] of nativeInstructions) {
-  assert.match(body(simd, name), instruction, `${name} did not emit its native v128 kernel`);
+  assert.match(
+    body(simd, name),
+    instruction,
+    `${name} did not emit its native v128 kernel`,
+  );
 }
 
 console.log("canonical v32/v64/v128 SIMD dispatch code-shape tests passed");

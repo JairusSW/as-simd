@@ -21,7 +21,7 @@ let hi_sink: u64 = 0;
 
 // @ts-expect-error: decorator
 @inline function splat_fill(fill: i8): u64 {
-  return (((fill as u64) & 0xff) * 0x0101010101010101);
+  return ((fill as u64) & 0xff) * 0x0101010101010101;
 }
 
 // @ts-expect-error: decorator
@@ -44,7 +44,8 @@ let hi_sink: u64 = 0;
   }
   const bits = (len - 8) << 3;
   const mask = ((1 as u64) << bits) - 1;
-  hi_sink = bits == 0 ? fillWord : ((load<u64>(ptr, 8) & mask) | (fillWord & ~mask));
+  hi_sink =
+    bits == 0 ? fillWord : (load<u64>(ptr, 8) & mask) | (fillWord & ~mask);
   return load<u64>(ptr);
 }
 
@@ -74,26 +75,56 @@ let hi_sink: u64 = 0;
   store<u64>(ptr, (load<u64>(ptr, 8) & ~mask) | (hi & mask), 8);
 }
 
-bench("i8x16.load-partial.lib", () => {
-  blackbox(load_lib(blackbox(ptr), blackbox(len), blackbox(fill)));
-  blackbox(hi_sink);
-}, OPS, 8);
+bench(
+  "i8x16.load-partial.lib",
+  () => {
+    blackbox(load_lib(blackbox(ptr), blackbox(len), blackbox(fill)));
+    blackbox(hi_sink);
+  },
+  OPS,
+  8,
+);
 dumpToFile("i8x16-partial-comp", "load-lib");
 
-bench("i8x16.load-partial.masked", () => {
-  blackbox(load_masked(blackbox(ptr), blackbox(len), blackbox(fill)));
-  blackbox(hi_sink);
-}, OPS, 8);
+bench(
+  "i8x16.load-partial.masked",
+  () => {
+    blackbox(load_masked(blackbox(ptr), blackbox(len), blackbox(fill)));
+    blackbox(hi_sink);
+  },
+  OPS,
+  8,
+);
 dumpToFile("i8x16-partial-comp", "load-masked");
 
-bench("i8x16.store-partial.lib", () => {
-  store_lib(blackbox(ptr), blackbox(valueLo), blackbox(valueHi), blackbox(len));
-  blackbox(load<u64>(IO_PTR));
-}, OPS, 8);
+bench(
+  "i8x16.store-partial.lib",
+  () => {
+    store_lib(
+      blackbox(ptr),
+      blackbox(valueLo),
+      blackbox(valueHi),
+      blackbox(len),
+    );
+    blackbox(load<u64>(IO_PTR));
+  },
+  OPS,
+  8,
+);
 dumpToFile("i8x16-partial-comp", "store-lib");
 
-bench("i8x16.store-partial.masked", () => {
-  store_masked(blackbox(ptr), blackbox(valueLo), blackbox(valueHi), blackbox(len));
-  blackbox(load<u64>(IO_PTR));
-}, OPS, 8);
+bench(
+  "i8x16.store-partial.masked",
+  () => {
+    store_masked(
+      blackbox(ptr),
+      blackbox(valueLo),
+      blackbox(valueHi),
+      blackbox(len),
+    );
+    blackbox(load<u64>(IO_PTR));
+  },
+  OPS,
+  8,
+);
 dumpToFile("i8x16-partial-comp", "store-masked");

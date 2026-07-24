@@ -84,9 +84,15 @@ fuzz("v128_kernels register VM parity vs v128_swar", (seedValue: i32): bool => {
   if (!expectPair(lo, v128_swar.take_hi(), 2)) return false;
 
   // reductions
-  if (v128_kernels.bitmask<i8>(0) != v128_swar.bitmask<i8>(aLo, aHi)) { expect<i32>(checkId).toBe(0); return false; }
+  if (v128_kernels.bitmask<i8>(0) != v128_swar.bitmask<i8>(aLo, aHi)) {
+    expect<i32>(checkId).toBe(0);
+    return false;
+  }
   checkId++;
-  if (v128_kernels.any_true(0) != v128_swar.any_true(aLo, aHi)) { expect<i32>(checkId).toBe(0); return false; }
+  if (v128_kernels.any_true(0) != v128_swar.any_true(aLo, aHi)) {
+    expect<i32>(checkId).toBe(0);
+    return false;
+  }
   checkId++;
 
   // aliasing: dst == src a. Compute expected from the original a/b first.

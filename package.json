@@ -25,7 +25,8 @@
     "bench:wide-values": "sh ./bench/wide-values/run.sh",
     "bench:wago-v256": "node ./scripts/run-wago-v256-bench.mjs",
     "v8:score": "node ./scripts/v8-score.mjs",
-    "format": "prettier -w .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "charts": "npm run charts:build && npm run charts:serve",
     "charts:build": "./scripts/build-charts.sh",
     "charts:overview": "bun run ./scripts/overview-v8.chart.ts",
@@ -44,6 +45,7 @@
     "assemblyscript": "^0.28.17",
     "assemblyscript-prettier": "^3.0.4",
     "json-as": "^1.3.4",
+    "prettier": "3.8.3",
     "serve": "^14.2.6",
     "typescript": "^5.9.3"
   },

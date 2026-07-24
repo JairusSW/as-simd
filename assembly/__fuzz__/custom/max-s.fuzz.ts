@@ -15,12 +15,14 @@ let state: u64 = 0;
 
 // @ts-expect-error: decorator
 @inline function nextU64(): u64 {
-  return (<u64>nextU32() << 32) | <u64>nextU32();
+  return ((<u64>nextU32()) << 32) | (<u64>nextU32());
 }
 
 // @ts-expect-error: decorator
 @inline function lt_mask_u_current(a: u64, b: u64): u64 {
-  const d = ((a | 0x8080808080808080) - (b & 0x7f7f7f7f7f7f7f7f)) ^ ((a ^ ~b) & 0x8080808080808080);
+  const d =
+    ((a | 0x8080808080808080) - (b & 0x7f7f7f7f7f7f7f7f)) ^
+    ((a ^ ~b) & 0x8080808080808080);
   return ((((~a & b) | (~(a ^ b) & d)) & 0x8080808080808080) >> 7) * 0xff;
 }
 
@@ -34,11 +36,17 @@ let state: u64 = 0;
 
 // @ts-expect-error: decorator
 @inline function lt_mask_u_split16(a: u64, b: u64): u64 {
-  const dlo = ((a | 0x0080008000800080) - (b & 0x007f007f007f007f)) ^ ((a ^ ~b) & 0x0080008000800080);
-  const dhi = ((a | 0x8000800080008000) - (b & 0x7f007f007f007f00)) ^ ((a ^ ~b) & 0x8000800080008000);
+  const dlo =
+    ((a | 0x0080008000800080) - (b & 0x007f007f007f007f)) ^
+    ((a ^ ~b) & 0x0080008000800080);
+  const dhi =
+    ((a | 0x8000800080008000) - (b & 0x7f007f007f007f00)) ^
+    ((a ^ ~b) & 0x8000800080008000);
   const ml = (((~a & b) | (~(a ^ b) & dlo)) & 0x0080008000800080) >> 7;
   const mh = (((~a & b) | (~(a ^ b) & dhi)) & 0x8000800080008000) >> 7;
-  return ((ml * 0xff) & 0x00ff00ff00ff00ff) | ((mh * 0xff) & 0xff00ff00ff00ff00);
+  return (
+    ((ml * 0xff) & 0x00ff00ff00ff00ff) | ((mh * 0xff) & 0xff00ff00ff00ff00)
+  );
 }
 
 // @ts-expect-error: decorator
@@ -64,7 +72,12 @@ let state: u64 = 0;
   const current = max_s_current(a, b);
   const split16 = max_s_split16(a, b);
   const dual16 = max_s_dual16(a, b);
-  if (lib != expected || current != expected || split16 != expected || dual16 != expected) {
+  if (
+    lib != expected ||
+    current != expected ||
+    split16 != expected ||
+    dual16 != expected
+  ) {
     expect<u64>(lib).toBe(expected);
     expect<u64>(current).toBe(expected);
     expect<u64>(split16).toBe(expected);
