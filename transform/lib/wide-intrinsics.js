@@ -3,27 +3,8 @@ import { ExpressionRewriter } from "./visitor.js";
 const INSTRUCTION_MODULE = "as-simd";
 const raw = binaryen;
 function wideCarrier(module) {
-    const name = (process.env["AS_SIMD_WIDE_CARRIER"] ?? "externref").toLowerCase();
-    const carriers = {
-        i32: binaryen.i32,
-        i64: binaryen.i64,
-        f32: binaryen.f32,
-        f64: binaryen.f64,
-        v128: binaryen.v128,
-        funcref: binaryen.funcref,
-        externref: binaryen.externref,
-    };
-    const carrier = carriers[name];
-    if (carrier === undefined) {
-        throw new Error(`as-simd: unsupported AS_SIMD_WIDE_CARRIER "${name}"; expected i32, i64, f32, f64, v128, funcref, or externref`);
-    }
-    if (name === "funcref" || name === "externref") {
-        module.setFeatures(module.getFeatures() | binaryen.Features.ReferenceTypes);
-    }
-    else if (name === "v128") {
-        module.setFeatures(module.getFeatures() | binaryen.Features.SIMD128);
-    }
-    return carrier;
+    module.setFeatures(module.getFeatures() | binaryen.Features.ReferenceTypes);
+    return binaryen.externref;
 }
 const binarySubopcode = new Map([
     [binaryen.EqVecI8x16, 35], [binaryen.NeVecI8x16, 36], [binaryen.LtSVecI8x16, 37], [binaryen.LtUVecI8x16, 38], [binaryen.GtSVecI8x16, 39], [binaryen.GtUVecI8x16, 40], [binaryen.LeSVecI8x16, 41], [binaryen.LeUVecI8x16, 42], [binaryen.GeSVecI8x16, 43], [binaryen.GeUVecI8x16, 44],

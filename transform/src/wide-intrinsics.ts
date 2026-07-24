@@ -2,7 +2,6 @@ import binaryen from "binaryen";
 import { ExpressionRewriter } from "./visitor.js";
 
 type Ref = binaryen.ExpressionRef;
-type WideCarrierName = "i32" | "i64" | "f32" | "f64" | "v128" | "funcref" | "externref";
 const INSTRUCTION_MODULE = "as-simd";
 const raw = binaryen as unknown as {
   _BinaryenBlockSetChildAt(expr: Ref, index: number, child: Ref): void;
@@ -13,28 +12,8 @@ const raw = binaryen as unknown as {
 };
 
 function wideCarrier(module: binaryen.Module): binaryen.Type {
-  const name = (process.env["AS_SIMD_WIDE_CARRIER"] ?? "externref").toLowerCase() as WideCarrierName;
-  const carriers: Record<WideCarrierName, binaryen.Type> = {
-    i32: binaryen.i32,
-    i64: binaryen.i64,
-    f32: binaryen.f32,
-    f64: binaryen.f64,
-    v128: binaryen.v128,
-    funcref: binaryen.funcref,
-    externref: binaryen.externref,
-  };
-  const carrier = carriers[name];
-  if (carrier === undefined) {
-    throw new Error(
-      `as-simd: unsupported AS_SIMD_WIDE_CARRIER "${name}"; expected i32, i64, f32, f64, v128, funcref, or externref`,
-    );
-  }
-  if (name === "funcref" || name === "externref") {
-    module.setFeatures(module.getFeatures() | binaryen.Features.ReferenceTypes);
-  } else if (name === "v128") {
-    module.setFeatures(module.getFeatures() | binaryen.Features.SIMD128);
-  }
-  return carrier;
+  module.setFeatures(module.getFeatures() | binaryen.Features.ReferenceTypes);
+  return binaryen.externref;
 }
 
 const binarySubopcode = new Map<number, number>([

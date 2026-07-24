@@ -5,18 +5,15 @@ import { mkdirSync, readFileSync } from "node:fs";
 const output = "build/transform-tests";
 mkdirSync(output, { recursive: true });
 
-function compile(mode, carrier = "") {
-  const suffix = carrier ? `${mode}-${carrier}` : mode;
-  const args = ["bench/wide/bench.ts", "--runtime", "stub", "--transform", "./transform", "-O3", "--converge", "-o", `${output}/wide-${suffix}.wasm`, "--textFile", `${output}/wide-${suffix}.wat`];
+function compile(mode) {
+  const args = ["bench/wide/bench.ts", "--runtime", "stub", "--transform", "./transform", "-O3", "--converge", "-o", `${output}/wide-${mode}.wasm`, "--textFile", `${output}/wide-${mode}.wat`];
   if (mode === "simd" || mode === "native" || mode === "relaxed") args.push("--enable", "simd");
   if (mode === "relaxed") args.push("--enable", "relaxed-simd");
   const env = { ...process.env };
-  delete env.AS_SIMD_WIDE_CARRIER;
   delete env.WAGO_PLUGINS;
   if (mode === "native") env.WAGO_PLUGINS = "wide";
-  if (carrier) env.AS_SIMD_WIDE_CARRIER = carrier;
   execFileSync("node_modules/.bin/asc", args, { env, stdio: "inherit" });
-  return readFileSync(`${output}/wide-${suffix}.wat`, "utf8");
+  return readFileSync(`${output}/wide-${mode}.wat`, "utf8");
 }
 
 function body(wat, name) {
@@ -36,12 +33,6 @@ assert.match(native, /\(import "as-simd" "i8x32\.add"/);
 assert.match(native, /\(import "as-simd" "v256\.load" \(func \$[^ ]+ \(param i32\) \(result externref\)\)\)/);
 assert.match(native, /\(import "as-simd" "i8x32\.add" \(func \$[^ ]+ \(param externref externref\) \(result externref\)\)\)/);
 assert.match(native, /\(import "as-simd" "v256\.store" \(func \$[^ ]+ \(param externref i32\)\)\)/);
-for (const carrier of ["i32", "i64", "f32", "f64", "v128", "funcref"]) {
-  const wat = compile("native", carrier);
-  assert.match(wat, new RegExp(`\\(import "as-simd" "v256\\.load" \\(func \\$[^ ]+ \\(param i32\\) \\(result ${carrier}\\)\\)\\)`));
-  assert.match(wat, new RegExp(`\\(import "as-simd" "i8x32\\.add" \\(func \\$[^ ]+ \\(param ${carrier} ${carrier}\\) \\(result ${carrier}\\)\\)\\)`));
-  assert.match(wat, new RegExp(`\\(import "as-simd" "v256\\.store" \\(func \\$[^ ]+ \\(param ${carrier} i32\\)\\)\\)`));
-}
 assert.match(body(native, "v256AddI8"), /call \$__as_simd_instruction_v256_load[\s\S]*call \$__as_simd_instruction_v256_fd_110[\s\S]*call \$__as_simd_instruction_v256_store/);
 assert.match(body(native, "v512AddI8"), /call \$__as_simd_instruction_v512_fd_110/);
 assert.match(native, /\(import "as-simd" "i8x64\.add"/);

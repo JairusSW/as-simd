@@ -162,32 +162,11 @@ if err := rt.Use(wide.New()); err != nil { panic(err) }
 mod, err := rt.Compile(wasmBytes)
 ```
 
-The Wasm validator checks each physical signature: load is
-`(i32) -> externref`, vector operations are `(externref...) -> externref`, and
-store is `(externref, i32) -> ()`. These are carrier signatures rather than
-runtime object semantics;
-the plugin owns the semantic operation catalog while Wago owns target
-selection and lowering. `externref` is the recommended default because it makes
-the opaque nature of a custom value clear, but `i32`, `i64`, `f32`, `f64`,
-`v128`, and `funcref` are also available when an embedding requires a different
-portable validation signature. Select the same carrier in the transform and
-plugin:
-
-```bash
-WAGO_PLUGINS=wide AS_SIMD_WIDE_CARRIER=v128 npx asc assembly/index.ts \
-  --transform as-simd --enable simd
-```
-
-```go
-if err := rt.Use(wide.New(wide.WithCarrier(wago.WasmV128))); err != nil {
-	panic(err)
-}
-```
-
-The setting changes only the module's physical import signatures; it does not
-make the carrier interchangeable with ordinary values of that Wasm type.
-Wago's registered custom-type identity still prevents a plain `v128`, scalar,
-or reference expression from being consumed by a wide instruction.
+The Wasm validator checks one physical ABI: load is `(i32) -> externref`,
+vector operations are `(externref...) -> externref`, and store is
+`(externref, i32) -> ()`. These are opaque carrier signatures rather than
+runtime object semantics. No host reference is created. The plugin owns the
+semantic operation catalog while Wago owns target selection and lowering.
 
 Current automatic v512 recognition covers chunk-independent unary and binary
 SIMD operations. The plugin registers reviewed unary, binary, and ternary
@@ -215,10 +194,9 @@ Wago compiler:
 npm run test:wago-wide
 ```
 
-The integration check covers the default `externref` carrier and every
-`AS_SIMD_WIDE_CARRIER` alternative. Set `WIDE_DIR` or `WAGO_DIR` to test local
-checkouts without modifying either checkout, or use `WIDE_VERSION` and
-`WAGO_VERSION` to select specific Go module revisions.
+The integration check verifies the `externref` ABI. Set `WIDE_DIR` or
+`WAGO_DIR` to test local checkouts without modifying either checkout, or use
+`WIDE_VERSION` and `WAGO_VERSION` to select specific Go module revisions.
 
 CLI:
 

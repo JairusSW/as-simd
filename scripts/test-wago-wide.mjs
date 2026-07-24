@@ -6,7 +6,6 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const output = path.join(root, "build", "wago-wide");
-const carriers = ["externref", "i32", "i64", "f32", "f64", "v128", "funcref"];
 const goEnv = {
   ...process.env,
   GONOSUMDB: [process.env.GONOSUMDB, "github.com/JairusSW/wide"].filter(Boolean).join(","),
@@ -28,31 +27,28 @@ function localModule(module, directory) {
 }
 
 mkdirSync(output, { recursive: true });
-for (const carrier of carriers) {
-  run(
-    path.join(root, "node_modules", ".bin", "asc"),
-    [
-      "bench/wide/bench.ts",
-      "--runtime",
-      "stub",
-      "--transform",
-      "./transform",
-      "-O3",
-      "--converge",
-      "--enable",
-      "simd",
-      "-o",
-      path.join(output, `${carrier}.wasm`),
-    ],
-    {
-      env: {
-        ...process.env,
-        WAGO_PLUGINS: "wide",
-        AS_SIMD_WIDE_CARRIER: carrier,
-      },
+run(
+  path.join(root, "node_modules", ".bin", "asc"),
+  [
+    "bench/wide/bench.ts",
+    "--runtime",
+    "stub",
+    "--transform",
+    "./transform",
+    "-O3",
+    "--converge",
+    "--enable",
+    "simd",
+    "-o",
+    path.join(output, "externref.wasm"),
+  ],
+  {
+    env: {
+      ...process.env,
+      WAGO_PLUGINS: "wide",
     },
-  );
-}
+  },
+);
 
 const temporaryModule = mkdtempSync(path.join(os.tmpdir(), "as-simd-wago-wide-"));
 writeFileSync(
@@ -73,40 +69,29 @@ import (
 )
 
 func main() {
-	carriers := map[string]wago.WasmType{
-		"externref": wago.WasmExternRef,
-		"i32":       wago.WasmI32,
-		"i64":       wago.WasmI64,
-		"f32":       wago.WasmF32,
-		"f64":       wago.WasmF64,
-		"v128":      wago.WasmV128,
-		"funcref":   wago.WasmFuncRef,
+	wasm, err := os.ReadFile(filepath.Join(os.Args[1], "externref.wasm"))
+	if err != nil {
+		panic(err)
 	}
-	for name, carrier := range carriers {
-		wasm, err := os.ReadFile(filepath.Join(os.Args[1], name+".wasm"))
-		if err != nil {
-			panic(err)
-		}
-		plain, err := wago.NewRuntime().Compile(wasm)
-		if err != nil {
-			panic(fmt.Errorf("%s compile without Wide: %w", name, err))
-		}
-		if plain.Compiled().RequiresAVX2() {
-			panic(fmt.Errorf("%s unexpectedly selected AVX2 without Wide", name))
-		}
-		runtime := wago.NewRuntime()
-		if err := runtime.Use(wide.New(wide.WithCarrier(carrier))); err != nil {
-			panic(fmt.Errorf("%s register Wide: %w", name, err))
-		}
-		native, err := runtime.Compile(wasm)
-		if err != nil {
-			panic(fmt.Errorf("%s compile with Wide: %w", name, err))
-		}
-		if !native.Compiled().RequiresAVX2() {
-			panic(fmt.Errorf("%s did not select native wide lowering", name))
-		}
-		fmt.Printf("ok: %s\\n", name)
+	plain, err := wago.NewRuntime().Compile(wasm)
+	if err != nil {
+		panic(fmt.Errorf("compile without Wide: %w", err))
 	}
+	if plain.Compiled().RequiresAVX2() {
+		panic("unexpectedly selected AVX2 without Wide")
+	}
+	runtime := wago.NewRuntime()
+	if err := runtime.Use(wide.New()); err != nil {
+		panic(fmt.Errorf("register Wide: %w", err))
+	}
+	native, err := runtime.Compile(wasm)
+	if err != nil {
+		panic(fmt.Errorf("compile with Wide: %w", err))
+	}
+	if !native.Compiled().RequiresAVX2() {
+		panic("did not select native wide lowering")
+	}
+	fmt.Println("ok: externref")
 }
 `,
 );
