@@ -93,11 +93,14 @@ for (const width of widths) {
     lines.push(
       `  const ${namespace}m = ${namespace}.splat(${scalarLiteral(laneType, 2)});`,
     );
+    lines.push(`  const ${namespace}z = ${namespace}.splat(0 as ${laneType});`);
     let namespaceCall = 0;
     for (const fn of functions) {
       const vectorArgs = [];
       const args = fn.params.map((param, index) => {
         if (param.type === width.vector) {
+          if (fn.name === "relaxed_laneselect" && index === 2)
+            return `${namespace}z`;
           const values = [`${namespace}a`, `${namespace}b`, `${namespace}m`];
           return values[vectorArgs.push(index) - 1] ?? `${namespace}a`;
         }

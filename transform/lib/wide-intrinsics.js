@@ -153,11 +153,11 @@ const ternarySubopcode = new Map([
     [binaryen.RelaxedNmaddVecF32x4, 262],
     [binaryen.RelaxedMaddVecF64x2, 263],
     [binaryen.RelaxedNmaddVecF64x2, 264],
-    [binaryen.LaneselectI8x16, 265],
-    [binaryen.LaneselectI16x8, 266],
-    [binaryen.LaneselectI32x4, 267],
-    [binaryen.LaneselectI64x2, 268],
-    [binaryen.DotI8x16I7x16AddSToVecI32x4, 275],
+    [binaryen.RelaxedLaneselectI8x16, 265],
+    [binaryen.RelaxedLaneselectI16x8, 266],
+    [binaryen.RelaxedLaneselectI32x4, 267],
+    [binaryen.RelaxedLaneselectI64x2, 268],
+    [binaryen.RelaxedDotI8x16I7x16AddSToVecI32x4, 275],
 ]);
 const canonicalNames = new Map([
     [35, "i8x16.eq"],

@@ -1,6 +1,6 @@
 {
   "name": "as-simd",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Drop-in AssemblyScript SIMD-compatible SWAR wrappers with transform support.",
   "main": "./transform/lib/index.js",
   "types": "assembly/index.ts",
@@ -111,6 +111,7 @@
     "./package.json": "./package.json"
   },
   "publishConfig": {
-    "@JairusSW:registry": "https://npm.pkg.github.com"
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
   }
 }

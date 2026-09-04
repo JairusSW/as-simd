@@ -101,13 +101,19 @@ for (const wat of [swar, simd, relaxed]) {
 }
 assert.match(body(relaxed, "v128RelaxedSwizzle"), /i8x16\.relaxed_swizzle/);
 assert.match(body(relaxed, "v128RelaxedMaddF32"), /f32x4\.relaxed_madd/);
-assert.match(body(relaxed, "v128RelaxedLaneselectI8"), /i8x16\.laneselect/);
+assert.match(
+  body(relaxed, "v128RelaxedLaneselectI8"),
+  /i8x16\.relaxed_laneselect/,
+);
 assert.match(body(relaxed, "v128RelaxedMinF32"), /f32x4\.relaxed_min/);
 assert.match(body(relaxed, "v128RelaxedQ15"), /i16x8\.relaxed_q15mulr_s/);
-assert.match(body(relaxed, "v128RelaxedDot"), /i16x8\.dot_i8x16_i7x16_s/);
+assert.match(
+  body(relaxed, "v128RelaxedDot"),
+  /i16x8\.relaxed_dot_i8x16_i7x16_s/,
+);
 assert.match(
   body(relaxed, "v128RelaxedDotAdd"),
-  /i32x4\.dot_i8x16_i7x16_add_s/,
+  /i32x4\.relaxed_dot_i8x16_i7x16_add_s/,
 );
 for (const name of [
   "v256AddI8",

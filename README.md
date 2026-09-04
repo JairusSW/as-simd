@@ -158,7 +158,23 @@ go get github.com/JairusSW/wide@main
 
 ```go
 rt := wago.NewRuntime()
-if err := rt.Use(wide.New()); err != nil { panic(err) }
+definition := wide.Definition()
+digest, err := wago.DefinitionDigest(definition)
+if err != nil { panic(err) }
+err = rt.LoadPlugins(context.Background(), wago.PluginSet{
+  Providers: []wago.PluginProvider{wide.Provider()},
+  Selections: []wago.PluginSelection{{
+    ID: definition.ID, DefinitionDigest: digest, Direct: true,
+    Dependencies: map[string]string{},
+    Grants: []wago.AuthorityGrant{
+      {Name: wago.AuthorityCompilerTypeDefine,
+        Scope: wago.AuthorityScope{Modules: []string{"wide"}}},
+      {Name: wago.AuthorityCompilerInstructionDefine,
+        Scope: wago.AuthorityScope{Modules: []string{wide.InstructionModule}}},
+    },
+  }},
+})
+if err != nil { panic(err) }
 mod, err := rt.Compile(wasmBytes)
 ```
 

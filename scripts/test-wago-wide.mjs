@@ -73,6 +73,7 @@ writeFileSync(
   `package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -86,7 +87,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	plain, err := wago.NewRuntime().Compile(wasm)
+	plainRuntime := wago.NewRuntime()
+	defer plainRuntime.Close()
+	plain, err := plainRuntime.Compile(wasm)
 	if err != nil {
 		panic(fmt.Errorf("compile without Wide: %w", err))
 	}
@@ -94,16 +97,38 @@ func main() {
 		panic("unexpectedly selected AVX2 without Wide")
 	}
 	runtime := wago.NewRuntime()
-	if err := runtime.Use(wide.New()); err != nil {
-		panic(fmt.Errorf("register Wide: %w", err))
+	definition := wide.Definition()
+	digest, err := wago.DefinitionDigest(definition)
+	if err != nil {
+		panic(fmt.Errorf("digest Wide definition: %w", err))
+	}
+	if err := runtime.LoadPlugins(context.Background(), wago.PluginSet{
+		Providers: []wago.PluginProvider{wide.Provider()},
+		Selections: []wago.PluginSelection{{
+			ID: definition.ID,
+			DefinitionDigest: digest,
+			Direct: true,
+			Dependencies: map[string]string{},
+			Grants: []wago.AuthorityGrant{
+				{Name: wago.AuthorityCompilerTypeDefine, Scope: wago.AuthorityScope{Modules: []string{"wide"}}},
+				{Name: wago.AuthorityCompilerInstructionDefine, Scope: wago.AuthorityScope{Modules: []string{wide.InstructionModule}}},
+			},
+		}},
+	}); err != nil {
+		panic(fmt.Errorf("load Wide: %w", err))
 	}
 	native, err := runtime.Compile(wasm)
 	if err != nil {
 		panic(fmt.Errorf("compile with Wide: %w", err))
 	}
-	if !native.Compiled().RequiresAVX2() {
-		panic("did not select native wide lowering")
+	if _, err := plainRuntime.Instantiate(context.Background(), plain); err == nil {
+		panic("plugin-free module unexpectedly instantiated without as-simd imports")
 	}
+	instance, err := runtime.Instantiate(context.Background(), native)
+	if err != nil {
+		panic(fmt.Errorf("instantiate with Wide: %w", err))
+	}
+	defer instance.Close()
 	fmt.Println("ok: externref")
 }
 `,
