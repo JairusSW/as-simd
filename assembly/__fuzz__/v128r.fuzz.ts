@@ -214,7 +214,7 @@ fuzz(
       return false;
     }
     checkId++;
-    const lane = seedValue as u32 & 7 as u8;
+    const lane: u8 = (seedValue & 7) as u8;
     if (
       v128_kernels.extract_lane<i16>(0, lane) !=
       v128_swar.extract_lane<i16>(aLo, aHi, lane)
