@@ -18,8 +18,20 @@ jobs:
         with:
           node-version: "22"
 
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache: false
+
       - name: Install
         run: npm install
 
       - name: Unit tests
         run: npm test
+
+      - name: Transform tests
+        run: npm run test:transform
+
+      - name: Latest Wago and Wide integration
+        run: npm run test:wago-wide

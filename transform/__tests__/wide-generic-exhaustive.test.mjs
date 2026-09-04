@@ -161,7 +161,9 @@ function expression(name, vector, bits) {
     case "relaxed_nmadd":
       return `${vector}.${name}<f32>(a, b, c)`;
     case "relaxed_laneselect":
-      return `${vector}.relaxed_laneselect<i16>(a, b, c)`;
+      // A zero mask makes both relaxed implementations deterministic: engines
+      // may legally choose bitselect or whole-lane selection for other masks.
+      return `${vector}.relaxed_laneselect<i16>(a, b, z)`;
     case "relaxed_dot_add":
       return `${vector}.relaxed_dot_add<i8>(a, b, c)`;
     default:
@@ -189,7 +191,7 @@ for (const [bits, vector, path] of [
     "  for (let i=0;i<128;i++) store<u8>(ptr+(i as usize),(i*37+11) as u8);",
   );
   lines.push(
-    `  const a=${vector}.splat<i16>(3), b=${vector}.splat<i16>(5), c=${vector}.splat<i16>(7);`,
+    `  const a=${vector}.splat<i16>(3), b=${vector}.splat<i16>(5), c=${vector}.splat<i16>(7), z=${vector}.splat<i16>(0);`,
   );
   lines.push("  let h:u64=0xcbf29ce484222325;");
   methods.forEach((method, index) => {
