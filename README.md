@@ -203,6 +203,26 @@ WAGO_PLUGINS=wide npx asc assembly/index.ts --transform as-simd --enable simd
 `AS_SIMD_OPTIMIZE=0` disables the entire transform optimization pipeline,
 including custom-instruction call generation.
 
+For bulk ASCII checks, `ascii_scan_256` and `ascii_scan_512` avoid the wide
+register file entirely. Each takes a pointer and the **first byte of the final
+complete block**, and returns zero only when every scanned byte is ASCII:
+
+```ts
+import { ascii_scan_512 } from "as-simd/wide/ascii";
+
+// For a 4096-byte buffer. Handle shorter inputs and tails separately.
+const allAscii = ascii_scan_512(ptr, ptr + 4096 - 64) == 0;
+```
+
+With `WAGO_PLUGINS=wide` and `--enable simd`, the transform emits one
+`ascii.scan_512` import for the whole run. Wago checks the first and final
+blocks once and keeps the accumulated byte result in a vector register. Other
+builds use portable SIMD or SWAR. On a Ryzen 7 7800X3D, the Wide path checked
+4 KiB of ASCII in about 31 ns, versus about 108 ns for `UTF8.validateUnsafe`
+in the same Wago benchmark. This scan only detects ASCII; a non-ASCII input
+still needs a UTF-8 validator. The current ARM64 Wide path is slower than that
+validator, so callers should measure before using this fast path there.
+
 To verify the emitted ABI against Wide's current `main` branch and the latest
 Wago compiler:
 

@@ -16,3 +16,4 @@ export { v256 } from "./v256/value";
 export { i8x32, i16x16, i32x8, i64x4, f32x8, f64x4 } from "./v256/lanes";
 export { v512 } from "./v512/value";
 export { i8x64, i16x32, i32x16, i64x8, f32x16, f64x8 } from "./v512/lanes";
+export { ascii_scan_256, ascii_scan_512 } from "./wide/ascii";

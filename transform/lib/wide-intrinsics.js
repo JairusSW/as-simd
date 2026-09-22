@@ -460,7 +460,7 @@ class KernelRewriter extends ExpressionRewriter {
         return this.module.call(this.store(bits), [result, this.module.i32.const(dst)], binaryen.none);
     }
 }
-class JSONEscapeCopyRewriter extends ExpressionRewriter {
+class FusedWideRewriter extends ExpressionRewriter {
     rewrites = 0;
     helpers = new Map();
     run() {
@@ -482,12 +482,16 @@ class JSONEscapeCopyRewriter extends ExpressionRewriter {
         if (!call || call.id !== binaryen.CallId) {
             return expr;
         }
+        const isAscii256 = call.target.endsWith("assembly/wide/ascii/ascii_scan_256");
+        const isAscii512 = call.target.endsWith("assembly/wide/ascii/ascii_scan_512");
         const isV512Bulk = call.target.endsWith("/json_escape_copy_utf16_bulk_v512") ||
             call.target.endsWith("/jsonEscapeCopyUtf16BulkV512Intrinsic");
         const isV512FindQuoteBackslash = call.target.endsWith("/json_find_quote_backslash_utf16_64_v512");
         const isV512x4 = call.target.endsWith("/json_escape_copy_utf16_256_v512");
         const isV512 = call.target.endsWith("/json_escape_copy_utf16_64_v512");
-        if (!isV512Bulk &&
+        if (!isAscii256 &&
+            !isAscii512 &&
+            !isV512Bulk &&
             !isV512FindQuoteBackslash &&
             !isV512x4 &&
             !isV512 &&
@@ -497,26 +501,34 @@ class JSONEscapeCopyRewriter extends ExpressionRewriter {
         const operandCount = isV512Bulk ? 4 : isV512FindQuoteBackslash ? 1 : 2;
         if (call.operands.length !== operandCount)
             return expr;
-        const external = isV512Bulk
-            ? "json.escape_copy_utf16_bulk.v512"
-            : isV512FindQuoteBackslash
-                ? "json.find_quote_backslash_utf16_64.v512"
-                : isV512x4
-                    ? "json.escape_copy_utf16_256.v512"
-                    : isV512
-                        ? "json.escape_copy_utf16_64.v512"
-                        : "json.escape_copy_utf16_64";
+        const external = isAscii256
+            ? "ascii.scan_256"
+            : isAscii512
+                ? "ascii.scan_512"
+                : isV512Bulk
+                    ? "json.escape_copy_utf16_bulk.v512"
+                    : isV512FindQuoteBackslash
+                        ? "json.find_quote_backslash_utf16_64.v512"
+                        : isV512x4
+                            ? "json.escape_copy_utf16_256.v512"
+                            : isV512
+                                ? "json.escape_copy_utf16_64.v512"
+                                : "json.escape_copy_utf16_64";
         let helper = this.helpers.get(external);
         if (!helper) {
-            helper = isV512Bulk
-                ? "__as_simd_json_escape_copy_utf16_bulk_v512"
-                : isV512FindQuoteBackslash
-                    ? "__as_simd_json_find_quote_backslash_utf16_64_v512"
-                    : isV512x4
-                        ? "__as_simd_json_escape_copy_utf16_256_v512"
-                        : isV512
-                            ? "__as_simd_json_escape_copy_utf16_64_v512"
-                            : "__as_simd_json_escape_copy_utf16_64";
+            helper = isAscii256
+                ? "__as_simd_ascii_scan_256"
+                : isAscii512
+                    ? "__as_simd_ascii_scan_512"
+                    : isV512Bulk
+                        ? "__as_simd_json_escape_copy_utf16_bulk_v512"
+                        : isV512FindQuoteBackslash
+                            ? "__as_simd_json_find_quote_backslash_utf16_64_v512"
+                            : isV512x4
+                                ? "__as_simd_json_escape_copy_utf16_256_v512"
+                                : isV512
+                                    ? "__as_simd_json_escape_copy_utf16_64_v512"
+                                    : "__as_simd_json_escape_copy_utf16_64";
             this.module.addFunctionImport(helper, INSTRUCTION_MODULE, external, binaryen.createType(Array.from({ length: operandCount }, () => binaryen.i32)), binaryen.i32);
             this.helpers.set(external, helper);
         }
@@ -524,8 +536,8 @@ class JSONEscapeCopyRewriter extends ExpressionRewriter {
         return this.module.call(helper, call.operands, binaryen.i32);
     }
 }
-export function insertJSONEscapeCopyIntrinsic(module) {
-    const pass = new JSONEscapeCopyRewriter(module);
+export function insertFusedWideIntrinsics(module) {
+    const pass = new FusedWideRewriter(module);
     pass.run();
     return pass.rewrites;
 }

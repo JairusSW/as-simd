@@ -4,7 +4,7 @@ import binaryen from "binaryen";
 import { optimizeSwarExpressions } from "./swar.js";
 import { injectPortableVectors } from "./v128.js";
 import {
-  insertJSONEscapeCopyIntrinsic,
+  insertFusedWideIntrinsics,
   insertWideIntrinsicKernels,
 } from "./wide-intrinsics.js";
 
@@ -58,7 +58,7 @@ export default class AsSimdTransform extends Transform {
     // Preserve domain-specific calls with dynamic loop bounds before the
     // generic inliner expands their portable fallback bodies.
     if (useWideIntrinsics) {
-      wideKernels += insertJSONEscapeCopyIntrinsic(module);
+      wideKernels += insertFusedWideIntrinsics(module);
     }
 
     // Valent-block style rewriting needs the whole pure expression island.
@@ -70,7 +70,7 @@ export default class AsSimdTransform extends Transform {
     module.runPasses(CLEANUP_PASSES);
     if (useWideIntrinsics) {
       // Catch fixed-size helpers revealed by the generic inliner as well.
-      wideKernels += insertJSONEscapeCopyIntrinsic(module);
+      wideKernels += insertFusedWideIntrinsics(module);
       // AssemblyScript's afterCompile hook precedes its final emission cleanup.
       // Run Binaryen's configured pipeline here so adjacent v128 halves have the
       // same canonical store/load shape the emitted module would otherwise gain

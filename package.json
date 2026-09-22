@@ -17,7 +17,7 @@
     "test:fuzz": "ast test --fuzz",
     "build:test": "rm -rf ./build/ && asc assembly/test.ts --config none --transform ./transform --enable simd -o ./build/test.wasm",
     "build:transform": "tsc -p ./transform",
-    "test:transform": "npm run build:transform && node ./transform/__tests__/api-parity.test.mjs && node ./transform/__tests__/import-paths.test.mjs && node ./transform/__tests__/code-shape.test.mjs && node ./transform/__tests__/wide-kernels.test.mjs && node ./transform/__tests__/wide-lane-exhaustive.test.mjs && node ./transform/__tests__/wide-generic-exhaustive.test.mjs && node ./transform/__tests__/v64-dispatch.test.mjs && node ./transform/__tests__/canonical-simd.test.mjs && node ./transform/__tests__/strict-benches.test.mjs && node ./transform/__tests__/v128-auto.test.mjs",
+    "test:transform": "npm run build:transform && node ./transform/__tests__/api-parity.test.mjs && node ./transform/__tests__/import-paths.test.mjs && node ./transform/__tests__/code-shape.test.mjs && node ./transform/__tests__/wide-kernels.test.mjs && node ./transform/__tests__/ascii-scan.test.mjs && node ./transform/__tests__/wide-lane-exhaustive.test.mjs && node ./transform/__tests__/wide-generic-exhaustive.test.mjs && node ./transform/__tests__/v64-dispatch.test.mjs && node ./transform/__tests__/canonical-simd.test.mjs && node ./transform/__tests__/strict-benches.test.mjs && node ./transform/__tests__/v128-auto.test.mjs",
     "test:wasmtime": "wasmtime ./build/test.wasm",
     "test:wago-wide": "npm run build:transform && node ./scripts/test-wago-wide.mjs",
     "bench": "./scripts/run-bench.sh",
@@ -106,6 +106,7 @@
     "./assembly/v128/value": "./assembly/v128/value.ts",
     "./assembly/v128/lanes": "./assembly/v128/lanes.ts",
     "./assembly/v128/kernels": "./assembly/v128/kernels.ts",
+    "./wide/ascii": "./assembly/wide/ascii.ts",
     "./transform": "./transform/lib/index.js",
     "./globals": "./globals.d.ts",
     "./package.json": "./package.json"

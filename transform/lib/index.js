@@ -2,7 +2,7 @@ import { Transform } from "assemblyscript/dist/transform.js";
 import binaryen from "binaryen";
 import { optimizeSwarExpressions } from "./swar.js";
 import { injectPortableVectors } from "./v128.js";
-import { insertJSONEscapeCopyIntrinsic, insertWideIntrinsicKernels, } from "./wide-intrinsics.js";
+import { insertFusedWideIntrinsics, insertWideIntrinsicKernels, } from "./wide-intrinsics.js";
 const CLEANUP_PASSES = [
     "precompute",
     "optimize-instructions",
@@ -41,14 +41,14 @@ export default class AsSimdTransform extends Transform {
             !!(module.getFeatures() & binaryen.Features.SIMD128);
         let wideKernels = 0;
         if (useWideIntrinsics) {
-            wideKernels += insertJSONEscapeCopyIntrinsic(module);
+            wideKernels += insertFusedWideIntrinsics(module);
         }
         module.runPasses(EXPOSE_PASSES);
         module.updateMaps();
         const stats = optimizeSwarExpressions(module);
         module.runPasses(CLEANUP_PASSES);
         if (useWideIntrinsics) {
-            wideKernels += insertJSONEscapeCopyIntrinsic(module);
+            wideKernels += insertFusedWideIntrinsics(module);
             for (let i = 0; i < 4; i++)
                 module.optimize();
             module.updateMaps();

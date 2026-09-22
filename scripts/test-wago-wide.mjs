@@ -60,6 +60,23 @@ run(
     },
   },
 );
+run(
+  path.join(root, "node_modules", ".bin", "asc"),
+  [
+    "transform/__tests__/ascii-scan-fixture.ts",
+    "--runtime",
+    "stub",
+    "--transform",
+    "./transform",
+    "-O3",
+    "--converge",
+    "--enable",
+    "simd",
+    "-o",
+    path.join(output, "ascii.wasm"),
+  ],
+  { env: { ...process.env, WAGO_PLUGINS: "wide" } },
+);
 
 const temporaryModule = mkdtempSync(
   path.join(os.tmpdir(), "as-simd-wago-wide-"),
@@ -129,7 +146,20 @@ func main() {
 		panic(fmt.Errorf("instantiate with Wide: %w", err))
 	}
 	defer instance.Close()
-	fmt.Println("ok: externref")
+	asciiBytes, err := os.ReadFile(filepath.Join(os.Args[1], "ascii.wasm"))
+	if err != nil { panic(err) }
+	asciiModule, err := runtime.Compile(asciiBytes)
+	if err != nil { panic(fmt.Errorf("compile ASCII scan: %w", err)) }
+	ascii, err := runtime.Instantiate(context.Background(), asciiModule)
+	if err != nil { panic(fmt.Errorf("instantiate ASCII scan: %w", err)) }
+	defer ascii.Close()
+	if _, err := ascii.Invoke("init"); err != nil { panic(err) }
+	got, err := ascii.Invoke("check")
+	if err != nil { panic(err) }
+	if len(got) != 1 || uint32(got[0]) != ^uint32(0) {
+		panic(fmt.Errorf("ASCII scan failed dirty-byte parity: %v", got))
+	}
+	fmt.Println("ok: externref and ASCII scan")
 }
 `,
 );
