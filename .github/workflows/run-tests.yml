@@ -33,5 +33,8 @@ jobs:
       - name: Transform tests
         run: npm run test:transform
 
-      - name: Latest Wago and Wide integration
+      - name: Wago and Wide integration
+        env:
+          # Wide PR #6 provides the imports exercised by this branch.
+          WIDE_VERSION: a47b1c960cadd824a2896fbbccc8fef345ddbc53
         run: npm run test:wago-wide
