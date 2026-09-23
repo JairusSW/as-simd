@@ -77,6 +77,23 @@ run(
   ],
   { env: { ...process.env, WAGO_PLUGINS: "wide" } },
 );
+run(
+  path.join(root, "node_modules", ".bin", "asc"),
+  [
+    "transform/__tests__/utf-wide-fixture.ts",
+    "--runtime",
+    "stub",
+    "--transform",
+    "./transform",
+    "-O3",
+    "--converge",
+    "--enable",
+    "simd",
+    "-o",
+    path.join(output, "utf-wide.wasm"),
+  ],
+  { env: { ...process.env, WAGO_PLUGINS: "wide" } },
+);
 
 const temporaryModule = mkdtempSync(
   path.join(os.tmpdir(), "as-simd-wago-wide-"),
@@ -159,7 +176,19 @@ func main() {
 	if len(got) != 1 || uint32(got[0]) != ^uint32(0) {
 		panic(fmt.Errorf("ASCII scan failed dirty-byte parity: %v", got))
 	}
-	fmt.Println("ok: externref and ASCII scan")
+	utfBytes, err := os.ReadFile(filepath.Join(os.Args[1], "utf-wide.wasm"))
+	if err != nil { panic(err) }
+	utfModule, err := runtime.Compile(utfBytes)
+	if err != nil { panic(fmt.Errorf("compile UTF Wide: %w", err)) }
+	utfInstance, err := runtime.Instantiate(context.Background(), utfModule)
+	if err != nil { panic(fmt.Errorf("instantiate UTF Wide: %w", err)) }
+	defer utfInstance.Close()
+	utfGot, err := utfInstance.Invoke("check")
+	if err != nil { panic(err) }
+	if len(utfGot) != 1 || uint32(utfGot[0]) != 144 {
+		panic(fmt.Errorf("UTF Wide fallback parity failed: %v", utfGot))
+	}
+	fmt.Println("ok: externref, ASCII scan and generic Wide UTF validation")
 }
 `,
 );

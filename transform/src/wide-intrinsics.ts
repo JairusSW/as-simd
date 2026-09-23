@@ -613,7 +613,13 @@ class FusedWideRewriter extends ExpressionRewriter {
       let helper = this.helpers.get(external);
       if (!helper) {
         helper = "__as_simd_" + suffix;
-        this.module.addFunctionImport(helper, INSTRUCTION_MODULE, external, binaryen.i32, binaryen.i32);
+        this.module.addFunctionImport(
+          helper,
+          INSTRUCTION_MODULE,
+          external,
+          binaryen.i32,
+          binaryen.i32,
+        );
         this.helpers.set(external, helper);
       }
       this.rewrites++;
@@ -624,18 +630,6 @@ class FusedWideRewriter extends ExpressionRewriter {
     );
     const isAscii512 = call.target.endsWith(
       "assembly/wide/ascii/ascii_scan_512",
-    );
-    const isUtf8Block256 = call.target.endsWith(
-      "assembly/wide/utf8/utf8_validate_block_256",
-    );
-    const isUtf8Block512 = call.target.endsWith(
-      "assembly/wide/utf8/utf8_validate_block_512",
-    );
-    const isUtf16Block256 = call.target.endsWith(
-      "assembly/wide/utf16/utf16_validate_block_256",
-    );
-    const isUtf16Block512 = call.target.endsWith(
-      "assembly/wide/utf16/utf16_validate_block_512",
     );
     const isV512Bulk =
       call.target.endsWith("/json_escape_copy_utf16_bulk_v512") ||
@@ -648,10 +642,6 @@ class FusedWideRewriter extends ExpressionRewriter {
     if (
       !isAscii256 &&
       !isAscii512 &&
-      !isUtf8Block256 &&
-      !isUtf8Block512 &&
-      !isUtf16Block256 &&
-      !isUtf16Block512 &&
       !isV512Bulk &&
       !isV512FindQuoteBackslash &&
       !isV512x4 &&
@@ -660,20 +650,12 @@ class FusedWideRewriter extends ExpressionRewriter {
     ) {
       return expr;
     }
-    const operandCount = isV512Bulk ? 4 : isV512FindQuoteBackslash || isUtf8Block256 || isUtf8Block512 || isUtf16Block256 || isUtf16Block512 ? 1 : 2;
+    const operandCount = isV512Bulk ? 4 : isV512FindQuoteBackslash ? 1 : 2;
     if (call.operands.length !== operandCount) return expr;
     const external = isAscii256
       ? "ascii.scan_256"
       : isAscii512
         ? "ascii.scan_512"
-        : isUtf8Block256
-          ? "utf8.validate_block_256"
-          : isUtf8Block512
-            ? "utf8.validate_block_512"
-            : isUtf16Block256
-              ? "utf16.validate_block_256"
-              : isUtf16Block512
-                ? "utf16.validate_block_512"
         : isV512Bulk
           ? "json.escape_copy_utf16_bulk.v512"
           : isV512FindQuoteBackslash
@@ -689,14 +671,6 @@ class FusedWideRewriter extends ExpressionRewriter {
         ? "__as_simd_ascii_scan_256"
         : isAscii512
           ? "__as_simd_ascii_scan_512"
-          : isUtf8Block256
-            ? "__as_simd_utf8_validate_block_256"
-            : isUtf8Block512
-              ? "__as_simd_utf8_validate_block_512"
-              : isUtf16Block256
-                ? "__as_simd_utf16_validate_block_256"
-                : isUtf16Block512
-                  ? "__as_simd_utf16_validate_block_512"
           : isV512Bulk
             ? "__as_simd_json_escape_copy_utf16_bulk_v512"
             : isV512FindQuoteBackslash

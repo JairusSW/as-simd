@@ -504,10 +504,6 @@ class FusedWideRewriter extends ExpressionRewriter {
         }
         const isAscii256 = call.target.endsWith("assembly/wide/ascii/ascii_scan_256");
         const isAscii512 = call.target.endsWith("assembly/wide/ascii/ascii_scan_512");
-        const isUtf8Block256 = call.target.endsWith("assembly/wide/utf8/utf8_validate_block_256");
-        const isUtf8Block512 = call.target.endsWith("assembly/wide/utf8/utf8_validate_block_512");
-        const isUtf16Block256 = call.target.endsWith("assembly/wide/utf16/utf16_validate_block_256");
-        const isUtf16Block512 = call.target.endsWith("assembly/wide/utf16/utf16_validate_block_512");
         const isV512Bulk = call.target.endsWith("/json_escape_copy_utf16_bulk_v512") ||
             call.target.endsWith("/jsonEscapeCopyUtf16BulkV512Intrinsic");
         const isV512FindQuoteBackslash = call.target.endsWith("/json_find_quote_backslash_utf16_64_v512");
@@ -515,10 +511,6 @@ class FusedWideRewriter extends ExpressionRewriter {
         const isV512 = call.target.endsWith("/json_escape_copy_utf16_64_v512");
         if (!isAscii256 &&
             !isAscii512 &&
-            !isUtf8Block256 &&
-            !isUtf8Block512 &&
-            !isUtf16Block256 &&
-            !isUtf16Block512 &&
             !isV512Bulk &&
             !isV512FindQuoteBackslash &&
             !isV512x4 &&
@@ -526,53 +518,37 @@ class FusedWideRewriter extends ExpressionRewriter {
             !call.target.endsWith("/json_escape_copy_utf16_64")) {
             return expr;
         }
-        const operandCount = isV512Bulk ? 4 : isV512FindQuoteBackslash || isUtf8Block256 || isUtf8Block512 || isUtf16Block256 || isUtf16Block512 ? 1 : 2;
+        const operandCount = isV512Bulk ? 4 : isV512FindQuoteBackslash ? 1 : 2;
         if (call.operands.length !== operandCount)
             return expr;
         const external = isAscii256
             ? "ascii.scan_256"
             : isAscii512
                 ? "ascii.scan_512"
-                : isUtf8Block256
-                    ? "utf8.validate_block_256"
-                    : isUtf8Block512
-                        ? "utf8.validate_block_512"
-                        : isUtf16Block256
-                            ? "utf16.validate_block_256"
-                            : isUtf16Block512
-                                ? "utf16.validate_block_512"
-                                : isV512Bulk
-                                    ? "json.escape_copy_utf16_bulk.v512"
-                                    : isV512FindQuoteBackslash
-                                        ? "json.find_quote_backslash_utf16_64.v512"
-                                        : isV512x4
-                                            ? "json.escape_copy_utf16_256.v512"
-                                            : isV512
-                                                ? "json.escape_copy_utf16_64.v512"
-                                                : "json.escape_copy_utf16_64";
+                : isV512Bulk
+                    ? "json.escape_copy_utf16_bulk.v512"
+                    : isV512FindQuoteBackslash
+                        ? "json.find_quote_backslash_utf16_64.v512"
+                        : isV512x4
+                            ? "json.escape_copy_utf16_256.v512"
+                            : isV512
+                                ? "json.escape_copy_utf16_64.v512"
+                                : "json.escape_copy_utf16_64";
         let helper = this.helpers.get(external);
         if (!helper) {
             helper = isAscii256
                 ? "__as_simd_ascii_scan_256"
                 : isAscii512
                     ? "__as_simd_ascii_scan_512"
-                    : isUtf8Block256
-                        ? "__as_simd_utf8_validate_block_256"
-                        : isUtf8Block512
-                            ? "__as_simd_utf8_validate_block_512"
-                            : isUtf16Block256
-                                ? "__as_simd_utf16_validate_block_256"
-                                : isUtf16Block512
-                                    ? "__as_simd_utf16_validate_block_512"
-                                    : isV512Bulk
-                                        ? "__as_simd_json_escape_copy_utf16_bulk_v512"
-                                        : isV512FindQuoteBackslash
-                                            ? "__as_simd_json_find_quote_backslash_utf16_64_v512"
-                                            : isV512x4
-                                                ? "__as_simd_json_escape_copy_utf16_256_v512"
-                                                : isV512
-                                                    ? "__as_simd_json_escape_copy_utf16_64_v512"
-                                                    : "__as_simd_json_escape_copy_utf16_64";
+                    : isV512Bulk
+                        ? "__as_simd_json_escape_copy_utf16_bulk_v512"
+                        : isV512FindQuoteBackslash
+                            ? "__as_simd_json_find_quote_backslash_utf16_64_v512"
+                            : isV512x4
+                                ? "__as_simd_json_escape_copy_utf16_256_v512"
+                                : isV512
+                                    ? "__as_simd_json_escape_copy_utf16_64_v512"
+                                    : "__as_simd_json_escape_copy_utf16_64";
             this.module.addFunctionImport(helper, INSTRUCTION_MODULE, external, binaryen.createType(Array.from({ length: operandCount }, () => binaryen.i32)), binaryen.i32);
             this.helpers.set(external, helper);
         }

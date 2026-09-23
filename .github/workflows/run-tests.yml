@@ -36,5 +36,5 @@ jobs:
       - name: Wago and Wide integration
         env:
           # Wide PR #6 provides the imports exercised by this branch.
-          WIDE_VERSION: a47b1c960cadd824a2896fbbccc8fef345ddbc53
+          WIDE_VERSION: ea40795012e0e230b234296acdb4881673bed136
         run: npm run test:wago-wide
